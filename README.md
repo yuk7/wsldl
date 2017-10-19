@@ -33,9 +33,9 @@ Arch
 
 
 ## How-to-Run
-#### Just Run arch.exe
+#### Just Run Arch.exe
 ```dos
->Arch
+>Arch.exe
 [root@PC-NAME user]#
 ```
 
