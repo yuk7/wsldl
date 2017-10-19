@@ -17,6 +17,12 @@ char *GetLxUID(char *DistributionName,char *LxUID);
 
 int main()
 {
+    //Set Target Name
+    char TargetName[] = "Arch";
+    WCHAR wTargetName[30];
+    mbstowcs(wTargetName,TargetName,30);
+
+
     HMODULE hmod;
     ISDISTRIBUTIONREBISTERED IsDistributionRegistered;
     REGISTERDISTRIBUTION RegisterDistribution;
@@ -40,10 +46,10 @@ int main()
         return 1;
     }
 
-    if(IsDistributionRegistered(L"Arch"))
+    if(IsDistributionRegistered(wTargetName))
     {
         char LxUID[50] = "";
-        if(GetLxUID(L"Arch",LxUID) != NULL)
+        if(GetLxUID(TargetName,LxUID) != NULL)
         {
             char wcmd[70] = "wsl.exe ";
             strcat(wcmd,LxUID);
@@ -58,7 +64,7 @@ int main()
     }
 
     printf("Installing...\n\n");
-    int a = RegisterDistribution(L"Arch",L"rootfs.tar.gz");
+    int a = RegisterDistribution(wTargetName,L"rootfs.tar.gz");
     if(a != 0)
     {
         printf("ERROR:Installation Failed! 0x%x",a);
