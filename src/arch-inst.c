@@ -12,15 +12,13 @@
 typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 
-char *GetLxUID(char *DistributionName,char *LxUID);
+wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
 
 int main()
 {
     //Set Target Name
-    char TargetName[] = "Arch";
-    WCHAR wTargetName[30];
-    mbstowcs(wTargetName,TargetName,30);
+    wchar_t TargetName[] = L"Arch";
 
 
     HMODULE hmod;
@@ -46,14 +44,14 @@ int main()
         return 1;
     }
 
-    if(IsDistributionRegistered(wTargetName))
+    if(IsDistributionRegistered(TargetName))
     {
-        char LxUID[50] = "";
+        wchar_t LxUID[50] = L"";
         if(GetLxUID(TargetName,LxUID) != NULL)
         {
-            char wcmd[70] = "wsl.exe ";
-            strcat(wcmd,LxUID);
-            int res = system(wcmd);//Excute wsl with LxUID
+            wchar_t wcmd[70] = L"wsl.exe ";
+            wcscat(wcmd,LxUID);
+            int res = _wsystem(wcmd);//Excute wsl with LxUID
             return res;
         }
         else
@@ -64,7 +62,7 @@ int main()
     }
 
     printf("Installing...\n\n");
-    int a = RegisterDistribution(wTargetName,L"rootfs.tar.gz");
+    int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
     if(a != 0)
     {
         printf("ERROR:Installation Failed! 0x%x",a);
@@ -74,25 +72,25 @@ int main()
     return 0;
 }
 
-char *GetLxUID(char *DistributionName,char *LxUID)
+wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
 {
-    char RKey[]="Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
+    wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
     HKEY hKey;
     LONG rres;
-    if(RegOpenKeyEx(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    if(RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
     {
 	    for(int i=0;;i++)
 	    {
-            char subKey[200];
-	        char subKeyF[200];
-	        strcpy(subKeyF,RKey);
-	        char regDistName[100];
+            wchar_t subKey[200];
+	        wchar_t subKeyF[200];
+	        wcscpy(subKeyF,RKey);
+	        wchar_t regDistName[100];
 	        DWORD subKeySz = 100;
 	        DWORD dwType;
 	        DWORD dwSize;
 	        FILETIME ftLastWriteTime;
 
-	        rres = RegEnumKeyEx(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
+	        rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
 	        if (rres == ERROR_NO_MORE_ITEMS)
                 break;
 	        else if(rres != ERROR_SUCCESS)
@@ -103,18 +101,18 @@ char *GetLxUID(char *DistributionName,char *LxUID)
 	        }
 
 	        HKEY hKeyS;
-            strcat(subKeyF,"\\");
-            strcat(subKeyF,subKey);
-	        RegOpenKeyEx(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-	        RegQueryValueEx(hKeyS, "DistributionName", NULL, &dwType, &regDistName,&dwSize);
-	        RegQueryValueEx(hKeyS, "DistributionName", NULL, &dwType, &regDistName,&dwSize);
+            wcscat(subKeyF,L"\\");
+            wcscat(subKeyF,subKey);
+	        RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
+	        RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
+	        RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
 	        if((subKeySz == 38)&&(strcmp(regDistName,DistributionName)==0))
 	        {
                 //SUCCESS:Distribution found!
                 //return LxUID
 	            RegCloseKey(hKey);
 	            RegCloseKey(hKeyS);
-	            strcpy(LxUID,subKey);
+	            wcscpy(LxUID,subKey);
 	            return LxUID;
 	        }
 	        RegCloseKey(hKeyS);
