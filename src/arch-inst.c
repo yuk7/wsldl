@@ -43,8 +43,7 @@ int main()
     if(IsDistributionRegistered(L"Arch"))
     {
         char LxUID[50] = "";
-        GetLxUID("Arch",LxUID);
-        if(LxUID != NULL)
+        if(GetLxUID(L"Arch",LxUID) != NULL)
         {
             char wcmd[70] = "wsl.exe ";
             strcat(wcmd,LxUID);
