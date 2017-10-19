@@ -67,15 +67,23 @@ int main(int argc,char *argv[])
             return 1;
         }
     }
-
-    printf("Installing...\n\n");
-    int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
-    if(a != 0)
+    else
     {
-        printf("ERROR:Installation Failed! 0x%x",a);
-        return 1;
+        if(argc >1)
+        {
+            wprintf(L"ERROR:[%s] is not installed.\nRun with no arguments to install",TargetName);
+            return 1;
+        }
+        printf("Installing...\n\n");
+        int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
+        if(a != 0)
+        {
+            printf("ERROR:Installation Failed! 0x%x",a);
+            return 1;
+        }
+        printf("Installation Complete!",a);
+        return 0;
     }
-    printf("Installation Complete!",a);
     return 0;
 }
 
