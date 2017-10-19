@@ -12,6 +12,9 @@
 typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 
+char *GetLxUID(char *DistributionName,char *LxUID);
+
+
 int main()
 {
     HMODULE hmod;
@@ -52,4 +55,62 @@ int main()
     }
     printf("Installation Complete!",a);
     return 0;
+}
+
+char *GetLxUID(char *DistributionName,char *LxUID)
+{
+    char RKey[]="Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
+    HKEY hKey;
+    LONG rres;
+    if(RegOpenKeyEx(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    {
+	    for(int i=0;;i++)
+	    {
+            char subKey[200];
+	        char subKeyF[200];
+	        strcpy(subKeyF,RKey);
+	        char regDistName[100];
+	        DWORD subKeySz = 100;
+	        DWORD dwType;
+	        DWORD dwSize;
+	        FILETIME ftLastWriteTime;
+
+	        rres = RegEnumKeyEx(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
+	        if (rres == ERROR_NO_MORE_ITEMS)
+                break;
+	        else if(rres != ERROR_SUCCESS)
+	        {
+	            //ERROR
+	            LxUID = NULL;
+	            return LxUID;
+	        }
+
+	        HKEY hKeyS;
+            strcat(subKeyF,"\\");
+            strcat(subKeyF,subKey);
+	        RegOpenKeyEx(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
+	        RegQueryValueEx(hKeyS, "DistributionName", NULL, &dwType, &regDistName,&dwSize);
+	        RegQueryValueEx(hKeyS, "DistributionName", NULL, &dwType, &regDistName,&dwSize);
+	        if((subKeySz == 38)&&(strcmp(regDistName,DistributionName)==0))
+	        {
+                //SUCCESS:Distribution found!
+                //return LxUID
+	            RegCloseKey(hKey);
+	            RegCloseKey(hKeyS);
+	            strcpy(LxUID,subKey);
+	            return LxUID;
+	        }
+	        RegCloseKey(hKeyS);
+	        }
+        }
+        else
+        {
+        //ERROR
+        LxUID = NULL;
+        return LxUID;
+        }
+    RegCloseKey(hKey);
+    //ERROR:Distribution Not Found
+    LxUID = NULL;
+    return LxUID;
 }
