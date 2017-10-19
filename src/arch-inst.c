@@ -9,11 +9,13 @@
 #include <stdio.h>
 #include <windows.h>
 
+typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 
 int main()
 {
     HMODULE hmod;
+    ISDISTRIBUTIONREBISTERED IsDistributionRegistered;
     REGISTERDISTRIBUTION RegisterDistribution;
 
     hmod = LoadLibrary(TEXT("wslapi.dll"));
@@ -22,11 +24,22 @@ int main()
         return 1;
     }
 
-
+    IsDistributionRegistered = (ISDISTRIBUTIONREBISTERED)GetProcAddress(hmod, "WslIsDistributionRegistered");
+    if (IsDistributionRegistered == NULL) {
+        FreeLibrary(hmod);
+        printf("ERROR:GetProcAddress failed\n");
+        return 1;
+    }
     RegisterDistribution = (REGISTERDISTRIBUTION)GetProcAddress(hmod, "WslRegisterDistribution");
     if (RegisterDistribution == NULL) {
         FreeLibrary(hmod);
         printf("ERROR:GetProcAddress failed\n");
+        return 1;
+    }
+
+    if(IsDistributionRegistered(L"Arch"))
+    {
+        printf("ERROR:Arch is already registered.");
         return 1;
     }
 
