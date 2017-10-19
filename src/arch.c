@@ -15,10 +15,17 @@ typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
 
-int main()
+int main(int argc,char *argv[])
 {
-    //Set Target Name
-    wchar_t TargetName[] = L"Arch";
+    //Get file name of exe
+    char efpath[300];
+    if(GetModuleFileName(NULL,efpath,300) == 0)
+        return 1;
+    char efName[50];
+    _splitpath(efpath,NULL,NULL,efName,NULL);
+
+    wchar_t TargetName[30];
+    mbstowcs_s(NULL,TargetName,30,efName,_TRUNCATE);
 
 
     HMODULE hmod;
