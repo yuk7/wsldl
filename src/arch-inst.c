@@ -42,8 +42,20 @@ int main()
 
     if(IsDistributionRegistered(L"Arch"))
     {
-        printf("ERROR:Arch is already registered.");
-        return 1;
+        char LxUID[50] = "";
+        GetLxUID("Arch",LxUID);
+        if(LxUID != NULL)
+        {
+            char wcmd[70] = "wsl.exe ";
+            strcat(wcmd,LxUID);
+            int res = system(wcmd);//Excute wsl with LxUID
+            return res;
+        }
+        else
+        {
+            printf("ERROR:GetLxUID failed!");
+            return 1;
+        }
     }
 
     printf("Installing...\n\n");
