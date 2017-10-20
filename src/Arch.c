@@ -87,7 +87,15 @@ int main(int argc,char *argv[])
             }
             else
             {
-                printf("ERROR:Invalid Arguments");
+                printf("ERROR:Invalid Arguments\n\n");
+                printf("Useage :\n");
+                printf("    <no args>\n");
+                printf("      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
+                printf("    run <command line>\n");
+                printf("      - Run the given command line in that distro.\n\n");
+                printf("    config [setting [value]]\n");
+                printf("      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
+
                 return 1;
             }
         }
