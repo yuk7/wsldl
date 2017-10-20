@@ -57,6 +57,34 @@ int main(int argc,char *argv[])
             if(strcmp(argv[1],"run") == 0)
             {
             }
+            else if(strcmp(argv[1],"config") == 0)
+            {
+                if(strcmp(argv[2],"--default-uid") == 0)
+                {
+                    long uid;
+                    if(sscanf(argv[3],"%d",&uid)==1)
+                    {
+                        int a = ConfigureDistribution(TargetName,uid,0x7);
+                        if(a != 0)
+                        {
+                            printf("ERROR:Configure Failed! 0x%x",a);
+                            return 1;
+                        }
+                        return 0;
+                    }
+                    else
+                    {
+                        printf("ERROR:Invalid Argument.\nInput UID");
+
+                    }
+                    return 1;
+                }
+                else
+                {
+                    printf("ERROR:Invalid Arguments");
+                    return 1;
+                }
+            }
             else
             {
                 printf("ERROR:Invalid Arguments");
