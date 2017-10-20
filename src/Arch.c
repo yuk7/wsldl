@@ -52,11 +52,32 @@ int main(int argc,char *argv[])
 
     if(IsDistributionRegistered(TargetName))
     {
+        if(argc >1)
+        {
+            if(strcmp(argv[1],"run") == 0)
+            {
+            }
+            else
+            {
+                printf("ERROR:Invalid Arguments");
+                return 1;
+            }
+        }
+
+        char rArgs[100] = "";
+        for (int i=2;i<argc;i++)
+        {
+            strcat(rArgs," ");
+            strcat(rArgs,argv[i]);
+        }
+        wchar_t wRcmd[100] = L"";
+        mbstowcs_s(NULL,wRcmd,100,rArgs,_TRUNCATE);
         wchar_t LxUID[50] = L"";
         if(GetLxUID(TargetName,LxUID) != NULL)
         {
-            wchar_t wcmd[70] = L"wsl.exe ";
+            wchar_t wcmd[120] = L"wsl.exe ";
             wcscat(wcmd,LxUID);
+            wcscat(wcmd,wRcmd);
             int res = _wsystem(wcmd);//Excute wsl with LxUID
             return res;
         }
