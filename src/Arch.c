@@ -57,7 +57,7 @@ int main(int argc,char *argv[])
             if(strcmp(argv[1],"run") == 0)
             {
             }
-            else if(strcmp(argv[1],"config") == 0)
+            else if((strcmp(argv[1],"config") == 0)&&argc>3)
             {
                 if(strcmp(argv[2],"--default-uid") == 0)
                 {
