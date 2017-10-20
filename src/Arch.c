@@ -11,6 +11,7 @@
 
 typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
+typedef int (WINAPI *CONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
 
 wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
@@ -31,6 +32,7 @@ int main(int argc,char *argv[])
     HMODULE hmod;
     ISDISTRIBUTIONREBISTERED IsDistributionRegistered;
     REGISTERDISTRIBUTION RegisterDistribution;
+    CONFIGUREDISTRIBUTION ConfigureDistribution;
 
     hmod = LoadLibrary(TEXT("wslapi.dll"));
     if (hmod == NULL) {
@@ -50,6 +52,13 @@ int main(int argc,char *argv[])
         printf("ERROR:GetProcAddress failed\n");
         return 1;
     }
+    ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
+    if (ConfigureDistribution == NULL) {
+        FreeLibrary(hmod);
+        printf("ERROR:GetProcAddress failed\n");
+        return 1;
+    }
+
 
     if(IsDistributionRegistered(TargetName))
     {
