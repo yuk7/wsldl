@@ -93,44 +93,44 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
     LONG rres;
     if(RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
     {
-	    for(int i=0;;i++)
-	    {
+        for(int i=0;;i++)
+        {
             wchar_t subKey[200];
-	        wchar_t subKeyF[200];
-	        wcscpy(subKeyF,RKey);
-	        wchar_t regDistName[100];
-	        DWORD subKeySz = 100;
-	        DWORD dwType;
-	        DWORD dwSize;
-	        FILETIME ftLastWriteTime;
+            wchar_t subKeyF[200];
+            wcscpy(subKeyF,RKey);
+            wchar_t regDistName[100];
+            DWORD subKeySz = 100;
+            DWORD dwType;
+            DWORD dwSize;
+            FILETIME ftLastWriteTime;
 
-	        rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
-	        if (rres == ERROR_NO_MORE_ITEMS)
+            rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
+            if (rres == ERROR_NO_MORE_ITEMS)
                 break;
-	        else if(rres != ERROR_SUCCESS)
-	        {
-	            //ERROR
-	            LxUID = NULL;
-	            return LxUID;
-	        }
+            else if(rres != ERROR_SUCCESS)
+            {
+                //ERROR
+                LxUID = NULL;
+                return LxUID;
+            }
 
-	        HKEY hKeyS;
+            HKEY hKeyS;
             wcscat(subKeyF,L"\\");
             wcscat(subKeyF,subKey);
-	        RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-	        RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
-	        RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
-	        if((subKeySz == 38)&&(strcmp(regDistName,DistributionName)==0))
-	        {
+            RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
+            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
+            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
+            if((subKeySz == 38)&&(strcmp(regDistName,DistributionName)==0))
+            {
                 //SUCCESS:Distribution found!
                 //return LxUID
-	            RegCloseKey(hKey);
-	            RegCloseKey(hKeyS);
-	            wcscpy(LxUID,subKey);
-	            return LxUID;
-	        }
-	        RegCloseKey(hKeyS);
-	        }
+                RegCloseKey(hKey);
+                RegCloseKey(hKeyS);
+                wcscpy(LxUID,subKey);
+                return LxUID;
+            }
+            RegCloseKey(hKeyS);
+            }
         }
         else
         {
