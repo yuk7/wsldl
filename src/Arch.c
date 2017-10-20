@@ -41,19 +41,9 @@ int main(int argc,char *argv[])
     }
 
     IsDistributionRegistered = (ISDISTRIBUTIONREBISTERED)GetProcAddress(hmod, "WslIsDistributionRegistered");
-    if (IsDistributionRegistered == NULL) {
-        FreeLibrary(hmod);
-        printf("ERROR:GetProcAddress failed\n");
-        return 1;
-    }
     RegisterDistribution = (REGISTERDISTRIBUTION)GetProcAddress(hmod, "WslRegisterDistribution");
-    if (RegisterDistribution == NULL) {
-        FreeLibrary(hmod);
-        printf("ERROR:GetProcAddress failed\n");
-        return 1;
-    }
     ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
-    if (ConfigureDistribution == NULL) {
+    if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL) {
         FreeLibrary(hmod);
         printf("ERROR:GetProcAddress failed\n");
         return 1;
