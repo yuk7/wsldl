@@ -36,7 +36,7 @@ int main(int argc,char *argv[])
 
     hmod = LoadLibrary(TEXT("wslapi.dll"));
     if (hmod == NULL) {
-        printf("ERROR:wslapi.dll load failed\n");
+        fprintf(stderr,"ERROR:wslapi.dll load failed\n");
         return 1;
     }
 
@@ -45,7 +45,7 @@ int main(int argc,char *argv[])
     ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
     if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL) {
         FreeLibrary(hmod);
-        printf("ERROR:GetProcAddress failed\n");
+        fprintf(stderr,"ERROR:GetProcAddress failed\n");
         return 1;
     }
 
@@ -67,27 +67,28 @@ int main(int argc,char *argv[])
                         int a = ConfigureDistribution(TargetName,uid,0x7);
                         if(a != 0)
                         {
-                            printf("ERROR:Configure Failed! 0x%x",a);
+                            fprintf(stderr,"ERROR:Configure Failed! 0x%x",a);
                             return 1;
                         }
                         return 0;
                     }
                     else
                     {
-                        printf("ERROR:Invalid Argument.\nInput UID");
+                        fprintf(stderr,"ERROR:Invalid Argument.\nInput UID");
 
                     }
                     return 1;
                 }
                 else
                 {
-                    printf("ERROR:Invalid Arguments");
+                    fprintf(stderr,"ERROR:Invalid Arguments");
                     return 1;
                 }
             }
             else
             {
-                printf("ERROR:Invalid Arguments\n\n");
+                fprintf(stderr,"ERROR:Invalid Arguments");
+                printf("\n\n")
                 printf("Useage :\n");
                 printf("    <no args>\n");
                 printf("      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
@@ -119,7 +120,7 @@ int main(int argc,char *argv[])
         }
         else
         {
-            printf("ERROR:GetLxUID failed!");
+            fprintf(stderr,"ERROR:GetLxUID failed!");
             return 1;
         }
     }
@@ -127,17 +128,17 @@ int main(int argc,char *argv[])
     {
         if(argc >1)
         {
-            wprintf(L"ERROR:[%s] is not installed.\nRun with no arguments to install",TargetName);
+            fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install",TargetName);
             return 1;
         }
-        printf("Installing...\n\n");
+        printf("Installing...\n");
         int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
         if(a != 0)
         {
-            printf("ERROR:Installation Failed! 0x%x",a);
+            fprintf(stderr,"ERROR:Installation Failed! 0x%x",a);
             return 1;
         }
-        printf("Installation Complete!",a);
+        printf("Installation Complete!");
         return 0;
     }
     return 0;
