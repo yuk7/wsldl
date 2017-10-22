@@ -6,6 +6,7 @@
  * http://opensource.org/licenses/mit-license.php
  */
 
+
 #include <stdio.h>
 #include <windows.h>
 
@@ -18,15 +19,16 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
 int main(int argc,char *argv[])
 {
-    //Get file name of exe
-    char efpath[300];
-    if(GetModuleFileName(NULL,efpath,300) == 0)
-        return 1;
-    char efName[50];
-    _splitpath(efpath,NULL,NULL,efName,NULL);
+    wchar_t **wargv;
+    int wargc;
+    wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
-    wchar_t TargetName[30];
-    mbstowcs_s(NULL,TargetName,30,efName,_TRUNCATE);
+    //Get file name of exe
+    wchar_t efpath[300];
+    if(GetModuleFileNameW(NULL,efpath,300) == 0)
+        return 1;
+    wchar_t TargetName[50];
+    _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
 
     HMODULE hmod;
@@ -34,9 +36,9 @@ int main(int argc,char *argv[])
     REGISTERDISTRIBUTION RegisterDistribution;
     CONFIGUREDISTRIBUTION ConfigureDistribution;
 
-    hmod = LoadLibrary(TEXT("wslapi.dll"));
+    hmod = LoadLibraryW(L"wslapi.dll");
     if (hmod == NULL) {
-        fprintf(stderr,"ERROR:wslapi.dll load failed\n");
+        fwprintf(stderr,L"ERROR:wslapi.dll load failed\n");
         return 1;
     }
 
@@ -45,100 +47,97 @@ int main(int argc,char *argv[])
     ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
     if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL) {
         FreeLibrary(hmod);
-        fprintf(stderr,"ERROR:GetProcAddress failed\n");
+        fwprintf(stderr,L"ERROR:GetProcAddress failed\n");
         return 1;
     }
 
 
     if(IsDistributionRegistered(TargetName))
     {
-        if(argc >1)
+        if(wargc >1)
         {
-            if(strcmp(argv[1],"run") == 0)
+            if(wcscmp(wargv[1],L"run") == 0)
             {
             }
-            else if((strcmp(argv[1],"config") == 0)&&argc>3)
+            else if((wcscmp(wargv[1],L"config") == 0)&&wargc>3)
             {
-                if(strcmp(argv[2],"--default-uid") == 0)
+                if(wcscmp(wargv[2],L"--default-uid") == 0)
                 {
                     long uid;
-                    if(sscanf(argv[3],"%d",&uid)==1)
+                    if(swscanf(wargv[3],L"%d",&uid)==1)
                     {
                         int a = ConfigureDistribution(TargetName,uid,0x7);
                         if(a != 0)
                         {
-                            fprintf(stderr,"ERROR:Configure Failed! 0x%x",a);
+                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",a);
                             return 1;
                         }
                         return 0;
                     }
                     else
                     {
-                        fprintf(stderr,"ERROR:Invalid Argument.\nInput UID");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput UID");
 
                     }
                     return 1;
                 }
                 else
                 {
-                    fprintf(stderr,"ERROR:Invalid Arguments");
+                    fwprintf(stderr,L"ERROR:Invalid Arguments");
                     return 1;
                 }
             }
             else
             {
-                fprintf(stderr,"ERROR:Invalid Arguments");
-                printf("\n\n")
-                printf("Useage :\n");
-                printf("    <no args>\n");
-                printf("      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
-                printf("    run <command line>\n");
-                printf("      - Run the given command line in that distro.\n\n");
-                printf("    config [setting [value]]\n");
-                printf("      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
+                fwprintf(stderr,L"ERROR:Invalid Arguments\n\n");
+                wprintf(L"Useage :\n");
+                wprintf(L"    <no args>\n");
+                wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
+                wprintf(L"    run <command line>\n");
+                wprintf(L"      - Run the given command line in that distro.\n\n");
+                wprintf(L"    config [setting [value]]\n");
+                wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
 
                 return 1;
             }
         }
 
-        char rArgs[100] = "";
-        for (int i=2;i<argc;i++)
+        wchar_t rArgs[100] = L"";
+        for (int i=2;i<wargc;i++)
         {
-            strcat(rArgs," ");
-            strcat(rArgs,argv[i]);
+            wcscat(rArgs,L" ");
+            wcscat(rArgs,wargv[i]);
         }
-        wchar_t wRcmd[100] = L"";
-        mbstowcs_s(NULL,wRcmd,100,rArgs,_TRUNCATE);
         wchar_t LxUID[50] = L"";
         if(GetLxUID(TargetName,LxUID) != NULL)
         {
             wchar_t wcmd[120] = L"wsl.exe ";
             wcscat(wcmd,LxUID);
-            wcscat(wcmd,wRcmd);
+            wcscat(wcmd,rArgs);
             int res = _wsystem(wcmd);//Excute wsl with LxUID
             return res;
         }
         else
         {
-            fprintf(stderr,"ERROR:GetLxUID failed!");
+            fwprintf(stderr,L"ERROR:GetLxUID failed!");
             return 1;
         }
     }
     else
     {
-        if(argc >1)
+        if(wargc >1)
         {
             fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install",TargetName);
             return 1;
         }
-        printf("Installing...\n");
+        wprintf(L"Installing...\n");
         int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
         if(a != 0)
         {
-            fprintf(stderr,"ERROR:Installation Failed! 0x%x",a);
+            fwprintf(stderr,L"ERROR:Installation Failed! 0x%x",a);
             return 1;
         }
-        printf("Installation Complete!");
+        wprintf(L"Installation Complete!");
         return 0;
     }
     return 0;
@@ -178,7 +177,7 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
             RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
             RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
             RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
-            if((subKeySz == 38)&&(strcmp(regDistName,DistributionName)==0))
+            if((subKeySz == 38)&&(wcscmp(regDistName,DistributionName)==0))
             {
                 //SUCCESS:Distribution found!
                 //return LxUID
