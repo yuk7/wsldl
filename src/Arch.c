@@ -77,7 +77,6 @@ int main(int argc,char *argv[])
                     else
                     {
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nInput UID");
-
                     }
                     return 1;
                 }
@@ -86,6 +85,25 @@ int main(int argc,char *argv[])
                     fwprintf(stderr,L"ERROR:Invalid Arguments");
                     return 1;
                 }
+            }
+            else if((wcscmp(wargv[1],L"get") == 0)&&wargc>2)
+            {
+                if(wcscmp(wargv[2],L"--lxuid") == 0)
+                {
+                    wchar_t LxUID[50] = L"";
+                    if(GetLxUID(TargetName,LxUID) != NULL)
+                    {
+                        wprintf(L"%s",LxUID);
+                        return 0;
+                    }
+                    else
+                    {
+                        fwprintf(stderr,L"ERROR:GetLxUID failed!");
+                        return 1;
+                    }
+                }
+                fwprintf(stderr,L"ERROR:Invalid Arguments");
+                return 1;
             }
             else
             {
@@ -98,6 +116,8 @@ int main(int argc,char *argv[])
                 wprintf(L"      - Run the given command line in that distro.\n\n");
                 wprintf(L"    config [setting [value]]\n");
                 wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
+                wprintf(L"    get [setting]\n");
+                wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
 
                 return 1;
             }
