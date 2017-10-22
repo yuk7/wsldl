@@ -89,7 +89,8 @@ int main(int argc,char *argv[])
             }
             else
             {
-                fwprintf(stderr,L"ERROR:Invalid Arguments\n\n");
+                fwprintf(stderr,L"ERROR:Invalid Arguments.");
+                wprintf(L"\n\n");
                 wprintf(L"Useage :\n");
                 wprintf(L"    <no args>\n");
                 wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
