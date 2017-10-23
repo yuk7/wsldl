@@ -2,11 +2,11 @@
 ArchLinux on WSL (Windows 10 FCU or later)
 
 
-## 2017102000 Testing Installation
+## 2017102300 Testing Installation
 #### Download testing installer and rootfs.tar.gz
-[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17102000/Arch.exe) (Release:17102000/md5:e281f65b65aae3cc976cbe65eb0cc287)
+[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17102300/Arch.exe) (Release:17102300/md5:e7ec2089b8db1dc098dbdd8e20aca618)
 
-[rootfs.tar.gz](https://github.com/yuk7/ArchWSL/releases/download/17101901/rootfs.tar.gz) (Release:17101901/md5:0080e1df5b1de2b567b288b7a1bd3f5e)
+[rootfs.tar.gz](https://github.com/yuk7/ArchWSL/releases/download/17102300/rootfs.tar.gz) (Release:17102300/md5:f0660ee8b236413429de8d05ea785d3b)
 
 
 #### First Run Arch.exe to Extract rootfs and Register to WSL
@@ -43,6 +43,10 @@ Useage :
 
     config [setting [value]]
       - `--default-uid <uid>`: Set the default user uid for this distro to <uid>
+
+    get [setting]
+      - `--default-uid`: Get the default user uid in this distro
+      - `--lxuid`: Get LxUID key for this distro
 ```
 
 
