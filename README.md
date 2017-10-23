@@ -1,6 +1,8 @@
 # ArchWSL
-ArchLinux on WSL (Windows 10 FCU or later)
+Install ArchLinux as a WSL Instance
 
+
+![screenshot](https://raw.githubusercontent.com/wiki/yuk7/ArchWSL/img/Arch_and_Ubuntu.png)
 
 ## 2017102300 Testing Installation
 #### Download testing installer and rootfs.tar.gz
