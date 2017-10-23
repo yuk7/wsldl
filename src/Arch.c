@@ -57,6 +57,17 @@ int main(int argc,char *argv[])
 
     if(IsDistributionRegistered(TargetName))
     {
+        long distributionVersion;
+        long defaultUID;
+        int distributionFlags;
+        LPSTR defaultEnv;
+        long defaultEnvCnt;
+        int res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
+        if(res!=0)
+        {
+            fwprintf(stderr,L"ERROR:Get Configuration failed! 0x%x",res);
+        }
+
         if(wargc >1)
         {
             if(wcscmp(wargv[1],L"run") == 0)
