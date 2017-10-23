@@ -80,7 +80,7 @@ int main(int argc,char *argv[])
                     long uid;
                     if(swscanf(wargv[3],L"%d",&uid)==1)
                     {
-                        int a = ConfigureDistribution(TargetName,uid,0x7);
+                        int a = ConfigureDistribution(TargetName,uid,distributionFlags);
                         if(a != 0)
                         {
                             fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",a);
