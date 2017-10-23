@@ -20,6 +20,7 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
 int main(int argc,char *argv[])
 {
+    int res = 0;
     wchar_t **wargv;
     int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
@@ -62,7 +63,7 @@ int main(int argc,char *argv[])
         int distributionFlags;
         LPSTR defaultEnv;
         long defaultEnvCnt;
-        int res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
+        res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
         if(res!=0)
         {
             fwprintf(stderr,L"ERROR:Get Configuration failed! 0x%x",res);
@@ -89,10 +90,10 @@ int main(int argc,char *argv[])
                     long uid;
                     if(swscanf(wargv[3],L"%d",&uid)==1)
                     {
-                        int a = ConfigureDistribution(TargetName,uid,distributionFlags);
-                        if(a != 0)
+                        res = ConfigureDistribution(TargetName,uid,distributionFlags);
+                        if(res != 0)
                         {
-                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",a);
+                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
                             return 1;
                         }
                         return 0;
@@ -147,8 +148,8 @@ int main(int argc,char *argv[])
         wchar_t wcmd[120] = L"wsl.exe ";
         wcscat(wcmd,LxUID);
         wcscat(wcmd,rArgs);
-        int resw = _wsystem(wcmd);//Excute wsl with LxUID
-        return resw;
+        res = _wsystem(wcmd);//Excute wsl with LxUID
+        return res;
     }
     else
     {
@@ -158,10 +159,10 @@ int main(int argc,char *argv[])
             return 1;
         }
         wprintf(L"Installing...\n");
-        int a = RegisterDistribution(TargetName,L"rootfs.tar.gz");
-        if(a != 0)
+        res = RegisterDistribution(TargetName,L"rootfs.tar.gz");
+        if(res != 0)
         {
-            fwprintf(stderr,L"ERROR:Installation Failed! 0x%x",a);
+            fwprintf(stderr,L"ERROR:Installation Failed! 0x%x",res);
             return 1;
         }
         wprintf(L"Installation Complete!");
