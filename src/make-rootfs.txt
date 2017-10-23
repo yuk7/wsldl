@@ -37,7 +37,8 @@ arch-chroot .
   #Init pacman and Install&Update some packages
   pacman-key --init
   pacman-key --populate archlinux
-  pacman -Syu less grep gzip sed vi vim nano iproute2 iputils
+  pacman -Syu bzip2 coreutils diffutils gawk gcc-libs gettext grep gzip inetutils iproute2 iputils
+  pacman -Syu less man-db man-pages nano sed tar vi vim wget which
  
   #install modded glibc and fakeroot-tcp package
   pacman -U /root/glibc-wsl-2.26-4-x86_64.pkg.tar.xz
