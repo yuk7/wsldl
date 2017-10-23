@@ -68,6 +68,15 @@ int main(int argc,char *argv[])
             fwprintf(stderr,L"ERROR:Get Configuration failed! 0x%x",res);
         }
 
+        wchar_t LxUID[50] = L"";
+        if(GetLxUID(TargetName,LxUID) == NULL)
+        {
+            fwprintf(stderr,L"ERROR:GetLxUID failed!");
+            return 1;
+        }
+
+
+
         if(wargc >1)
         {
             if(wcscmp(wargv[1],L"run") == 0)
@@ -104,17 +113,8 @@ int main(int argc,char *argv[])
             {
                 if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
-                    wchar_t LxUID[50] = L"";
-                    if(GetLxUID(TargetName,LxUID) != NULL)
-                    {
-                        wprintf(L"%s",LxUID);
-                        return 0;
-                    }
-                    else
-                    {
-                        fwprintf(stderr,L"ERROR:GetLxUID failed!");
-                        return 1;
-                    }
+                    wprintf(L"%s",LxUID);
+                    return 0;
                 }
                 fwprintf(stderr,L"ERROR:Invalid Arguments");
                 return 1;
@@ -143,20 +143,12 @@ int main(int argc,char *argv[])
             wcscat(rArgs,L" ");
             wcscat(rArgs,wargv[i]);
         }
-        wchar_t LxUID[50] = L"";
-        if(GetLxUID(TargetName,LxUID) != NULL)
-        {
-            wchar_t wcmd[120] = L"wsl.exe ";
-            wcscat(wcmd,LxUID);
-            wcscat(wcmd,rArgs);
-            int res = _wsystem(wcmd);//Excute wsl with LxUID
-            return res;
-        }
-        else
-        {
-            fwprintf(stderr,L"ERROR:GetLxUID failed!");
-            return 1;
-        }
+
+        wchar_t wcmd[120] = L"wsl.exe ";
+        wcscat(wcmd,LxUID);
+        wcscat(wcmd,rArgs);
+        int resw = _wsystem(wcmd);//Excute wsl with LxUID
+        return resw;
     }
     else
     {
