@@ -112,6 +112,11 @@ int main(int argc,char *argv[])
             }
             else if((wcscmp(wargv[1],L"get") == 0)&&wargc>2)
             {
+                if(wcscmp(wargv[2],L"--default-uid") == 0)
+                {
+                    wprintf(L"%d",defaultUID);
+                    return 0;
+                }
                 if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
                     wprintf(L"%s",LxUID);
@@ -132,6 +137,7 @@ int main(int argc,char *argv[])
                 wprintf(L"    config [setting [value]]\n");
                 wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
                 wprintf(L"    get [setting]\n");
+                wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
                 wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
 
                 return 1;
