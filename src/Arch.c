@@ -155,6 +155,22 @@ int main(int argc,char *argv[])
                     wprintf(L"%d",defaultUID);
                     return 0;
                 }
+                if(wcscmp(wargv[2],L"--append-path") == 0)
+                {
+                    if(distributionFlags & 0x2)
+                        wprintf(L"on");
+                    else
+                        wprintf(L"off");
+                    return 0;
+                }
+                if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                {
+                    if(distributionFlags & 0x4)
+                    wprintf(L"on");
+                else
+                    wprintf(L"off");
+                return 0;
+                }
                 if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
                     wprintf(L"%s",LxUID);
@@ -178,6 +194,8 @@ int main(int argc,char *argv[])
                 wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
                 wprintf(L"    get [setting]\n");
                 wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
+                wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
+                wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
                 wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
 
                 return 1;
