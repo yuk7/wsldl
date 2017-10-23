@@ -104,6 +104,44 @@ int main(int argc,char *argv[])
                     }
                     return 1;
                 }
+                else if(wcscmp(wargv[2],L"--append-path") == 0)
+                {
+                    if(wcscmp(wargv[3],L"on") == 0)
+                        distributionFlags |= 0x2;
+                    else if(wcscmp(wargv[3],L"off") == 0)
+                        distributionFlags &= ~0x2;
+                    else
+                    {
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off");
+                        return 1;
+                    }
+                    res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    if(res != 0)
+                    {
+                        fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                        return 1;
+                    }
+                    return 0;
+                }
+                else if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                {
+                    if(wcscmp(wargv[3],L"on") == 0)
+                        distributionFlags |= 0x4;
+                    else if(wcscmp(wargv[3],L"off") == 0)
+                        distributionFlags &= ~0x4;
+                    else
+                    {
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off");
+                        return 1;
+                    }
+                    res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    if(res != 0)
+                    {
+                        fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                        return 1;
+                    }
+                    return 0;
+                }
                 else
                 {
                     fwprintf(stderr,L"ERROR:Invalid Arguments");
@@ -135,7 +173,9 @@ int main(int argc,char *argv[])
                 wprintf(L"    run <command line>\n");
                 wprintf(L"      - Run the given command line in that distro.\n\n");
                 wprintf(L"    config [setting [value]]\n");
-                wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n\n");
+                wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
+                wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
+                wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
                 wprintf(L"    get [setting]\n");
                 wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
                 wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
