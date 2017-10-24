@@ -8,6 +8,9 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 #include <windows.h>
 
 typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
