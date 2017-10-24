@@ -88,7 +88,41 @@ int main(int argc,char *argv[])
             }
             else if((wcscmp(wargv[1],L"config") == 0)&&wargc>3)
             {
-                if(wcscmp(wargv[2],L"--default-uid") == 0)
+                if(wcscmp(wargv[2],L"--default-user") == 0)
+                {
+                    FILE *fp;
+                    long uid;
+                    wchar_t wcmd[120] = L"wsl.exe ";
+                    wcscat(wcmd,LxUID);
+                    wcscat(wcmd,L"id -u ");
+                    wcscat(wcmd,wargv[3]);
+                    if((fp=_wpopen(wcmd,L"r")) ==NULL) {
+                        fwprintf(stderr,L"ERROR:Command Excute Failed!");
+                        return 1;
+                    }
+                    wchar_t buf[256];
+                    if (!feof(fp))
+                        fgetws(buf, sizeof(buf), fp);
+
+                    (void) pclose(fp);
+                    if(swscanf(buf,L"%d",&uid)==1)
+                    {
+                        res = ConfigureDistribution(TargetName,uid,distributionFlags);
+                        if(res != 0)
+                        {
+                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                            return 1;
+                        }
+                        return 0;
+                    }
+                    else
+                    {
+                        wprintf(L"\n");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.");
+                    }
+                    return 1;
+                }
+                else if(wcscmp(wargv[2],L"--default-uid") == 0)
                 {
                     long uid;
                     if(swscanf(wargv[3],L"%d",&uid)==1)
@@ -192,6 +226,7 @@ int main(int argc,char *argv[])
                 wprintf(L"    run <command line>\n");
                 wprintf(L"      - Run the given command line in that distro.\n\n");
                 wprintf(L"    config [setting [value]]\n");
+                wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
                 wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
                 wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
                 wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
