@@ -4,9 +4,9 @@ Install ArchLinux as a WSL Instance
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/ArchWSL/img/Arch_and_Ubuntu.png)
 
-## 2017102300 Testing Installation
+## 2017102400 Testing Installation
 #### Download testing installer and rootfs.tar.gz
-[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17102300/Arch.exe) (Release:17102300/md5:e7ec2089b8db1dc098dbdd8e20aca618)
+[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17102400/Arch.exe) (Release:17102400/md5:429ff512b7cd3a657b9eea6e29560beb)
 
 [rootfs.tar.gz](https://github.com/yuk7/ArchWSL/releases/download/17102300/rootfs.tar.gz) (Release:17102300/md5:f0660ee8b236413429de8d05ea785d3b)
 
@@ -23,7 +23,6 @@ Installation Complete!
 ```
 This process may take a few minutes.
 
-be partient:)
 
 
 #### Check Registerd Distribution
@@ -38,16 +37,21 @@ Arch
 ```dos
 Useage :
     <no args>
-          - Launches the distro's default behavior. By default, this launches your default shell.
+      - Launches the distro's default behavior. By default, this launches your default shell.
 
     run <command line>
-          -  Run the given command line in that distro.
+      - Run the given command line in that distro.
 
     config [setting [value]]
+      - `--default-user <user>`: Set the default user for this distro to <user>
       - `--default-uid <uid>`: Set the default user uid for this distro to <uid>
+      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH
+      - `--mount-drive <on|off>`: Switch of Mount drives
 
     get [setting]
       - `--default-uid`: Get the default user uid in this distro
+      - `--append-path`: Get on/off status of Append Windows PATH to $PATH
+      - `--mount-drive`: Get on/off status of Mount drives
       - `--lxuid`: Get LxUID key for this distro
 ```
 
@@ -74,10 +78,7 @@ Useage :
 
 #### Change Default User
 ```dos
->Arch.exe run id user -u
-1000
-
->Arch.exe config --default-uid 1000
+>Arch.exe config --default-user user
 
 >Arch.exe
 [user@PC-NAME dir]$
