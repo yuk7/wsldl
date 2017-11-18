@@ -13,6 +13,8 @@
 #include <wchar.h>
 #include <windows.h>
 
+#define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
+
 typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 typedef int (WINAPI *CONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
@@ -30,9 +32,9 @@ int main(int argc,char *argv[])
 
     //Get file name of exe
     wchar_t efpath[300];
-    if(GetModuleFileNameW(NULL,efpath,300) == 0)
+    if(GetModuleFileNameW(NULL,efpath,ARRAY_LENGTH(efpath)-1) == 0)
         return 1;
-    wchar_t TargetName[50];
+    wchar_t TargetName[300];
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
 
@@ -92,10 +94,10 @@ int main(int argc,char *argv[])
                 {
                     FILE *fp;
                     unsigned long uid;
-                    wchar_t wcmd[120] = L"wsl.exe ";
-                    wcscat(wcmd,LxUID);
-                    wcscat(wcmd,L"id -u ");
-                    wcscat(wcmd,wargv[3]);
+                    wchar_t wcmd[300] = L"wsl.exe ";
+                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),LxUID);
+                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),L"id -u ");
+                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),wargv[3]);
                     if((fp=_wpopen(wcmd,L"r")) ==NULL) {
                         fwprintf(stderr,L"ERROR:Command Excute Failed!");
                         return 1;
@@ -247,9 +249,9 @@ int main(int argc,char *argv[])
             wcscat(rArgs,wargv[i]);
         }
 
-        wchar_t wcmd[120] = L"wsl.exe ";
-        wcscat(wcmd,LxUID);
-        wcscat(wcmd,rArgs);
+        wchar_t wcmd[300] = L"wsl.exe ";
+        wcscat_s(wcmd,ARRAY_LENGTH(wcmd),LxUID);
+        wcscat_s(wcmd,ARRAY_LENGTH(wcmd),rArgs);
         res = _wsystem(wcmd);//Excute wsl with LxUID
         return res;
     }
@@ -284,11 +286,11 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
         {
             wchar_t subKey[200];
             wchar_t subKeyF[200];
-            wcscpy(subKeyF,RKey);
+            wcscpy_s(subKeyF,ARRAY_LENGTH(subKeyF),RKey);
             wchar_t regDistName[100];
             DWORD subKeySz = 100;
             DWORD dwType;
-            DWORD dwSize;
+            DWORD dwSize = 50;
             FILETIME ftLastWriteTime;
 
             rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
@@ -302,10 +304,9 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
             }
 
             HKEY hKeyS;
-            wcscat(subKeyF,L"\\");
-            wcscat(subKeyF,subKey);
+            wcscat_s(subKeyF,ARRAY_LENGTH(subKeyF),L"\\");
+            wcscat_s(subKeyF,ARRAY_LENGTH(subKeyF),subKey);
             RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
             RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
             if((subKeySz == 38)&&(wcscmp(regDistName,DistributionName)==0))
             {
@@ -313,7 +314,7 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
                 //return LxUID
                 RegCloseKey(hKey);
                 RegCloseKey(hKeyS);
-                wcscpy(LxUID,subKey);
+                wcscpy_s(LxUID,40,subKey);
                 return LxUID;
             }
             RegCloseKey(hKeyS);
