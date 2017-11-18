@@ -92,6 +92,7 @@ int main(int argc,char *argv[])
             {
                 if(wcscmp(wargv[2],L"--default-user") == 0)
                 {
+                    (void) ConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
                     FILE *fp;
                     unsigned long uid;
                     wchar_t wcmd[300] = L"wsl.exe ";
@@ -112,6 +113,7 @@ int main(int argc,char *argv[])
                         res = ConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
                         {
+                            (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                             fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
                             return 1;
                         }
@@ -119,6 +121,7 @@ int main(int argc,char *argv[])
                     }
                     else
                     {
+                        (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                         wprintf(L"\n");
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.");
                     }
