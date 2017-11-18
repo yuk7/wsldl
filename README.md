@@ -4,9 +4,9 @@ Install ArchLinux as a WSL Instance
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/ArchWSL/img/Arch_and_Ubuntu.png)
 
-## 2017102400 Testing Installation
+## Install (17111800 version)
 #### Download testing installer and rootfs.tar.gz
-[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17102400/Arch.exe) (Release:17102400/md5:429ff512b7cd3a657b9eea6e29560beb)
+[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17111800/Arch.exe) (Release:17111800/md5:c419f21c77c8987923d48ba7ff1787f7)
 
 [rootfs.tar.gz](https://github.com/yuk7/ArchWSL/releases/download/17102300/rootfs.tar.gz) (Release:17102300/md5:f0660ee8b236413429de8d05ea785d3b)
 
