@@ -61,11 +61,11 @@ int main(int argc,char *argv[])
 
     if(IsDistributionRegistered(TargetName))
     {
-        long distributionVersion;
-        long defaultUID;
+        unsigned long distributionVersion;
+        unsigned long defaultUID;
         int distributionFlags;
         LPSTR defaultEnv;
-        long defaultEnvCnt;
+        unsigned long defaultEnvCnt;
         res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
         if(res!=0)
         {
@@ -91,7 +91,7 @@ int main(int argc,char *argv[])
                 if(wcscmp(wargv[2],L"--default-user") == 0)
                 {
                     FILE *fp;
-                    long uid;
+                    unsigned long uid;
                     wchar_t wcmd[120] = L"wsl.exe ";
                     wcscat(wcmd,LxUID);
                     wcscat(wcmd,L"id -u ");
@@ -124,7 +124,7 @@ int main(int argc,char *argv[])
                 }
                 else if(wcscmp(wargv[2],L"--default-uid") == 0)
                 {
-                    long uid;
+                    unsigned long uid;
                     if(swscanf(wargv[3],L"%d",&uid)==1)
                     {
                         res = ConfigureDistribution(TargetName,uid,distributionFlags);
@@ -305,8 +305,8 @@ wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
             wcscat(subKeyF,L"\\");
             wcscat(subKeyF,subKey);
             RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
-            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, &regDistName,&dwSize);
+            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
+            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
             if((subKeySz == 38)&&(wcscmp(regDistName,DistributionName)==0))
             {
                 //SUCCESS:Distribution found!
