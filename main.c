@@ -19,6 +19,7 @@ typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
 typedef int (WINAPI *CONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
 typedef int (WINAPI *GETDISTRIBUTIONCONFIGURATION)(PCWSTR,ULONG*,ULONG*,INT*,PSTR*,ULONG*);
+typedef int (WINAPI *LAUNCHINTERACTIVE)(PCWSTR,PCWSTR,INT,DWORD*);
 
 wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
@@ -43,6 +44,7 @@ int main(int argc,char *argv[])
     REGISTERDISTRIBUTION RegisterDistribution;
     CONFIGUREDISTRIBUTION ConfigureDistribution;
     GETDISTRIBUTIONCONFIGURATION GetDistributionConfiguration;
+    LAUNCHINTERACTIVE LaunchInteractive;
 
     hmod = LoadLibraryW(L"wslapi.dll");
     if (hmod == NULL) {
@@ -54,7 +56,9 @@ int main(int argc,char *argv[])
     RegisterDistribution = (REGISTERDISTRIBUTION)GetProcAddress(hmod, "WslRegisterDistribution");
     ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
     GetDistributionConfiguration = (GETDISTRIBUTIONCONFIGURATION)GetProcAddress(hmod, "WslGetDistributionConfiguration");
-    if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL | GetDistributionConfiguration == NULL) {
+    LaunchInteractive = (LAUNCHINTERACTIVE)GetProcAddress(hmod, "WslLaunchInteractive");
+    if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL 
+        | GetDistributionConfiguration == NULL | LaunchInteractive ==NULL) {
         FreeLibrary(hmod);
         fwprintf(stderr,L"ERROR:GetProcAddress failed\n");
         return 1;
