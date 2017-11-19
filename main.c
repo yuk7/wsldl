@@ -253,14 +253,18 @@ int main(int argc,char *argv[])
         for (int i=2;i<wargc;i++)
         {
             wcscat_s(rArgs,ARRAY_LENGTH(rArgs),L" ");
-            wcscat_s(rArgs,ARRAY_LENGTH(rArgs,wargv[i]);
+            wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
         }
 
-        wchar_t wcmd[300] = L"wsl.exe ";
-        wcscat_s(wcmd,ARRAY_LENGTH(wcmd),LxUID);
-        wcscat_s(wcmd,ARRAY_LENGTH(wcmd),rArgs);
-        res = _wsystem(wcmd);//Excute wsl with LxUID
-        return res;
+        unsigned long exitcode;
+        res = LaunchInteractive(TargetName,rArgs,1,&exitcode);
+        if(res==0)
+            return exitcode;
+        else
+        {
+            fwprintf(stderr,L"ERROR:Launch Interactive mode Failed! 0x%x",res);
+            return 1;
+        }
     }
     else
     {
