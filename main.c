@@ -49,6 +49,8 @@ int main(int argc,char *argv[])
     hmod = LoadLibraryW(L"wslapi.dll");
     if (hmod == NULL) {
         fwprintf(stderr,L"ERROR:wslapi.dll load failed\n");
+        wprintf(L"Please any key to continue...");
+        getchar();
         return 1;
     }
 
@@ -61,6 +63,8 @@ int main(int argc,char *argv[])
         | GetDistributionConfiguration == NULL | LaunchInteractive ==NULL) {
         FreeLibrary(hmod);
         fwprintf(stderr,L"ERROR:GetProcAddress failed\n");
+        wprintf(L"Please any key to continue...");
+        getchar();
         return 1;
     }
 
@@ -76,12 +80,16 @@ int main(int argc,char *argv[])
         if(res!=0)
         {
             fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
+            wprintf(L"Please any key to continue...");
+            getchar();
         }
 
         wchar_t LxUID[50] = L"";
         if(GetLxUID(TargetName,LxUID) == NULL)
         {
             fwprintf(stderr,L"ERROR:GetLxUID failed!\n");
+            wprintf(L"Please any key to continue...");
+            getchar();
             return 1;
         }
 
@@ -263,6 +271,8 @@ int main(int argc,char *argv[])
         else
         {
             fwprintf(stderr,L"ERROR:Launch Interactive mode Failed!\nHRESULT:0x%x\n",res);
+            wprintf(L"Please any key to continue...");
+            getchar();
             return 1;
         }
     }
@@ -278,6 +288,8 @@ int main(int argc,char *argv[])
         if(res != 0)
         {
             fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
+            wprintf(L"Please any key to continue...");
+            getchar();
             return 1;
         }
         wprintf(L"Installation Complete!\n");
