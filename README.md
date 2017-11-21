@@ -21,13 +21,6 @@ If you rename it you can register with a diffrent name.
 #### 3. Run exe to install. This process may take a few minutes.
 
 
-#### Check Registerd Distribution
-```dos
->wslconfig /l
-~
-Arch
-```
-
 ## How-to-Use(for Installed Instance)
 #### exe Usage
 ```dos
