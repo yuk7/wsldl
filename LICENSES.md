@@ -3,13 +3,13 @@
 ---
 PublicDomain
 
-* [src/make-rootfs.txt](https://github.com/yuk7/ArchWSL)
+* [src/make-rootfs.txt](https://github.com/yuk7/WSL-DistroLauncher)
 
 ---
 [MIT license](http://opensource.org/licenses/mit-license.php)
 
-* [main.c](https://github.com/yuk7/ArchWSL)
-* [res/Arch-res.rc](https://github.com/yuk7/ArchWSL)
+* [main.c](https://github.com/yuk7/WSL-DistroLauncher)
+* [res/Arch-res.rc](https://github.com/yuk7/WSL-DistroLauncher)
 * [res/Alpine-res.rc](https://github.com/yuk7/WSL-DistroLauncher)
 
 ---
