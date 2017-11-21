@@ -1,7 +1,7 @@
 # WSL-DistroLauncher
 Gernal Perpose WSL Distribution Installer&Launcher
 
-![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_and_Ubuntu.png)
+![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
 
 ## Install with prebuilt rootfs
 #### 1. Download installer zip
