@@ -75,13 +75,13 @@ int main(int argc,char *argv[])
         res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
         if(res!=0)
         {
-            fwprintf(stderr,L"ERROR:Get Configuration failed! 0x%x",res);
+            fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
         }
 
         wchar_t LxUID[50] = L"";
         if(GetLxUID(TargetName,LxUID) == NULL)
         {
-            fwprintf(stderr,L"ERROR:GetLxUID failed!");
+            fwprintf(stderr,L"ERROR:GetLxUID failed!\n");
             return 1;
         }
 
@@ -104,7 +104,7 @@ int main(int argc,char *argv[])
                     wcscat_s(wcmd,ARRAY_LENGTH(wcmd),L"id -u ");
                     wcscat_s(wcmd,ARRAY_LENGTH(wcmd),wargv[3]);
                     if((fp=_wpopen(wcmd,L"r")) ==NULL) {
-                        fwprintf(stderr,L"ERROR:Command Excute Failed!");
+                        fwprintf(stderr,L"ERROR:Command Excute Failed!\n");
                         return 1;
                     }
                     wchar_t buf[256];
@@ -118,7 +118,7 @@ int main(int argc,char *argv[])
                         if(res != 0)
                         {
                             (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
-                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                            fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
                             return 1;
                         }
                         return 0;
@@ -127,7 +127,7 @@ int main(int argc,char *argv[])
                     {
                         (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                         wprintf(L"\n");
-                        fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.\n");
                     }
                     return 1;
                 }
@@ -139,14 +139,14 @@ int main(int argc,char *argv[])
                         res = ConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
                         {
-                            fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                            fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
                             return 1;
                         }
                         return 0;
                     }
                     else
                     {
-                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput UID");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput UID\n");
                     }
                     return 1;
                 }
@@ -158,13 +158,13 @@ int main(int argc,char *argv[])
                         distributionFlags &= ~0x2;
                     else
                     {
-                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off\n");
                         return 1;
                     }
                     res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
                     if(res != 0)
                     {
-                        fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                        fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT0x%x\n",res);
                         return 1;
                     }
                     return 0;
@@ -177,20 +177,20 @@ int main(int argc,char *argv[])
                         distributionFlags &= ~0x4;
                     else
                     {
-                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off");
+                        fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off\n");
                         return 1;
                     }
                     res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
                     if(res != 0)
                     {
-                        fwprintf(stderr,L"ERROR:Configure Failed! 0x%x",res);
+                        fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
                         return 1;
                     }
                     return 0;
                 }
                 else
                 {
-                    fwprintf(stderr,L"ERROR:Invalid Arguments");
+                    fwprintf(stderr,L"ERROR:Invalid Arguments\n");
                     return 1;
                 }
             }
@@ -222,13 +222,13 @@ int main(int argc,char *argv[])
                     wprintf(L"%s",LxUID);
                     return 0;
                 }
-                fwprintf(stderr,L"ERROR:Invalid Arguments");
+                fwprintf(stderr,L"ERROR:Invalid Arguments\n");
                 return 1;
             }
             else
             {
-                fwprintf(stderr,L"ERROR:Invalid Arguments.");
-                wprintf(L"\n\n");
+                fwprintf(stderr,L"ERROR:Invalid Arguments.\n");
+                wprintf(L"\n");
                 wprintf(L"Useage :\n");
                 wprintf(L"    <no args>\n");
                 wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
@@ -262,7 +262,7 @@ int main(int argc,char *argv[])
             return exitcode;
         else
         {
-            fwprintf(stderr,L"ERROR:Launch Interactive mode Failed! 0x%x",res);
+            fwprintf(stderr,L"ERROR:Launch Interactive mode Failed!\nHRESULT:0x%x\n",res);
             return 1;
         }
     }
@@ -270,17 +270,17 @@ int main(int argc,char *argv[])
     {
         if(wargc >1)
         {
-            fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install",TargetName);
+            fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
             return 1;
         }
         wprintf(L"Installing...\n");
         res = RegisterDistribution(TargetName,L"rootfs.tar.gz");
         if(res != 0)
         {
-            fwprintf(stderr,L"ERROR:Installation Failed! 0x%x",res);
+            fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
             return 1;
         }
-        wprintf(L"Installation Complete!");
+        wprintf(L"Installation Complete!\n");
         return 0;
     }
     return 0;
