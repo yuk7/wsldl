@@ -10,11 +10,18 @@ PublicDomain
 
 * [main.c](https://github.com/yuk7/ArchWSL)
 * [res/Arch-res.rc](https://github.com/yuk7/ArchWSL)
+* [res/Alpine-res.rc](https://github.com/yuk7/WSL-DistroLauncher)
 
 ---
 [Creative Commons (Attribution 3.0 Unported)](https://creativecommons.org/licenses/by/3.0/)
 
 * [res/Arch-icon.ico](https://www.shareicon.net/archlinux-arch-linux-101867)
+
+---
+[Creative Commons (Attribution-ShareAlike 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)
+
+* [res/Alpine-icon.ico](https://github.com/yuk7/WSL-DistroLauncher)
+  this file is modified. original by [Alpinelinux](https://commons.wikimedia.org/wiki/File:Alpine_Linux.svg)
 
 ---
 Multiple License
