@@ -82,6 +82,7 @@ int main(int argc,char *argv[])
             fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
             wprintf(L"Please any key to continue...");
             getchar();
+            return 1;
         }
 
         wchar_t LxUID[50] = L"";
