@@ -1,28 +1,24 @@
-# ArchWSL
-Install ArchLinux as a WSL Instance
+# WSL-DistroLauncher
+Gernal Perpose WSL Distribution Installer&Launcher
 
+![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_and_Ubuntu.png)
 
-![screenshot](https://raw.githubusercontent.com/wiki/yuk7/ArchWSL/img/Arch_and_Ubuntu.png)
+## Install with prebuilt rootfs
+#### 1. Download installer zip
+ArchLinux:[Arch.zip](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112100/Arch.zip)(md5:50e300a63395c8f11f2f13663c009c85)
 
-## Install (17111800 version)
-#### Download testing installer and rootfs.tar.gz
-[Arch.exe](https://github.com/yuk7/ArchWSL/releases/download/17111800/Arch.exe) (Release:17111800/md5:c419f21c77c8987923d48ba7ff1787f7)
+##### 2. extract all files in zip file to same directory
 
-[rootfs.tar.gz](https://github.com/yuk7/ArchWSL/releases/download/17102300/rootfs.tar.gz) (Release:17102300/md5:f0660ee8b236413429de8d05ea785d3b)
-
-
-#### First Run Arch.exe to Extract rootfs and Register to WSL
-Excutable filename is using to distribution name to register.
-
+#### 3.Run exe to Extract rootfs and Register to WSL
+Exe filename is using to the instance name to register.
 If you rename it you can register with a diffrent name.
 
-```dos
->Arch.exe
-~
-Installation Complete!
-```
-This process may take a few minutes.
 
+## Install with any rootfs
+#### 1. Download [Launcher.exe](https://github.com/yuk7/WSL-DistLauncher/releases/download/17111801/Launcher.exe) and rename it for distribution name to register.
+(Ex:Rename to Arch.exe if you want to "Arch" for the Instance name)
+#### 2. Put your rootfs.tar.gz in same directory as exe (Installation directory)
+#### 3. Run exe to install. This process may take a few minutes.
 
 
 #### Check Registerd Distribution
@@ -32,8 +28,8 @@ This process may take a few minutes.
 Arch
 ```
 
-## How-to-Use
-#### Arch.exe Usage
+## How-to-Use(for Installed Instance)
+#### exe Usage
 ```dos
 Useage :
     <no args>
@@ -56,37 +52,30 @@ Useage :
 ```
 
 
-#### Just Run Arch.exe
+#### Just Run exe
 ```dos
->Arch.exe
+>{InstanceName}.exe
 [root@PC-NAME user]#
 ```
 
 #### Run with command line
 ```dos
->Arch.exe run uname -r
+>{InstanceName}.exe run uname -r
 4.4.0-43-Microsoft
 
 ```
 
-#### Change Default Distribution to Arch and Run it
+#### Change Default User(id command required)
 ```dos
->wslconfig /s Arch
->wsl
-[root@PC-NAME dir]#
-```
+>{InstanceName}.exe config --default-user user
 
-#### Change Default User
-```dos
->Arch.exe config --default-user user
-
->Arch.exe
+>{InstanceName}.exe
 [user@PC-NAME dir]$
 ```
 
 
 #### How to uninstall instance
 ```dos
->wslconfig /u Arch
+>wslconfig /u {InstanceName}
 
 ```
