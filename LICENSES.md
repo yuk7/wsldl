@@ -8,13 +8,13 @@ PublicDomain
 ---
 [MIT license](http://opensource.org/licenses/mit-license.php)
 
-* [src/Arch.c](https://github.com/yuk7/ArchWSL)
-* [src/Arch-res.rc](https://github.com/yuk7/ArchWSL)
+* [main.c](https://github.com/yuk7/ArchWSL)
+* [res/Arch-res.rc](https://github.com/yuk7/ArchWSL)
 
 ---
 [Creative Commons (Attribution 3.0 Unported)](https://creativecommons.org/licenses/by/3.0/)
 
-* [src/Arch-icon.ico](https://www.shareicon.net/archlinux-arch-linux-101867)
+* [res/Arch-icon.ico](https://www.shareicon.net/archlinux-arch-linux-101867)
 
 ---
 Multiple License
