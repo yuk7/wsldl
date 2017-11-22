@@ -1,9 +1,10 @@
 # WSL-DistroLauncher
 Gernal Perpose WSL Distribution Installer&Launcher
 
-[![Build Status](https://travis-ci.org/yuk7/WSL-DistroLauncher.svg?branch=master)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
+
+[![Build Status](https://travis-ci.org/yuk7/WSL-DistroLauncher.svg?branch=master)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
 
 ## Install with prebuilt rootfs
 #### 1. Download installer zip
@@ -19,7 +20,7 @@ If you rename it you can register with a diffrent name.
 
 
 ## Install with any rootfs
-#### 1. Download [Launcher.exe](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112100/Launcher.exe) and rename it for distribution name to register.
+#### 1. Download [_Launcher.exe](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112200/_Launcher.exe) and rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to "Arch" for the Instance name)
 #### 2. Put your rootfs.tar.gz in same directory as exe (Installation directory)
 #### 3. Run exe to install. This process may take a few minutes.
