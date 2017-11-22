@@ -9,7 +9,7 @@ Gernal Perpose WSL Distribution Installer&Launcher
 
 [Arch Linux](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112100/Arch.zip)(md5:50e300a63395c8f11f2f13663c009c85)
 
-##### 2. extract all files in zip file to same directory
+#### 2. Extract all files in zip file to same directory
 
 #### 3.Run exe to Extract rootfs and Register to WSL
 Exe filename is using to the instance name to register.
