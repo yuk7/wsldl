@@ -17,11 +17,9 @@
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
 
-int main(int argc,char *argv[])
+int main(int wargc,wchar_t *wargv[])
 {
     int res = 0;
-    wchar_t **wargv;
-    int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
     //Get file name of exe
