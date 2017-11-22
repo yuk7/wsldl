@@ -8,7 +8,7 @@ before_script:
 - sudo apt-get install gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 check -qq
 script:
 - mkdir out
-- x86_64-w64-mingw32-gcc main.c -o out/Launcher.exe
+- x86_64-w64-mingw32-gcc main.c -o out/_Launcher.exe
 - x86_64-w64-mingw32-windres res/Arch-res.rc -o Arch-res.o
 - x86_64-w64-mingw32-gcc main.c Arch-res.o -o out/Arch.exe
 - x86_64-w64-mingw32-windres res/Alpine-res.rc -o Alpine-res.o
@@ -16,4 +16,14 @@ script:
 - 
 notifications:
   email: false
-  
+deploy:
+  provider: releases
+  api_key:
+    secure: LErGUUK/E5nRqR+n2AggRR9dU2+DD7KGSZf5kHeNJkmhr/WTPt2LU1LbCNSpd7uzKgOrx24ZkmOiWLzgY5LS8j3BN7W9Nm8Yh6U+wRwuHm86FxkJF0tutL4OEhnME+T5BbGde47q7F23JHwvR033EDP4CUOXIHBdCu+UYHbfQl7yZUUdUKAVYcMZVcVvFV2EgPAZUlUBWQXB8MGtN5dOHKPSqJOyHT6lM9lDAuYfrP9jrxd/93eQIFR12tyRYW360oSjXKJLSdTUdwquQYu/oxFjJWr17T+1CK3KFxhkOxA+ecUEQU7GmUolFuftMp5rxul8ehYNwI8TBE8SJ7WoMWJeLXO8lCLnou5AYkQDgah8C5ubYzM9zt7b2xKUmTva5Tb8nFq24lu2ftlc5JyLccpvabWG/hjugeoohcpngxXhVB3JsNqqrtkc2qdOPCczAETiis7XVQ8DDLehuiFlSrYOtXAkTZxzyX5WgmJakUgxHFr31v+sljlg/RICo60wDdf50sCxfjVaXtiu4bTQQMlVDctyUanjPpFNFoHBfwd7PHBxr9X+996yILVthLLIKc39WPmvkVU+ctQxfjFWEZARnpTxO9JPTTe/9jhpkQxvvlQkY5HuauKo8/OMJ2uZ8GTusvus8SmDQglJxuNMT7hIwrbybcS4E7aIUNJpo5Q=
+  file_glob: true
+  file: 'out/*.{exe}''
+  on:
+    repo: yuk7/WSL-DistroLauncher
+    tags: true
+    all_branches: true
+  skip_cleanup: true
