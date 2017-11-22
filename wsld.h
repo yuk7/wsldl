@@ -10,6 +10,9 @@
  #define WSLD_H_
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 #include <windows.h>
 
 #ifdef __cplusplus
