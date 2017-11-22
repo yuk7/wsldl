@@ -20,6 +20,7 @@ extern "C" {
 
 typedef int (WINAPI *WSLISDISTRIBUTIONREBISTERED)(PCWSTR);
 typedef int (WINAPI *WSLREGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
+typedef int (WINAPI *WSLUNREGISTERDISTRIBUTION)(PCWSTR);
 typedef int (WINAPI *WSLCONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
 typedef int (WINAPI *WSLGETDISTRIBUTIONCONFIGURATION)(PCWSTR,ULONG*,ULONG*,INT*,PSTR*,ULONG*);
 typedef int (WINAPI *WSLLAUNCHINTERACTIVE)(PCWSTR,PCWSTR,INT,DWORD*);
@@ -28,6 +29,7 @@ typedef int (WINAPI *WSLLAUNCH)(PCWSTR,PCWSTR,INT,HANDLE,HANDLE,HANDLE,HANDLE*);
 HMODULE WslHmod;
 WSLISDISTRIBUTIONREBISTERED WslIsDistributionRegistered;
 WSLREGISTERDISTRIBUTION WslRegisterDistribution;
+WSLUNREGISTERDISTRIBUTION WslUnregisterDistribution;
 WSLCONFIGUREDISTRIBUTION WslConfigureDistribution;
 WSLGETDISTRIBUTIONCONFIGURATION WslGetDistributionConfiguration;
 WSLLAUNCHINTERACTIVE WslLaunchInteractive;
@@ -47,12 +49,13 @@ int WslApiInit()
 
     WslIsDistributionRegistered = (WSLISDISTRIBUTIONREBISTERED)GetProcAddress(WslHmod, "WslIsDistributionRegistered");
     WslRegisterDistribution = (WSLREGISTERDISTRIBUTION)GetProcAddress(WslHmod, "WslRegisterDistribution");
+    WslUnregisterDistribution = (WSLUNREGISTERDISTRIBUTION)GetProcAddress(WslHmod, "WslUnregisterDistribution");
     WslConfigureDistribution = (WSLCONFIGUREDISTRIBUTION)GetProcAddress(WslHmod, "WslConfigureDistribution");
     WslGetDistributionConfiguration = (WSLGETDISTRIBUTIONCONFIGURATION)GetProcAddress(WslHmod, "WslGetDistributionConfiguration");
     WslLaunchInteractive = (WSLLAUNCHINTERACTIVE)GetProcAddress(WslHmod, "WslLaunchInteractive");
     WslLaunch = (WSLLAUNCH)GetProcAddress(WslHmod, "WslLaunch");
-    if (WslIsDistributionRegistered == NULL | WslRegisterDistribution == NULL | WslConfigureDistribution == NULL 
-        | WslGetDistributionConfiguration == NULL | WslLaunchInteractive == NULL | WslLaunch == NULL) {
+    if (WslIsDistributionRegistered == NULL | WslRegisterDistribution == NULL | WslUnregisterDistribution == NULL
+        | WslConfigureDistribution == NULL | WslGetDistributionConfiguration == NULL | WslLaunchInteractive == NULL | WslLaunch == NULL) {
         FreeLibrary(WslHmod);
         return 2;
     }
