@@ -12,16 +12,9 @@
 #include <string.h>
 #include <wchar.h>
 #include <windows.h>
+#include "wsld.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
-
-typedef int (WINAPI *ISDISTRIBUTIONREBISTERED)(PCWSTR);
-typedef int (WINAPI *REGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
-typedef int (WINAPI *CONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
-typedef int (WINAPI *GETDISTRIBUTIONCONFIGURATION)(PCWSTR,ULONG*,ULONG*,INT*,PSTR*,ULONG*);
-typedef int (WINAPI *LAUNCHINTERACTIVE)(PCWSTR,PCWSTR,INT,DWORD*);
-
-wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID);
 
 
 int main(int argc,char *argv[])
@@ -39,44 +32,23 @@ int main(int argc,char *argv[])
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
 
-    HMODULE hmod;
-    ISDISTRIBUTIONREBISTERED IsDistributionRegistered;
-    REGISTERDISTRIBUTION RegisterDistribution;
-    CONFIGUREDISTRIBUTION ConfigureDistribution;
-    GETDISTRIBUTIONCONFIGURATION GetDistributionConfiguration;
-    LAUNCHINTERACTIVE LaunchInteractive;
-
-    hmod = LoadLibraryW(L"wslapi.dll");
-    if (hmod == NULL) {
-        fwprintf(stderr,L"ERROR:wslapi.dll load failed\n");
-        wprintf(L"Please any key to continue...");
-        getchar();
-        return 1;
-    }
-
-    IsDistributionRegistered = (ISDISTRIBUTIONREBISTERED)GetProcAddress(hmod, "WslIsDistributionRegistered");
-    RegisterDistribution = (REGISTERDISTRIBUTION)GetProcAddress(hmod, "WslRegisterDistribution");
-    ConfigureDistribution = (CONFIGUREDISTRIBUTION)GetProcAddress(hmod, "WslConfigureDistribution");
-    GetDistributionConfiguration = (GETDISTRIBUTIONCONFIGURATION)GetProcAddress(hmod, "WslGetDistributionConfiguration");
-    LaunchInteractive = (LAUNCHINTERACTIVE)GetProcAddress(hmod, "WslLaunchInteractive");
-    if (IsDistributionRegistered == NULL | RegisterDistribution == NULL | ConfigureDistribution == NULL 
-        | GetDistributionConfiguration == NULL | LaunchInteractive ==NULL) {
-        FreeLibrary(hmod);
-        fwprintf(stderr,L"ERROR:GetProcAddress failed\n");
+    res = WslApiInit();
+    if (res) {
+        fwprintf(stderr,L"ERROR:WslApi.dll load failed(%s).\n",res);
         wprintf(L"Please any key to continue...");
         getchar();
         return 1;
     }
 
 
-    if(IsDistributionRegistered(TargetName))
+    if(WslIsDistributionRegistered(TargetName))
     {
         unsigned long distributionVersion;
         unsigned long defaultUID;
         int distributionFlags;
         LPSTR defaultEnv;
         unsigned long defaultEnvCnt;
-        res = GetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
+        res = WslGetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
         if(res!=0)
         {
             fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
@@ -86,7 +58,7 @@ int main(int argc,char *argv[])
         }
 
         wchar_t LxUID[50] = L"";
-        if(GetLxUID(TargetName,LxUID) == NULL)
+        if(WslGetLxUID(TargetName,LxUID) == NULL)
         {
             fwprintf(stderr,L"ERROR:GetLxUID failed!\n");
             wprintf(L"Please any key to continue...");
@@ -105,7 +77,7 @@ int main(int argc,char *argv[])
             {
                 if(wcscmp(wargv[2],L"--default-user") == 0)
                 {
-                    (void) ConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
+                    (void) WslConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
                     FILE *fp;
                     unsigned long uid;
                     wchar_t wcmd[300] = L"wsl.exe ";
@@ -123,10 +95,10 @@ int main(int argc,char *argv[])
                     (void) pclose(fp);
                     if(swscanf(buf,L"%d",&uid)==1)
                     {
-                        res = ConfigureDistribution(TargetName,uid,distributionFlags);
+                        res = WslConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
                         {
-                            (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
+                            (void) WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                             fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
                             return 1;
                         }
@@ -134,7 +106,7 @@ int main(int argc,char *argv[])
                     }
                     else
                     {
-                        (void) ConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
+                        (void) WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                         wprintf(L"\n");
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.\n");
                     }
@@ -145,7 +117,7 @@ int main(int argc,char *argv[])
                     unsigned long uid;
                     if(swscanf(wargv[3],L"%d",&uid)==1)
                     {
-                        res = ConfigureDistribution(TargetName,uid,distributionFlags);
+                        res = WslConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
                         {
                             fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
@@ -170,7 +142,7 @@ int main(int argc,char *argv[])
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off\n");
                         return 1;
                     }
-                    res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    res = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                     if(res != 0)
                     {
                         fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT0x%x\n",res);
@@ -189,7 +161,7 @@ int main(int argc,char *argv[])
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nInput on/off\n");
                         return 1;
                     }
-                    res = ConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    res = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                     if(res != 0)
                     {
                         fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
@@ -266,7 +238,7 @@ int main(int argc,char *argv[])
         }
 
         unsigned long exitcode;
-        res = LaunchInteractive(TargetName,rArgs,1,&exitcode);
+        res = WslLaunchInteractive(TargetName,rArgs,1,&exitcode);
         if(res==0)
             return exitcode;
         else
@@ -285,7 +257,7 @@ int main(int argc,char *argv[])
             return 1;
         }
         wprintf(L"Installing...\n");
-        res = RegisterDistribution(TargetName,L"rootfs.tar.gz");
+        res = WslRegisterDistribution(TargetName,L"rootfs.tar.gz");
         if(res != 0)
         {
             fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
@@ -297,61 +269,4 @@ int main(int argc,char *argv[])
         return 0;
     }
     return 0;
-}
-
-wchar_t *GetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
-{
-    wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
-    HKEY hKey;
-    LONG rres;
-    if(RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
-    {
-        for(int i=0;;i++)
-        {
-            wchar_t subKey[200];
-            wchar_t subKeyF[200];
-            wcscpy_s(subKeyF,ARRAY_LENGTH(subKeyF),RKey);
-            wchar_t regDistName[100];
-            DWORD subKeySz = 100;
-            DWORD dwType;
-            DWORD dwSize = 50;
-            FILETIME ftLastWriteTime;
-
-            rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
-            if (rres == ERROR_NO_MORE_ITEMS)
-                break;
-            else if(rres != ERROR_SUCCESS)
-            {
-                //ERROR
-                LxUID = NULL;
-                return LxUID;
-            }
-
-            HKEY hKeyS;
-            wcscat_s(subKeyF,ARRAY_LENGTH(subKeyF),L"\\");
-            wcscat_s(subKeyF,ARRAY_LENGTH(subKeyF),subKey);
-            RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
-            if((subKeySz == 38)&&(wcscmp(regDistName,DistributionName)==0))
-            {
-                //SUCCESS:Distribution found!
-                //return LxUID
-                RegCloseKey(hKey);
-                RegCloseKey(hKeyS);
-                wcscpy_s(LxUID,40,subKey);
-                return LxUID;
-            }
-            RegCloseKey(hKeyS);
-            }
-        }
-        else
-        {
-        //ERROR
-        LxUID = NULL;
-        return LxUID;
-        }
-    RegCloseKey(hKey);
-    //ERROR:Distribution Not Found
-    LxUID = NULL;
-    return LxUID;
 }
