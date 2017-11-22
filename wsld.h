@@ -42,7 +42,7 @@ void WslApiFree()
 
 int WslApiInit()
 {
-    WslHmod = LoadLibraryW(L"wslapi.dll");
+    WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, 0x00000800);
     if (WslHmod == NULL) {
         return 1;
     }
