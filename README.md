@@ -1,6 +1,8 @@
 # WSL-DistroLauncher
 Gernal Perpose WSL Distribution Installer&Launcher
 
+[![Build Status](https://travis-ci.org/yuk7/WSL-DistroLauncher.svg?branch=master)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
+
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
 
 ## Install with prebuilt rootfs
