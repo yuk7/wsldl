@@ -66,7 +66,8 @@ wchar_t *WslGetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
     LONG rres;
     if(RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
     {
-        for(int i=0;;i++)
+        int i;
+        for(i=0;;i++)
         {
             wchar_t subKey[200];
             wchar_t subKeyF[200];

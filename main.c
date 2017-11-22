@@ -231,7 +231,8 @@ int main(int argc,char *argv[])
         }
 
         wchar_t rArgs[300] = L"";
-        for (int i=2;i<wargc;i++)
+        int i;
+        for (i=2;i<wargc;i++)
         {
             wcscat_s(rArgs,ARRAY_LENGTH(rArgs),L" ");
             wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
