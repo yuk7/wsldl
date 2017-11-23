@@ -252,13 +252,26 @@ int main()
     }
     else
     {
-        if(wargc >1)
+        wchar_t tgzname[300] = L"rootfs.tar.gz";
+        if(wargc >2)
+        {
+            if(wcscmp(wargv[1],L"tgz")==0)
+            {
+                wcscpy_s(tgzname,ARRAY_LENGTH(tgzname),wargv[2]);
+            }
+            else
+            {
+                fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
+                return 1;
+            }
+        }
+        else if(wargc >1)
         {
             fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
             return 1;
         }
         wprintf(L"Installing...\n");
-        res = WslRegisterDistribution(TargetName,L"rootfs.tar.gz");
+        res = WslRegisterDistribution(TargetName,tgzname);
         if(res != 0)
         {
             fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
