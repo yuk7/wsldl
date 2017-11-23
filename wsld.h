@@ -10,6 +10,9 @@
  #define WSLD_H_
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 #include <windows.h>
 
 #ifdef __cplusplus
@@ -42,7 +45,7 @@ void WslApiFree()
 
 int WslApiInit()
 {
-    WslHmod = LoadLibraryW(L"wslapi.dll");
+    WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, 0x00000800);
     if (WslHmod == NULL) {
         return 1;
     }
