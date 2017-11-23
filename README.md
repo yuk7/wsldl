@@ -20,10 +20,11 @@ If you rename it you can register with a diffrent name.
 
 
 ## Install with any rootfs
-#### 1. Download [_Launcher.exe](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112200/_Launcher.exe) and rename it for distribution name to register.
+#### 1. [Download exe](https://github.com/yuk7/WSL-DistroLauncher/releases/download/latest) (There are lots of exe files. _Launcher.exe has no icon. Other exe files each have a different icon.)
+#### 2. Rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to "Arch" for the Instance name)
-#### 2. Put your rootfs.tar.gz in same directory as exe (Installation directory)
-#### 3. Run exe to install. This process may take a few minutes.
+#### 3. Put your rootfs.tar.gz in same directory as exe (Installation directory)
+#### 4. Run exe to install. This process may take a few minutes.
 
 
 ## How-to-Use(for Installed Instance)
