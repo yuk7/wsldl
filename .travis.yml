@@ -1,11 +1,13 @@
-sudo: required
+sudo: false
 dist: trusty
 language: gcc
 compiler:
 - gcc
-before_script:
-- sudo apt-get update -qq
-- sudo apt-get install gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64 check -qq
+addons:
+  apt:
+    packages:
+    - gcc-mingw-w64-x86-64
+    - binutils-mingw-w64-x86-64
 script:
 - mkdir out
 - x86_64-w64-mingw32-gcc main.c -o out/_Launcher.exe
