@@ -4,13 +4,13 @@ Gernal Perpose WSL Distribution Installer&Launcher
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
 
-[![Build Status](https://travis-ci.org/yuk7/WSL-DistroLauncher.svg?branch=master)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
+[![Build Status](https://travis-ci.org/yuk7/WSL-DistroLauncher.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
 
 ## Install with prebuilt rootfs
 #### 1. Download installer zip
 [Alpine Linux 3.6.2](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112101/Alpine.zip)(md5:e7476fd779e27c75aa61265bcc10df5)
 
-[Arch Linux](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112100/Arch.zip)(md5:50e300a63395c8f11f2f13663c009c85)
+[Arch Linux](https://github.com/yuk7/ArchWSL)
 
 #### 2. Extract all files in zip file to same directory
 
