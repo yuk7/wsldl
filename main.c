@@ -78,22 +78,41 @@ int main()
                 if(wcscmp(wargv[2],L"--default-user") == 0)
                 {
                     (void) WslConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
-                    FILE *fp;
+                    HANDLE hProcess;
+                    HANDLE hOutTmp,hOut;
+                    HANDLE hInTmp,hIn;
+                    SECURITY_ATTRIBUTES sa;
+                    sa.nLength = sizeof(sa);
+                    sa.bInheritHandle = TRUE;
+                    sa.lpSecurityDescriptor = NULL;
                     unsigned long uid;
-                    wchar_t wcmd[300] = L"wsl.exe ";
-                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),LxUID);
-                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),L"id -u ");
-                    wcscat_s(wcmd,ARRAY_LENGTH(wcmd),wargv[3]);
-                    if((fp=_wpopen(wcmd,L"r")) ==NULL) {
-                        fwprintf(stderr,L"ERROR:Command Excute Failed!\n");
+                    wchar_t idcmd[30] = L"id -u ";
+                    wcscat_s(idcmd,ARRAY_LENGTH(idcmd),wargv[3]);
+                    
+                    CreatePipe(&hOut, &hOutTmp, &sa, 0);
+                    CreatePipe(&hIn, &hInTmp, &sa, 0);
+                    
+                    if(WslLaunch(TargetName,idcmd,0,hInTmp,hOutTmp,hOutTmp,&hProcess))
+                    {
+                        fwprintf(stderr,L"ERROR:Failed to Excute id command.\n");
                         return 1;
                     }
-                    wchar_t buf[256];
-                    if (!feof(fp))
-                        fgetws(buf, sizeof(buf), fp);
+                    CloseHandle(hInTmp);
+                    CloseHandle(hOutTmp);
 
-                    (void) pclose(fp);
-                    if(swscanf(buf,L"%d",&uid)==1)
+                    char buf[300];
+                    DWORD len = 0;
+                    if(!ReadFile(hOut, &buf, sizeof(buf), &len, NULL))
+                    {
+                        fwprintf(stderr,L"ERROR:Failed to read result.\n");
+                        return 1;
+                    }
+                    
+                    CloseHandle(hInTmp);
+                    CloseHandle(hOutTmp);
+                    CloseHandle(hProcess);
+
+                    if(sscanf(buf,"%d",&uid)==1)
                     {
                         res = WslConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
