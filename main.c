@@ -57,15 +57,6 @@ int main()
             return 1;
         }
 
-        wchar_t LxUID[50] = L"";
-        if(WslGetLxUID(TargetName,LxUID) == NULL)
-        {
-            fwprintf(stderr,L"ERROR:GetLxUID failed!\n");
-            wprintf(L"Please any key to continue...");
-            getchar();
-            return 1;
-        }
-
 
 
         if(wargc >1)
@@ -219,6 +210,12 @@ int main()
                 }
                 if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
+                    wchar_t LxUID[50] = L"";
+                    if(WslGetLxUID(TargetName,LxUID) == NULL)
+                    {
+                        fwprintf(stderr,L"ERROR:GetLxUID failed!\n");
+                        return 1;
+                    }
                     wprintf(L"%s",LxUID);
                     return 0;
                 }
