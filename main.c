@@ -35,7 +35,7 @@ int main()
     res = WslApiInit();
     if (res) {
         fwprintf(stderr,L"ERROR:WslApi.dll load failed(%s).\n",res);
-        wprintf(L"Please any key to continue...");
+        wprintf(L"Press any key to continue...");
         getchar();
         return 1;
     }
@@ -52,7 +52,7 @@ int main()
         if(res!=0)
         {
             fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
-            wprintf(L"Please any key to continue...");
+            wprintf(L"Press any key to continue...");
             getchar();
             return 1;
         }
@@ -261,7 +261,7 @@ int main()
         else
         {
             fwprintf(stderr,L"ERROR:Launch Interactive mode Failed!\nHRESULT:0x%x\n",res);
-            wprintf(L"Please any key to continue...");
+            wprintf(L"Press any key to continue...");
             getchar();
             return 1;
         }
@@ -291,7 +291,7 @@ int main()
         if(res != 0)
         {
             fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
-            wprintf(L"Please any key to continue...");
+            wprintf(L"Press any key to continue...");
             getchar();
             return 1;
         }
