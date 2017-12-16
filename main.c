@@ -223,6 +223,11 @@ int main()
                 fwprintf(stderr,L"ERROR:Invalid Arguments\n");
                 return 1;
             }
+            else if(wcscmp(wargv[1],L"help") == 0)
+            {
+                show_usage();
+                return 0;
+            } 
             else
             {
                 fwprintf(stderr,L"ERROR:Invalid Arguments.\n");
@@ -307,4 +312,7 @@ void show_usage()
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
+    wprintf(L"    help\n");
+    wprintf(L"      - Print this usage message.\n\n");
+    
 }
