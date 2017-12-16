@@ -16,6 +16,7 @@
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
+void show_usage();
 
 int main()
 {
@@ -226,22 +227,8 @@ int main()
             {
                 fwprintf(stderr,L"ERROR:Invalid Arguments.\n");
                 wprintf(L"\n");
-                wprintf(L"Useage :\n");
-                wprintf(L"    <no args>\n");
-                wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
-                wprintf(L"    run <command line>\n");
-                wprintf(L"      - Run the given command line in that distro.\n\n");
-                wprintf(L"    config [setting [value]]\n");
-                wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
-                wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
-                wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
-                wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
-                wprintf(L"    get [setting]\n");
-                wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
-                wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
-                wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
-                wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
-
+                show_usage();
+                
                 return 1;
             }
         }
@@ -301,4 +288,23 @@ int main()
         return 0;
     }
     return 0;
+}
+
+void show_usage()
+{
+    wprintf(L"Useage :\n");
+    wprintf(L"    <no args>\n");
+    wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
+    wprintf(L"    run <command line>\n");
+    wprintf(L"      - Run the given command line in that distro.\n\n");
+    wprintf(L"    config [setting [value]]\n");
+    wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
+    wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
+    wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
+    wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
+    wprintf(L"    get [setting]\n");
+    wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
+    wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
+    wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
+    wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
 }
