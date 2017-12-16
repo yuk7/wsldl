@@ -38,7 +38,7 @@ int main()
         fwprintf(stderr,L"ERROR:WslApi.dll load failed(%s).\n",res);
         wprintf(L"Press any key to continue...");
         getchar();
-        return 1;
+        return res;
     }
 
 
@@ -55,7 +55,7 @@ int main()
             fwprintf(stderr,L"ERROR:Get Configuration failed!\nHRESULT:0x%x\n",res);
             wprintf(L"Press any key to continue...");
             getchar();
-            return 1;
+            return res;
         }
 
 
@@ -111,7 +111,7 @@ int main()
                         {
                             (void) WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                             fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
-                            return 1;
+                            return res;
                         }
                         return 0;
                     }
@@ -132,7 +132,7 @@ int main()
                         if(res != 0)
                         {
                             fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
-                            return 1;
+                            return res;
                         }
                         return 0;
                     }
@@ -157,7 +157,7 @@ int main()
                     if(res != 0)
                     {
                         fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT0x%x\n",res);
-                        return 1;
+                        return res;
                     }
                     return 0;
                 }
@@ -176,7 +176,7 @@ int main()
                     if(res != 0)
                     {
                         fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
-                        return 1;
+                        return res;
                     }
                     return 0;
                 }
@@ -250,7 +250,7 @@ int main()
             fwprintf(stderr,L"ERROR:Launch Interactive mode Failed!\nHRESULT:0x%x\n",res);
             wprintf(L"Press any key to continue...");
             getchar();
-            return 1;
+            return res;
         }
     }
     else
@@ -280,7 +280,7 @@ int main()
             fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",res);
             wprintf(L"Press any key to continue...");
             getchar();
-            return 1;
+            return res;
         }
         wprintf(L"Installation Complete!\n");
         wprintf(L"Press any key to continue...");
