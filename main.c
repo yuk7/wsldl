@@ -296,7 +296,7 @@ int main()
             return 1;
         }
         wprintf(L"Installation Complete!\n");
-        wprintf(L"Please any key to continue...");
+        wprintf(L"Press any key to continue...");
         getchar();
         return 0;
     }
