@@ -223,6 +223,28 @@ int main()
                 fwprintf(stderr,L"ERROR:Invalid Arguments\n");
                 return 1;
             }
+            else if(wcscmp(wargv[1],L"clean") == 0)
+            {
+                char yn;
+                wprintf(L"This will remove this distro (%s) from the filesystem.\n",TargetName);
+                wprintf(L"Are you sure you would like to proceed? (This cannot be undone)\n");
+                wprintf(L"Type \"y\" to continue:");
+                scanf("%c",&yn);
+                if(yn == 'y')
+                {
+                    wprintf(L"Unregistering...\n");
+                    res = WslUnregisterDistribution(TargetName);
+                    if(res != 0)
+                    {
+                        fwprintf(stderr,L"ERROR:Unregister Failed!\nHRESULT:0x%x\n",res);
+                        return res;
+                    }
+                    wprintf(L"Successfully removed distro.");
+                    return 0;
+                }
+                fwprintf(stderr,L"Accepting is required to proceed. Exiting...");
+                return 1;
+            }
             else if(wcscmp(wargv[1],L"help") == 0)
             {
                 show_usage();
@@ -233,7 +255,6 @@ int main()
                 fwprintf(stderr,L"ERROR:Invalid Arguments.\n");
                 wprintf(L"\n");
                 show_usage();
-                
                 return 1;
             }
         }
@@ -312,6 +333,8 @@ void show_usage()
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
+    wprintf(L"    clean\n");
+    wprintf(L"     - Uninstalls the distro.\n\n");
     wprintf(L"    help\n");
     wprintf(L"      - Print this usage message.\n\n");
     
