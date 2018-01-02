@@ -35,7 +35,6 @@ int main()
 
     res = WslApiInit();
     if (res) {
-        fwprintf(stderr,L"ERROR:WslApi.dll load failed(%s).\n",res);
         wprintf(L"Press any key to continue...");
         getchar();
         return res;

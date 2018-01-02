@@ -45,9 +45,10 @@ void WslApiFree()
 
 int WslApiInit()
 {
-    WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, 0x00000800);
+    WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (WslHmod == NULL) {
-        return 1;
+        printf("Error: LoadLibraryEx() failed to load wslapi.dll\n");
+        exit(EXIT_FAILURE);
     }
 
     WslIsDistributionRegistered = (WSLISDISTRIBUTIONREBISTERED)GetProcAddress(WslHmod, "WslIsDistributionRegistered");
@@ -60,7 +61,8 @@ int WslApiInit()
     if (WslIsDistributionRegistered == NULL | WslRegisterDistribution == NULL | WslUnregisterDistribution == NULL
         | WslConfigureDistribution == NULL | WslGetDistributionConfiguration == NULL | WslLaunchInteractive == NULL | WslLaunch == NULL) {
         FreeLibrary(WslHmod);
-        return 2;
+		printf("Error: GetProcAddress() failed to get function address\n");
+		exit(EXIT_FAILURE);
     }
 return 0;
 }
