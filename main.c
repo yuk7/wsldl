@@ -62,7 +62,7 @@ int main()
             {
                 if(wcscmp(wargv[2],L"--default-user") == 0)
                 {
-                    (void) WslConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
+                    WslConfigureDistribution(TargetName,0,distributionFlags); //set default uid to 0(root)
                     HANDLE hProcess;
                     HANDLE hOutTmp,hOut;
                     HANDLE hInTmp,hIn;
@@ -102,7 +102,7 @@ int main()
                         res = WslConfigureDistribution(TargetName,uid,distributionFlags);
                         if(res != 0)
                         {
-                            (void) WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
+                            WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                             fwprintf(stderr,L"ERROR:Configure Failed!\nHRESULT:0x%x\n",res);
                             return res;
                         }
@@ -110,7 +110,7 @@ int main()
                     }
                     else
                     {
-                        (void) WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
+                        WslConfigureDistribution(TargetName,defaultUID,distributionFlags); //revert uid
                         wprintf(L"\n");
                         fwprintf(stderr,L"ERROR:Invalid Argument.\nFailed to detect user.\n");
                     }
