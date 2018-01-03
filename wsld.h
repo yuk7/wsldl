@@ -49,6 +49,8 @@ int WslApiInit()
     if (WslHmod == NULL)
     {
         fwprintf(stderr,L"ERROR: LoadLibraryEx() failed to load wslapi.dll\n");
+        wprintf(L"Press any key to exit...");
+        getchar();
         exit(EXIT_FAILURE);
     }
 
@@ -64,6 +66,8 @@ int WslApiInit()
     {
         FreeLibrary(WslHmod);
         fwprintf(stderr,L"ERROR: GetProcAddress() failed to get function address\n");
+        wprintf(L"Press any key to exit...");
+        getchar();
         exit(EXIT_FAILURE);
     }
 return 0;
