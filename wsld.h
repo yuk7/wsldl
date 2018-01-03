@@ -48,7 +48,7 @@ int WslApiInit()
     WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
     if (WslHmod == NULL)
     {
-        printf("Error: LoadLibraryEx() failed to load wslapi.dll\n");
+        fwprintf(stderr,L"ERROR: LoadLibraryEx() failed to load wslapi.dll\n");
         exit(EXIT_FAILURE);
     }
 
@@ -63,7 +63,7 @@ int WslApiInit()
     | WslConfigureDistribution == NULL | WslGetDistributionConfiguration == NULL | WslLaunchInteractive == NULL | WslLaunch == NULL)
     {
         FreeLibrary(WslHmod);
-        printf("Error: GetProcAddress() failed to get function address\n");
+        fwprintf(stderr,L"ERROR: GetProcAddress() failed to get function address\n");
         exit(EXIT_FAILURE);
     }
 return 0;
