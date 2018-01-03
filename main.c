@@ -32,13 +32,7 @@ int main()
     wchar_t TargetName[300];
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
-
-    res = WslApiInit();
-    if (res) {
-        wprintf(L"Press any key to continue...");
-        getchar();
-        return res;
-    }
+    WslApiInit();
 
 
     if(WslIsDistributionRegistered(TargetName))
