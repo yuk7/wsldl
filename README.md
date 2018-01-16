@@ -6,6 +6,11 @@ Gernal Perpose WSL Distribution Installer&Launcher
 
 [![Build Status](https://img.shields.io/travis/yuk7/WSL-DistroLauncher.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
 
+
+## Requirements
+* Windows 10 1709 Fall Creators Update 64bit or later.
+* Windows Subsystem for Linux feature is enabled.
+
 ## Install with prebuilt rootfs
 #### 1. Download installer zip
 [Alpine Linux 3.6.2](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112101/Alpine.zip)(md5:e7476fd779e27c75aa61265bcc10df5)
