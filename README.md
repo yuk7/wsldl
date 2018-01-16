@@ -5,6 +5,8 @@ Gernal Perpose WSL Distribution Installer&Launcher
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
 
 [![Build Status](https://img.shields.io/travis/yuk7/WSL-DistroLauncher.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
+[![Github All Releases](https://img.shields.io/github/downloads/yuk7/WSL-DistroLauncher/total.svg?style=flat-square)](https://github.com/yuk7/WSL-DistroLauncher/releases/latest)
+
 
 
 ## Requirements
