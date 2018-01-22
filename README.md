@@ -1,5 +1,5 @@
 # WSL-DistroLauncher
-Gernal Perpose WSL Distribution Installer&Launcher
+General Purpose WSL Distribution Installer & Launcher
 
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
@@ -23,7 +23,7 @@ Gernal Perpose WSL Distribution Installer&Launcher
 
 #### 3.Run exe to Extract rootfs and Register to WSL
 Exe filename is using to the instance name to register.
-If you rename it you can register with a diffrent name.
+If you rename it, you can register with a different name.
 
 
 ## Install with any rootfs
@@ -37,7 +37,7 @@ If you rename it you can register with a diffrent name.
 ## How-to-Use(for Installed Instance)
 #### exe Usage
 ```dos
-Useage :
+Usage :
     <no args>
       - Launches the distro's default behavior. By default, this launches your default shell.
 
