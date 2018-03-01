@@ -15,7 +15,7 @@ General Purpose WSL Distribution Installer & Launcher
 
 ## Install with prebuilt rootfs
 #### 1. Download installer zip
-[Alpine Linux 3.6.2](https://github.com/yuk7/WSL-DistroLauncher/releases/download/17112101/Alpine.zip)(md5:e7476fd779e27c75aa61265bcc10df5)
+[Alpine Linux](https://github.com/yuk7/AlpineWSL)
 
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
