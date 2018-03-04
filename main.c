@@ -53,10 +53,12 @@ int main()
 
 
 
+        int Lcurrent = 0;
         if(wargc >1)
         {
             if(wcscmp(wargv[1],L"run") == 0)
             {
+                Lcurrent = 1;
             }
             else if((wcscmp(wargv[1],L"config") == 0)&&wargc>3)
             {
@@ -261,7 +263,7 @@ int main()
         }
 
         unsigned long exitcode;
-        res = WslLaunchInteractive(TargetName,rArgs,1,&exitcode);
+        res = WslLaunchInteractive(TargetName,rArgs,Lcurrent,&exitcode);
         if(res==0)
             return exitcode;
         else
@@ -315,7 +317,7 @@ void show_usage()
     wprintf(L"    <no args>\n");
     wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
     wprintf(L"    run <command line>\n");
-    wprintf(L"      - Run the given command line in that distro.\n\n");
+    wprintf(L"      - Run the given command line in that distro. Inherit current directory.\n\n");
     wprintf(L"    config [setting [value]]\n");
     wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
     wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
