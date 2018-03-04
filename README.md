@@ -42,7 +42,7 @@ Usage :
       - Launches the distro's default behavior. By default, this launches your default shell.
 
     run <command line>
-      - Run the given command line in that distro.
+      - Run the given command line in that distro. Inherit current directory.
 
     config [setting [value]]
       - `--default-user <user>`: Set the default user for this distro to <user>
