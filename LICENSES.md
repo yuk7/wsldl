@@ -1,11 +1,6 @@
 # Licenses
 
 ---
-PublicDomain
-
-* [src/make-rootfs.txt](https://github.com/yuk7/WSL-DistroLauncher)
-
----
 [MIT license](http://opensource.org/licenses/mit-license.php)
 
 * [main.c](https://github.com/yuk7/WSL-DistroLauncher)
