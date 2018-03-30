@@ -103,4 +103,3 @@ run these commands in msys shell
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
 $ mingw-w64-x86_64-gcc main.c -o Launcher.exe # conpile main.c
 ```
-```
