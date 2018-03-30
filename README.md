@@ -91,3 +91,16 @@ Usage :
 >{InstanceName}.exe clean
 
 ```
+
+## How-to-Build
+Can build with MSYS2 mingw-w64 gcc.
+
+Install x86_64 version of MSYS2
+https://www.msys2.org
+
+run these commands in msys shell
+```bash
+$ pacman -S mingw-w64-x86_64-toolchain # install tool chain
+$ mingw-w64-x86_64-gcc main.c -o Launcher.exe # conpile main.c
+```
+```
