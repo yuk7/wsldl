@@ -11,10 +11,10 @@ addons:
     - zip
 script:
 - mkdir out zip
-- x86_64-w64-mingw32-g++ main.cpp -o out/Launcher.exe
+- x86_64-w64-mingw32-g++ --static main.cpp -o out/Launcher.exe
 - find  ./res/* -maxdepth 1 -type d -printf '%f\n' > resl.txt
 - xargs -a resl.txt -I{} x86_64-w64-mingw32-windres res/{}/res.rc -o res/{}.o
-- xargs -a resl.txt -I{} x86_64-w64-mingw32-g++ main.cpp res/{}.o -o zip/{}.exe
+- xargs -a resl.txt -I{} x86_64-w64-mingw32-g++ --static main.cpp res/{}.o -o zip/{}.exe
 - cd zip
 - zip ../out/icons.zip *
 - cd ..
