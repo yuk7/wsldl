@@ -26,10 +26,10 @@ int main()
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
     //Get file name of exe
-    wchar_t efpath[300];
+    wchar_t efpath[MAX_PATH];
     if(GetModuleFileNameW(NULL,efpath,ARRAY_LENGTH(efpath)-1) == 0)
         return 1;
-    wchar_t TargetName[300];
+    wchar_t TargetName[MAX_PATH];
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
     WslApiInit();
@@ -276,7 +276,7 @@ int main()
     }
     else
     {
-        wchar_t tgzname[300] = L"rootfs.tar.gz";
+        wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz";
         if(wargc >2)
         {
             if(wcscmp(wargv[1],L"tgz")==0)
