@@ -16,6 +16,7 @@
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
+unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 void show_usage();
 
@@ -62,6 +63,13 @@ int main()
     }
     else
     {
+        unsigned long distributionVersion;
+        unsigned long defaultUID;
+        int distributionFlags;
+        LPSTR defaultEnv;
+        unsigned long defaultEnvCnt;
+        res = WslGetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
+
         if(wargc == 1)
         {
             hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
@@ -76,6 +84,41 @@ int main()
                 wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
             }
             hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
+        }
+        else if(wcscmp(wargv[1],L"config") == 0)
+        {
+            if(wargc == 4)
+            {
+                if(wcscmp(wargv[2],L"--default-user") == 0)
+                {
+                    unsigned long uid;
+                    uid = QueryUser(TargetName,wargv[3]);
+                    if(uid != E_FAIL)
+                    {
+                        hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
+                    }
+                }
+                else if(wcscmp(wargv[2],L"--default-uid") == 0)
+                {
+                    unsigned long uid;
+                    if(swscanf(wargv[3],L"%d",&uid)==1)
+                    {
+                        hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
+                    }
+                    else
+                    {
+                        hr = E_INVALIDARG;
+                    }
+                }
+                else
+                {
+                    hr = E_INVALIDARG;
+                }
+            }
+            else
+            {
+                hr = E_INVALIDARG;
+            }
         }
         else if(wcscmp(wargv[1],L"help")==0)
         {
@@ -110,6 +153,49 @@ int main()
     }
 }
 
+unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
+{
+    HANDLE hProcess;
+    HANDLE hOutTmp,hOut;
+    HANDLE hInTmp,hIn;
+    SECURITY_ATTRIBUTES sa;
+    sa.nLength = sizeof(sa);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+    unsigned long uid;
+    wchar_t idcmd[30] = L"id -u ";
+    wcscat_s(idcmd,ARRAY_LENGTH(idcmd),username);
+    
+    CreatePipe(&hOut, &hOutTmp, &sa, 0);
+    CreatePipe(&hIn, &hInTmp, &sa, 0);
+    if(WslLaunch(TargetName,idcmd,0,hInTmp,hOutTmp,hOutTmp,&hProcess))
+    {
+        fwprintf(stderr,L"ERROR:Failed to Excute id command.\n");
+        return E_FAIL;
+    }
+    CloseHandle(hInTmp);
+    CloseHandle(hOutTmp);
+
+    char buf[300];
+    DWORD len = 0;
+    if(!ReadFile(hOut, &buf, sizeof(buf), &len, NULL))
+    {
+        fwprintf(stderr,L"ERROR:Failed to read result.\n");
+        return E_FAIL;
+    }
+    
+    CloseHandle(hInTmp);
+    CloseHandle(hOutTmp);
+    CloseHandle(hProcess);
+
+    //read output
+    if(sscanf(buf,"%d",&uid)==1)
+    {
+        return uid;
+    }
+    return E_FAIL;
+}
+
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
 {
     wprintf(L"Installing...\n");
@@ -134,6 +220,9 @@ void show_usage()
     wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
     wprintf(L"    run <command line>\n");
     wprintf(L"      - Run the given command line in that distro. Inherit current directory.\n\n");
+    wprintf(L"    config [setting [value]]\n");
+    wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
+    wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
     wprintf(L"    help\n");
     wprintf(L"      - Print this usage message.\n\n");
     
