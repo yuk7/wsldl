@@ -110,6 +110,81 @@ int main()
                         hr = E_INVALIDARG;
                     }
                 }
+                else if(wcscmp(wargv[2],L"--append-path") == 0)
+                {
+                    if(wcscmp(wargv[3],L"on") == 0)
+                        distributionFlags |= 0x2;
+                    else if(wcscmp(wargv[3],L"off") == 0)
+                        distributionFlags &= ~0x2;
+                    else
+                    {
+                        hr = E_INVALIDARG;
+                    }
+                    if(hr != E_INVALIDARG)
+                    {
+                        res = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    }
+                }
+                else if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                {
+                    if(wcscmp(wargv[3],L"on") == 0)
+                        distributionFlags |= 0x4;
+                    else if(wcscmp(wargv[3],L"off") == 0)
+                        distributionFlags &= ~0x4;
+                    else
+                    {
+                        hr = E_INVALIDARG;
+                    }
+                    if(hr != E_INVALIDARG)
+                    {
+                        res = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    }
+                }
+                else
+                {
+                    hr = E_INVALIDARG;
+                }
+            }
+            else
+            {
+                hr = E_INVALIDARG;
+            }
+        }
+        else if(wcscmp(wargv[1],L"get") == 0)
+        {
+            if(wargc == 3)
+            {
+                if(wcscmp(wargv[2],L"--default-uid") == 0)
+                {
+                    wprintf(L"%d",defaultUID);
+                    hr = S_OK;
+                }
+                else if(wcscmp(wargv[2],L"--append-path") == 0)
+                {
+                    if(distributionFlags & 0x2)
+                        wprintf(L"on");
+                    else
+                        wprintf(L"off");
+                    hr = S_OK;
+                }
+                else if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                {
+                    if(distributionFlags & 0x4)
+                        wprintf(L"on");
+                    else
+                        wprintf(L"off");
+                hr = S_OK;
+                }
+                else if(wcscmp(wargv[2],L"--lxuid") == 0)
+                {
+                    wchar_t LxUID[50] = L"";
+                    if(WslGetLxUID(TargetName,LxUID) == NULL)
+                    {
+                        hr = E_FAIL;
+                    }
+                    wprintf(L"%s",LxUID);
+                    hr = S_OK;
+                }
                 else
                 {
                     hr = E_INVALIDARG;
@@ -223,6 +298,13 @@ void show_usage()
     wprintf(L"    config [setting [value]]\n");
     wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
     wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
+    wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
+    wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
+    wprintf(L"    get [setting]\n");
+    wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
+    wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
+    wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
+    wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
     wprintf(L"    help\n");
     wprintf(L"      - Print this usage message.\n\n");
     
