@@ -101,5 +101,5 @@ https://www.msys2.org
 run these commands in msys shell
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ mingw-w64-x86_64-gcc main.c -o Launcher.exe # conpile main.c
+$ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # conpile main.c
 ```
