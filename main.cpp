@@ -278,7 +278,7 @@ int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
 {
     wprintf(L"Installing...\n");
     HRESULT hr = WslRegisterDistribution(TargetName,tgzname);
-    if(SUCCEEDED(hr))
+    if(FAILED(hr))
     {
         fwprintf(stderr,L"ERROR:Installation Failed!\nHRESULT:0x%x\n",hr);
         wprintf(L"Press any key to continue...");
