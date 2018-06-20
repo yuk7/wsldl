@@ -23,7 +23,6 @@ void show_usage();
 
 int main()
 {
-    int res = 0;
     HRESULT hr = E_FAIL;
     DWORD exitCode = 0;
     wchar_t **wargv;
@@ -69,7 +68,7 @@ int main()
         int distributionFlags;
         LPSTR defaultEnv;
         unsigned long defaultEnvCnt;
-        res = WslGetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
+        WslGetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
 
         if(wargc == 1)
         {
