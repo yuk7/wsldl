@@ -106,3 +106,6 @@ run these commands in msys shell
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
 $ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # conpile main.c
 ```
+
+## License
+[MIT](https://github.com/yuk7/WSL-DistroLauncher/blob/master/LICENSES.md)
