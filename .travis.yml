@@ -27,7 +27,7 @@ deploy:
   file_glob: true
   file: 'out/*.{exe,zip}'
   on:
-    repo: yuk7/WSL-DistroLauncher
+    repo: yuk7/wsldl
     tags: true
     all_branches: true
   skip_cleanup: true

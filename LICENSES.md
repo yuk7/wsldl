@@ -3,8 +3,8 @@
 ---
 [MIT license](http://opensource.org/licenses/mit-license.php)
 
-* [main.c](https://github.com/yuk7/WSL-DistroLauncher)
-* [res//res.rc](https://github.com/yuk7/WSL-DistroLauncher)
+* [main.c](https://github.com/yuk7/wsldl)
+* [res//res.rc](https://github.com/yuk7/wsldl)
 
 ---
 [Creative Commons (Attribution 3.0 Unported)](https://creativecommons.org/licenses/by/3.0/)
@@ -21,5 +21,5 @@
 ---
 [Creative Commons (Attribution-ShareAlike 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)
 
-* [res/Alpine/icon.ico](https://github.com/yuk7/WSL-DistroLauncher)
+* [res/Alpine/icon.ico](https://github.com/yuk7/wsldl)
   this file is modified. original by [Alpinelinux](https://commons.wikimedia.org/wiki/File:Alpine_Linux.svg)

@@ -2,11 +2,11 @@
 General Purpose WSL Distribution Installer & Launcher
 
 
-![screenshot](https://raw.githubusercontent.com/wiki/yuk7/WSL-DistroLauncher/img/Arch_Alpine_Ubuntu.png)
+![screenshot](https://raw.githubusercontent.com/wiki/yuk7/wsldl/img/Arch_Alpine_Ubuntu.png)
 
-[![Build Status](https://img.shields.io/travis/yuk7/WSL-DistroLauncher.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
-[![Github All Releases](https://img.shields.io/github/downloads/yuk7/WSL-DistroLauncher/total.svg?style=flat-square)](https://github.com/yuk7/WSL-DistroLauncher/releases/latest)
-![License](https://img.shields.io/github/license/yuk7/WSL-DistroLauncher.svg?style=flat-square)
+[![Build Status](https://img.shields.io/travis/yuk7/wsldl.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/wsldl)
+[![Github All Releases](https://img.shields.io/github/downloads/yuk7/wsldl/total.svg?style=flat-square)](https://github.com/yuk7/wsldl/releases/latest)
+![License](https://img.shields.io/github/license/yuk7/wsldl.svg?style=flat-square)
 
 
 
@@ -30,7 +30,7 @@ If you rename it, you can register with a different name.
 
 
 ## Install with any rootfs
-#### 1. [Download Launcher.exe](https://github.com/yuk7/WSL-DistroLauncher/releases/latest)
+#### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
 #### 2. Rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to "Arch" for the Instance name)
 #### 3. Put your rootfs.tar.gz in same directory as exe (Installation directory)
@@ -108,4 +108,4 @@ $ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # conpile main.c
 ```
 
 ## License
-[MIT](https://github.com/yuk7/WSL-DistroLauncher/blob/master/LICENSES.md)
+[MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
