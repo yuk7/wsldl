@@ -6,6 +6,7 @@ General Purpose WSL Distribution Installer & Launcher
 
 [![Build Status](https://img.shields.io/travis/yuk7/WSL-DistroLauncher.svg?branch=master&style=flat-square)](https://travis-ci.org/yuk7/WSL-DistroLauncher)
 [![Github All Releases](https://img.shields.io/github/downloads/yuk7/WSL-DistroLauncher/total.svg?style=flat-square)](https://github.com/yuk7/WSL-DistroLauncher/releases/latest)
+![License](https://img.shields.io/github/license/yuk7/WSL-DistroLauncher.svg?style=flat-square)
 
 
 
