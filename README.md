@@ -19,6 +19,8 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
+[CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
+
 #### 2. Extract all files in zip file to same directory
 
 #### 3.Run exe to Extract rootfs and Register to WSL
