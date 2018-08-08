@@ -96,16 +96,21 @@ Usage :
 ```
 
 ## How-to-Build
-Can build with MSYS2 mingw-w64 gcc.
-
-Install x86_64 version of MSYS2
-https://www.msys2.org
+### Windows
+Install x86_64 version of MSYS2(https://www.msys2.org)
 
 run these commands in msys shell
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # conpile main.c
+$ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # compile main.c
 ```
 
+### Linux (cross compile)
+Install mingw-w64 toolchain include g++-mingw-w64-x86-64.
+
+run this command in shell
+```bash
+ $ g++-mingw-w64-x86-64 main.cpp -o Launcher.exe # compile main.c
+```
 ## License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
