@@ -1,4 +1,4 @@
-# WSL-DistroLauncher
+# wsldl
 General Purpose WSL Distribution Installer & Launcher
 
 
