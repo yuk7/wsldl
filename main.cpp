@@ -13,6 +13,7 @@
 #include <wchar.h>
 #include <windows.h>
 #include "wsld.h"
+#include "version.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
@@ -20,6 +21,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
 void show_usage();
+void show_version();
 
 int main()
 {
@@ -29,6 +31,12 @@ int main()
     int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
+   if(wargc >1 && wcscmp(wargv[1],L"version")==0)
+    {
+        show_version();
+        return 0;
+    }
+
     //Get file name of exe
     wchar_t efpath[MAX_PATH];
     if(GetModuleFileNameW(NULL,efpath,ARRAY_LENGTH(efpath)-1) == 0)
@@ -37,6 +45,9 @@ int main()
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
     WslApiInit();
+
+ 
+
 
     if(!WslIsDistributionRegistered(TargetName))
     {
@@ -329,4 +340,10 @@ void show_usage()
     wprintf(L"    help\n");
     wprintf(L"      - Print this usage message.\n\n");
     
+}
+
+void show_version()
+{
+    wprintf(L"%s, version %s\n",SW_NAME,SW_VER);
+    wprintf(L"%s\n",SW_URL);
 }
