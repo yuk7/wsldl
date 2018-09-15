@@ -256,7 +256,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     CreatePipe(&hIn, &hInTmp, &sa, 0);
     if(WslLaunch(TargetName,idcmd,0,hInTmp,hOutTmp,hOutTmp,&hProcess))
     {
-        fwprintf(stderr,L"ERROR:Failed to Excute id command.\n");
+        fwprintf(stderr,L"ERROR:Failed to execute id command.\n");
         return E_FAIL;
     }
     CloseHandle(hInTmp);
@@ -320,7 +320,7 @@ HRESULT RemoveDist(wchar_t *TargetName)
 
 void show_usage()
 {
-    wprintf(L"Useage :\n");
+    wprintf(L"Usage :\n");
     wprintf(L"    <no args>\n");
     wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
     wprintf(L"    run <command line>\n");
@@ -336,7 +336,7 @@ void show_usage()
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
     wprintf(L"    clean\n");
-    wprintf(L"     - Uninstalls the distro.\n\n");
+    wprintf(L"      - Uninstall the distro.\n\n");
     wprintf(L"    help\n");
     wprintf(L"      - Print this usage message.\n\n");
     
