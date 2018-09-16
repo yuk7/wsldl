@@ -33,7 +33,7 @@ If you rename it, you can register with a different name.
 ## Install with any rootfs
 #### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
 #### 2. Rename it for distribution name to register.
-(Ex:Rename to Arch.exe if you want to "Arch" for the Instance name)
+(Ex:Rename to Arch.exe if you want to use "Arch" for the Instance name)
 #### 3. Put your rootfs.tar.gz in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
@@ -43,7 +43,7 @@ If you rename it, you can register with a different name.
 ```dos
 Usage :
     <no args>
-      - Launches the distro's default behavior. By default, this launches your default shell.
+      - Open a new shell with your default settings.
 
     run <command line>
       - Run the given command line in that distro. Inherit current directory.
@@ -97,20 +97,26 @@ Usage :
 
 ## How-to-Build
 ### Windows
-Install x86_64 version of MSYS2(https://www.msys2.org)
+Install x86_64 version of MSYS2(https://www.msys2.org).
 
-run these commands in msys shell
+Run these commands in msys shell
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ mingw-w64-x86_64-g++ main.cpp -o Launcher.exe # compile main.c
+$ g++ main.cpp -o Launcher.exe # compile main.c
+```
+
+Optionally, to add an icon to the exe, create and link a resource with
+```bash
+$ windres res/Arch/res.rc res.o # compile resource
+$ g++ main.cpp -o Launcher.exe res.o # compile main.cpp
 ```
 
 ### Linux (cross compile)
 Install mingw-w64 toolchain include g++-mingw-w64-x86-64.
 
-run this command in shell
+Run this command in shell
 ```bash
- $ g++-mingw-w64-x86-64 main.cpp -o Launcher.exe # compile main.c
+ $ g++-mingw-w64-x86-64 main.cpp -o Launcher.exe # compile main.cpp
 ```
 ## License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
