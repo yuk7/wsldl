@@ -322,7 +322,7 @@ void show_usage()
 {
     wprintf(L"Usage :\n");
     wprintf(L"    <no args>\n");
-    wprintf(L"      - Launches the distro's default behavior. By default, this launches your default shell.\n\n");
+    wprintf(L"      - Open a new shell with your default settings.\n\n");
     wprintf(L"    run <command line>\n");
     wprintf(L"      - Run the given command line in that distro. Inherit current directory.\n\n");
     wprintf(L"    config [setting [value]]\n");
