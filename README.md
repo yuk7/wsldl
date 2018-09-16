@@ -61,7 +61,7 @@ Usage :
       - `--lxuid`: Get LxUID key for this distro
 
     clean
-     - Uninstalls the distro.
+      - Uninstall the distro.
 
     help
       - Print this usage message.
@@ -88,7 +88,6 @@ Usage :
 >{InstanceName}.exe
 [user@PC-NAME dir]$
 ```
-
 
 #### How to uninstall instance
 ```dos
