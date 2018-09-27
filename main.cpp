@@ -310,6 +310,7 @@ HRESULT RemoveDist(wchar_t *TargetName)
     {
         wprintf(L"Unregistering...\n");
         HRESULT hr = WslUnregisterDistribution(TargetName);
+        return hr;
     }
     else
     {
