@@ -18,6 +18,7 @@
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
+bool dirExists(const char* dirName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
 void show_usage();
@@ -31,7 +32,7 @@ int main()
     int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
-   if(wargc >1 && wcscmp(wargv[1],L"version")==0)
+    if(wargc >1 && wcscmp(wargv[1],L"version")==0)
     {
         show_version();
         return 0;
@@ -45,9 +46,6 @@ int main()
     _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
 
     WslApiInit();
-
- 
-
 
     if(!WslIsDistributionRegistered(TargetName))
     {
@@ -83,7 +81,16 @@ int main()
 
         if(wargc == 1)
         {
-            hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+            WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
+            char buffer[MAX_BASEPATH_SIZE];
+            wcstombs(buffer, wslInstallation.basePath, MAX_BASEPATH_SIZE);
+            if (!dirExists(buffer))
+            {
+                fwprintf(stderr,L"Installation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
+                hr = E_ABORT;
+            }
+            else
+                hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
         }
         else if(wcscmp(wargv[1],L"run") == 0)
         {
@@ -182,16 +189,16 @@ int main()
                         wprintf(L"on");
                     else
                         wprintf(L"off");
-                hr = S_OK;
+                    hr = S_OK;
                 }
                 else if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
-                    wchar_t LxUID[50] = L"";
-                    if(WslGetLxUID(TargetName,LxUID) == NULL)
+                    WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                    if(wsl.uuid == NULL)
                     {
                         hr = E_FAIL;
                     }
-                    wprintf(L"%s",LxUID);
+                    wprintf(L"%.*s",UUID_SIZE,wsl.uuid);
                     hr = S_OK;
                 }
                 else
@@ -223,6 +230,13 @@ int main()
         {
             return exitCode;
         }
+        // already controlled error cases
+        else if(hr==E_ABORT)
+        {
+            wprintf(L"Press any key to continue...");
+            getchar();
+            return hr;
+        }
         else if(hr==E_INVALIDARG)
         {
             fwprintf(stderr,L"ERROR:Invalid Argument.\n\n");
@@ -237,6 +251,12 @@ int main()
             return hr;
         }
     }
+}
+
+bool dirExists(const char* dirName)
+{
+    DWORD ftyp = GetFileAttributesA(dirName);
+    return (ftyp != INVALID_FILE_ATTRIBUTES) && (ftyp & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)

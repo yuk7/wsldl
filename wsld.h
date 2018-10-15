@@ -38,6 +38,15 @@ WSLGETDISTRIBUTIONCONFIGURATION WslGetDistributionConfiguration;
 WSLLAUNCHINTERACTIVE WslLaunchInteractive;
 WSLLAUNCH WslLaunch;
 
+#define MAX_DISTRO_NAME_SIZE 50
+#define MAX_BASEPATH_SIZE 128
+#define UUID_SIZE 38
+
+struct WslInstallation {
+    wchar_t uuid[UUID_SIZE];
+    wchar_t basePath[MAX_BASEPATH_SIZE];
+};
+
 void WslApiFree()
 {
     FreeLibrary(WslHmod);
@@ -73,8 +82,9 @@ int WslApiInit()
 return 0;
 }
 
-wchar_t *WslGetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
-{
+WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
+    WslInstallation wslInstallation;
+
     wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
     HKEY hKey;
     LONG rres;
@@ -83,52 +93,54 @@ wchar_t *WslGetLxUID(wchar_t *DistributionName,wchar_t *LxUID)
         int i;
         for(i=0;;i++)
         {
-            wchar_t subKey[200];
             wchar_t subKeyF[200];
             wcscpy_s(subKeyF,(sizeof(subKeyF)/sizeof(subKeyF[0])),RKey);
-            wchar_t regDistName[100];
+            
+            wchar_t subKey[200];
             DWORD subKeySz = 100;
-            DWORD dwType;
-            DWORD dwSize = 50;
             FILETIME ftLastWriteTime;
-
             rres = RegEnumKeyExW(hKey, i, subKey, &subKeySz, NULL, NULL, NULL, &ftLastWriteTime);
             if (rres == ERROR_NO_MORE_ITEMS)
                 break;
             else if(rres != ERROR_SUCCESS)
             {
-                //ERROR
-                LxUID = NULL;
-                return LxUID;
+                return wslInstallation;
             }
 
+            DWORD dwType;
             HKEY hKeyS;
             wcscat_s(subKeyF,(sizeof(subKeyF)/sizeof(subKeyF[0])),L"\\");
             wcscat_s(subKeyF,(sizeof(subKeyF)/sizeof(subKeyF[0])),subKey);
             RegOpenKeyExW(HKEY_CURRENT_USER,subKeyF, 0, KEY_READ, &hKeyS);
-            RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
-            if((subKeySz == 38)&&(wcscmp(regDistName,DistributionName)==0))
+
+            wchar_t regDistName[MAX_DISTRO_NAME_SIZE*2];
+            DWORD dwSize = MAX_DISTRO_NAME_SIZE;
+            rres = RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&regDistName,&dwSize);
+            if (rres != ERROR_SUCCESS)
             {
-                //SUCCESS:Distribution found!
-                //return LxUID
+                // TODO: this helps for diagnostic, but we should implement a better error handling in the future
+                fwprintf(stderr,L"ERROR:[%i] Could not read registry key\n", rres);
+            }
+            if((subKeySz == UUID_SIZE) && (wcscmp(regDistName,DistributionName)==0))
+            {
+                // SUCCESS: Distribution found
+                wcscpy_s(wslInstallation.uuid, UUID_SIZE*2, subKey);
+                DWORD pathSize = MAX_BASEPATH_SIZE*2;
+                rres = RegQueryValueExW(hKeyS, L"BasePath", NULL, &dwType, (LPBYTE)&wslInstallation.basePath, &pathSize);
+                if (rres != ERROR_SUCCESS)
+                {
+                    fwprintf(stderr,L"ERROR:[%i] Could not read registry key\n", rres);
+                }                
                 RegCloseKey(hKey);
                 RegCloseKey(hKeyS);
-                wcscpy_s(LxUID,40,subKey);
-                return LxUID;
+                return wslInstallation;
             }
             RegCloseKey(hKeyS);
-            }
         }
-        else
-        {
-        //ERROR
-        LxUID = NULL;
-        return LxUID;
-        }
+    }
     RegCloseKey(hKey);
-    //ERROR:Distribution Not Found
-    LxUID = NULL;
-    return LxUID;
+
+    return wslInstallation;
 }
 
 #ifdef __cplusplus
