@@ -92,7 +92,7 @@ int main()
             else
                 hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
         }
-        else if(wcscmp(wargv[1],L"run") == 0)
+        else if( (wcscmp(wargv[1],L"run") == 0) | (wcscmp(wargv[1],L"-c") == 0) | (wcscmp(wargv[1],L"/c") == 0) )
         {
             wchar_t rArgs[500] = L"";
             int i;
