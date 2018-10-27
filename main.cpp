@@ -49,12 +49,17 @@ int main()
 
     if(!WslIsDistributionRegistered(TargetName))
     {
+        bool InstSilent = false;
         wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz";
-        if(wargc >2)
+        if(wargc >1)
         {
-            if(wcscmp(wargv[1],L"tgz")==0)
+            if( (wcscmp(wargv[1],L"tgz")==0) & (wargc>2) )
             {
                 wcscpy_s(tgzname,ARRAY_LENGTH(tgzname),wargv[2]);
+            }
+            else if(wcscmp(wargv[1],L"silent")==0)
+            {
+                InstSilent = true;
             }
             else
             {
@@ -67,7 +72,14 @@ int main()
             fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
             return 1;
         }
-        hr = InstallDist(TargetName,tgzname);
+        if(InstSilent)
+        {
+            hr = WslRegisterDistribution(TargetName,tgzname);
+        }
+        else
+        {
+            hr = InstallDist(TargetName,tgzname);
+        }
         return hr;
     }
     else
