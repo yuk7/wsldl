@@ -21,6 +21,8 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
+[Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5/ArtixWSL))
+
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
 #### 2. Extract all files in zip file to same directory
