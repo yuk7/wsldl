@@ -227,7 +227,7 @@ int main()
         {
             hr = RemoveDist(TargetName);
         }
-        else if(wcscmp(wargv[1],L"help")==0)
+        else if( (wcscmp(wargv[1],L"help")==0) | (wcscmp(wargv[1],L"-h")==0) | (wcscmp(wargv[1],L"/h")==0) )
         {
             show_usage();
             hr = S_OK;
