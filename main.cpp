@@ -67,11 +67,6 @@ int main()
                 return 1;
             }
         }
-        else if(wargc >1)
-        {
-            fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
-            return 1;
-        }
         if(InstSilent)
         {
             hr = WslRegisterDistribution(TargetName,tgzname);
