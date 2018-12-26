@@ -6,16 +6,16 @@ compiler:
 addons:
   apt:
     packages:
-    - g++-mingw-w64-x86-64
+    - gcc-mingw-w64-x86-64
     - binutils-mingw-w64-x86-64
     - zip
 script:
 - '[ -z "$TRAVIS_TAG" ] || SW_VER=-DSW_VER=L\"$TRAVIS_TAG\"'
 - 'mkdir out zip'
-- 'x86_64-w64-mingw32-g++ --static main.cpp -o out/Launcher.exe $SW_VER'
+- 'x86_64-w64-mingw32-gcc -std=c99 --static main.c -o out/Launcher.exe $SW_VER'
 - 'find  ./res/* -maxdepth 1 -type d -printf ''%f\n'' > resl.txt'
 - 'xargs -a resl.txt -I{} x86_64-w64-mingw32-windres res/{}/res.rc -o res/{}.o'
-- 'xargs -a resl.txt -I{} x86_64-w64-mingw32-g++ --static main.cpp res/{}.o -o zip/{}.exe $SW_VER'
+- 'xargs -a resl.txt -I{} x86_64-w64-mingw32-gcc -std=c99 --static main.c res/{}.o -o zip/{}.exe $SW_VER'
 - 'cd zip'
 - 'zip ../out/icons.zip *'
 - 'cd ..'
