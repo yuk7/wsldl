@@ -45,7 +45,7 @@ WSLLAUNCH WslLaunch;
 struct WslInstallation {
     wchar_t uuid[UUID_SIZE];
     wchar_t basePath[MAX_BASEPATH_SIZE];
-};
+} WslInstallation;
 
 void WslApiFree()
 {
@@ -82,8 +82,8 @@ int WslApiInit()
 return 0;
 }
 
-WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
-    WslInstallation wslInstallation;
+struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
+    struct WslInstallation wslInstallation;
 
     wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
     HKEY hKey;

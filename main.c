@@ -7,6 +7,7 @@
  */
 
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,7 +89,7 @@ int main()
 
         if(wargc == 1)
         {
-            WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
+            struct WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
             char buffer[MAX_BASEPATH_SIZE];
             wcstombs(buffer, wslInstallation.basePath, MAX_BASEPATH_SIZE);
             if (!dirExists(buffer))
@@ -200,7 +201,7 @@ int main()
                 }
                 else if(wcscmp(wargv[2],L"--lxuid") == 0)
                 {
-                    WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                    struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
                     if(wsl.uuid == NULL)
                     {
                         hr = E_FAIL;
