@@ -19,6 +19,8 @@ General Purpose WSL Distribution Installer & Launcher
 #### 1. Download installer zip
 [Alpine Linux](https://github.com/yuk7/AlpineWSL)
 
+[Alpine Linux with Git-LFS and Sphinx](https://github.com/binarylandscapes/AlpineWSL) (by [binarylandscapes](https://github.com/binarylandscapes))
+
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
 [Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5/ArtixWSL))
