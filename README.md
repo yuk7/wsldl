@@ -29,7 +29,7 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
-[Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [fbigun](https://github.com/am11))
+[Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [am11](https://github.com/am11))
 
 #### 2. Extract all files in zip file to same directory
 
