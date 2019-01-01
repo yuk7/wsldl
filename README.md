@@ -110,13 +110,13 @@ Install x86_64 version of MSYS2(https://www.msys2.org).
 Run these commands in msys shell
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ g++ main.cpp -o Launcher.exe # compile main.c
+$ gcc -std=c99 --static main.cpp -o Launcher.exe # compile main.c
 ```
 
 Optionally, to add an icon to the exe, create and link a resource with
 ```bash
 $ windres res/Arch/res.rc res.o # compile resource
-$ g++ main.cpp -o Launcher.exe res.o # compile main.cpp
+$ gcc -std=c99 --static main.cpp -o Launcher.exe res.o # compile main.cpp
 ```
 
 ### Linux (cross compile)
@@ -124,7 +124,7 @@ Install mingw-w64 toolchain include g++-mingw-w64-x86-64.
 
 Run this command in shell
 ```bash
- $ g++-mingw-w64-x86-64 main.cpp -o Launcher.exe # compile main.cpp
+ $ x86_64-w64-mingw32-gcc -std=c99 --static main.cpp -o Launcher.exe # compile main.cpp
 ```
 ## License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
