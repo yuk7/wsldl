@@ -27,9 +27,9 @@ General Purpose WSL Distribution Installer & Launcher
 
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
-[Void Linux (glibc)](https://github.com/am11/VoidWSL)
+[Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
-[Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL)
+[Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [fbigun](https://github.com/am11))
 
 #### 2. Extract all files in zip file to same directory
 
