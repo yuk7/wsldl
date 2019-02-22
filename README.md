@@ -120,11 +120,11 @@ $ gcc -std=c99 --static main.cpp -o Launcher.exe res.o # compile main.cpp
 ```
 
 ### Linux (cross compile)
-Install mingw-w64 toolchain include g++-mingw-w64-x86-64.
+Install mingw-w64 toolchain include gcc-mingw-w64-x86-64.
 
 Run this command in shell
 ```bash
- $ x86_64-w64-mingw32-gcc -std=c99 --static main.cpp -o Launcher.exe # compile main.cpp
+ $ x86_64-w64-mingw32-gcc -std=c99 --static main.c -o Launcher.exe # compile main.c
 ```
 ## License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
