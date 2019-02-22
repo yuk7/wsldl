@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 yuk7
+ * Copyright (c) 2017-2019 yuk7
  * Author: yuk7 <yukx00@gmail.com>
  *
  * Released under the MIT license
