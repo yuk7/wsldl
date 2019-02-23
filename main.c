@@ -232,7 +232,7 @@ int main()
             else
             {
                 fwprintf(stderr,L"ERROR:Mount drive feature is not enabled.\n");
-                wprintf(L"Please enable it.\n");
+                fwprintf(stderr,L"Please enable it and retry.\n");
                 hr = E_FAIL;
             }
             
