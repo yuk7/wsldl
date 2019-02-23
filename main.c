@@ -219,6 +219,24 @@ int main()
                 hr = E_INVALIDARG;
             }
         }
+        else if((wcscmp(wargv[1],L"backup") == 0)&&(wargc == 2))
+        {
+            if(distributionFlags & 0x4)
+            {
+                WslConfigureDistribution(TargetName,0,distributionFlags);
+                wprintf(L"Running backup command.\n");
+                wprintf(L"If a password is requested, please enter the root password.\n\n");
+                hr = WslLaunchInteractive(TargetName,L"su root -c \"tar -zcpf backup.tar.gz --exclude \"mnt/*\" --exclude \"dev/*\" --exclude \"proc/*\" --exclude \"sys/*\" --exclude \"run/*\" /\"", true, &exitCode);
+                WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+            }
+            else
+            {
+                fwprintf(stderr,L"ERROR:Mount drive feature is not enabled.\n");
+                wprintf(L"Please enable it.\n");
+                hr = E_FAIL;
+            }
+            
+        }
         else if(wcscmp(wargv[1],L"clean") == 0)
         {
             hr = RemoveDist(TargetName);
@@ -364,6 +382,8 @@ void show_usage()
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
+    wprintf(L"    backup\n");
+    wprintf(L"      - Execute the backup function using tar.\n\n");
     wprintf(L"    clean\n");
     wprintf(L"      - Uninstall the distro.\n\n");
     wprintf(L"    help\n");
