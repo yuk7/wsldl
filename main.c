@@ -44,7 +44,7 @@ int main()
     if(GetModuleFileNameW(NULL,efpath,ARRAY_LENGTH(efpath)-1) == 0)
         return 1;
     wchar_t TargetName[MAX_PATH];
-    _wsplitpath(efpath,NULL,NULL,TargetName,NULL);
+    _wsplitpath_s(efpath,NULL,0,NULL,0,TargetName,MAX_PATH,NULL,0);
 
     WslApiInit();
 
@@ -91,7 +91,8 @@ int main()
         {
             struct WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
             char buffer[MAX_BASEPATH_SIZE];
-            wcstombs(buffer, wslInstallation.basePath, MAX_BASEPATH_SIZE);
+            size_t *retSize = 0;
+            wcstombs_s(retSize, buffer, MAX_BASEPATH_SIZE, wslInstallation.basePath, MAX_BASEPATH_SIZE);
             if (!dirExists(buffer))
             {
                 fwprintf(stderr,L"Installation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
@@ -127,7 +128,7 @@ int main()
                 else if(wcscmp(wargv[2],L"--default-uid") == 0)
                 {
                     unsigned long uid;
-                    if(swscanf(wargv[3],L"%d",&uid)==1)
+                    if(swscanf_s(wargv[3],L"%d",&uid)==1)
                     {
                         hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
                     }
@@ -303,7 +304,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     if(WslLaunch(TargetName,idcmd,0,hInTmp,hOutTmp,hOutTmp,&hProcess))
     {
         fwprintf(stderr,L"ERROR:Failed to execute id command.\n");
-        return E_FAIL;
+        return (unsigned long)E_FAIL;
     }
     CloseHandle(hInTmp);
     CloseHandle(hOutTmp);
@@ -313,7 +314,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     if(!ReadFile(hOut, &buf, sizeof(buf), &len, NULL))
     {
         fwprintf(stderr,L"ERROR:Failed to read result.\n");
-        return E_FAIL;
+        return (unsigned long)E_FAIL;
     }
     
     CloseHandle(hInTmp);
@@ -321,11 +322,11 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     CloseHandle(hProcess);
 
     //read output
-    if(sscanf(buf,"%d",&uid)==1)
+    if(sscanf_s(buf,"%d",&uid)==1)
     {
         return uid;
     }
-    return E_FAIL;
+    return (unsigned long)E_FAIL;
 }
 
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
@@ -351,7 +352,7 @@ HRESULT RemoveDist(wchar_t *TargetName)
     wprintf(L"This will remove this distro (%s) from the filesystem.\n",TargetName);
     wprintf(L"Are you sure you would like to proceed? (This cannot be undone)\n");
     wprintf(L"Type \"y\" to continue:");
-    scanf("%c",&yn);
+    scanf_s("%c",&yn,1);
     if(yn == 'y')
     {
         wprintf(L"Unregistering...\n");
