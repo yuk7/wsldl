@@ -12,11 +12,11 @@ General Purpose WSL Distribution Installer & Launcher
 
 
 
-## Requirements
+## 💻Requirements
 * Windows 10 1709 Fall Creators Update 64bit or later.
 * Windows Subsystem for Linux feature is enabled.
 
-## Install with prebuilt rootfs
+## 📦Install with prebuilt rootfs
 #### 1. Download installer zip
 [Alpine Linux](https://github.com/yuk7/AlpineWSL)
 
@@ -39,7 +39,7 @@ Exe filename is using to the instance name to register.
 If you rename it, you can register with a different name.
 
 
-## Install with any rootfs
+## 🔧Install with any rootfs
 #### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
 #### 2. Rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to use "Arch" for the Instance name)
@@ -47,7 +47,7 @@ If you rename it, you can register with a different name.
 #### 4. Run exe to install. This process may take a few minutes.
 
 
-## How-to-Use(for Installed Instance)
+## 📝How-to-Use(for Installed Instance)
 #### exe Usage
 ```cmd
 Usage :
@@ -107,7 +107,7 @@ Usage :
 
 ```
 
-## How-to-Build
+## 🛠How-to-Build
 ### Windows
 
 #### Visual Studio or Build Tools 2017+
@@ -166,7 +166,7 @@ Run this command in shell
 ```bash
  $ x86_64-w64-mingw32-gcc -std=c99 --static main.c -o Launcher.exe # compile main.c
 ```
-## License
+## 📄License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
 
 Copyright (c) 2017-2019 yuk7
