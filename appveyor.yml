@@ -14,9 +14,9 @@ artifacts:
   - path: 'out\icons.zip'
   - path: 'out\Launcher.exe'
 
-deploy:
- - provider: GitHub
-   auth_token:
-     secure: rCqOyJBPSWdF3bF/UbVvDFT+VRukRKDBR1Kk0W6viw8BjXJYTxZcyrWTUyIMBtJR
-   on:
-     appveyor_repo_tag: true       # deploy on tag push only
+#deploy:
+# - provider: GitHub
+#   auth_token:
+#     secure: rCqOyJBPSWdF3bF/UbVvDFT+VRukRKDBR1Kk0W6viw8BjXJYTxZcyrWTUyIMBtJR
+#   on:
+#     appveyor_repo_tag: true       # deploy on tag push only
