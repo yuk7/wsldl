@@ -145,7 +145,7 @@ cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:%YourDistroName%
 ```
 
 #### MinGW
-x86_64のMSYS2(https://www.msys2.org)をインストール
+x86_64のMSYS2( https://www.msys2.org )をインストール
 
 以下のようなコマンドをmsys2シェルで実行します
 ```bash
