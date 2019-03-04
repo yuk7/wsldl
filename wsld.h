@@ -56,6 +56,15 @@ int WslApiInit()
     if (WslHmod == NULL)
     {
         fwprintf(stderr,L"ERROR: LoadLibraryEx() failed to load wslapi.dll\n");
+
+        BOOL isWow64 = FALSE;
+        if (IsWow64Process(GetCurrentProcess(), &isWow64))
+        {
+            if (isWow64)
+            {
+                fwprintf(stderr,L"       wslapi.dll is only known to support 64-bit executables but this executable is not.\n");
+            }
+        }
         wprintf(L"Press any key to exit...");
         getchar();
         exit(EXIT_FAILURE);
