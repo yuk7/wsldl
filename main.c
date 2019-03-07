@@ -227,7 +227,7 @@ int main()
                 WslConfigureDistribution(TargetName,0,distributionFlags);
                 wprintf(L"Running backup command.\n");
                 wprintf(L"If a password is requested, please enter the root password.\n\n");
-                hr = WslLaunchInteractive(TargetName,L"su root -c \"tar -zcpf backup.tar.gz --exclude \"mnt/*\" --exclude \"dev/*\" --exclude \"proc/*\" --exclude \"sys/*\" --exclude \"run/*\" /\"", true, &exitCode);
+                hr = WslLaunchInteractive(TargetName,L"su root -c \'tar -zcpf backup.tar.gz --exclude \"mnt/*\" --exclude \"dev/*\" --exclude \"proc/*\" --exclude \"sys/*\" --exclude \"run/*\" /\'", true, &exitCode);
                 WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
             }
             else
