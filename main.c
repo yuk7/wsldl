@@ -384,7 +384,7 @@ void show_usage()
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
     wprintf(L"    backup\n");
-    wprintf(L"      - Execute the backup function using tar.\n\n");
+    wprintf(L"      - Output backup.tar.gz to the current directory using tar command.\n\n");
     wprintf(L"    clean\n");
     wprintf(L"      - Uninstall the distro.\n\n");
     wprintf(L"    help\n");
