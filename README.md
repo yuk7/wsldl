@@ -70,7 +70,7 @@ Usage :
       - `--lxuid`: Get LxUID key for this distro
 
     backup
-      - Execute the backup function using tar.
+      - Output backup.tar.gz to the current directory using tar command.
       
     clean
       - Uninstall the distro.
