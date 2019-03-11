@@ -58,6 +58,13 @@ int main()
             {
                 wcscpy_s(tgzname,ARRAY_LENGTH(tgzname),wargv[2]);
             }
+            else if(wcscmp(wargv[1],L"install")==0)
+            {
+                if((wargc>2)?wcscmp(wargv[2],L"--root")==0:false)
+                {
+                    InstSilent = true;
+                }
+            }
             else if(wcscmp(wargv[1],L"silent")==0)
             {
                 InstSilent = true;
