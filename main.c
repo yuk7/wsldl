@@ -33,7 +33,7 @@ int main()
     int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
-    if(wargc >1 && wcscmp(wargv[1],L"version")==0)
+    if((wargc>1)?wcscmp(wargv[1],L"version")==0:false)
     {
         show_version();
         return 0;
