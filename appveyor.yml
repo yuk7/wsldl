@@ -2,7 +2,7 @@ os: Visual Studio 2017
 
 build_script:
 - call "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
-- IF defined APPVEYOR_REPO_COMMIT ( SET VersionDefinition=/DSW_VER=L\"dev-%APPVEYOR_REPO_COMMIT%\" )
+- IF defined APPVEYOR_REPO_COMMIT ( SET VersionDefinition=/DSW_VER=L\"dev-%APPVEYOR_REPO_COMMIT:~0,7%\" )
 - IF defined APPVEYOR_REPO_TAG_NAME ( SET VersionDefinition=/DSW_VER=L\"%APPVEYOR_REPO_TAG_NAME%\" )
 - mkdir out
 - cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\Launcher.exe Advapi32.lib Shell32.lib %VersionDefinition%
