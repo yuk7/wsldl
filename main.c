@@ -17,6 +17,7 @@
 #include "version.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
+#define WARGV_CMP(a,b) (wargc>a)?wcscmp(wargv[a],b)==0:false
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 bool dirExists(const char* dirName);
@@ -33,7 +34,7 @@ int main()
     int wargc;
     wargv = CommandLineToArgvW(GetCommandLineW(),&wargc);
 
-    if((wargc>1)?wcscmp(wargv[1],L"version")==0:false)
+    if(WARGV_CMP(1,L"version"))
     {
         show_version();
         return 0;
@@ -54,18 +55,18 @@ int main()
         wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz";
         if(wargc >1)
         {
-            if( (wcscmp(wargv[1],L"tgz")==0) & (wargc>2) )
+            if( WARGV_CMP(1,L"tgz") & (wargc>2) )
             {
                 wcscpy_s(tgzname,ARRAY_LENGTH(tgzname),wargv[2]);
             }
-            else if(wcscmp(wargv[1],L"install")==0)
+            else if(WARGV_CMP(1,L"install"))
             {
-                if((wargc>2)?wcscmp(wargv[2],L"--root")==0:false)
+                if(WARGV_CMP(2,L"--root"))
                 {
                     InstSilent = true;
                 }
             }
-            else if(wcscmp(wargv[1],L"silent")==0)
+            else if(WARGV_CMP(1,L"silent"))
             {
                 InstSilent = true;
             }
@@ -108,7 +109,7 @@ int main()
             else
                 hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
         }
-        else if( (wcscmp(wargv[1],L"run") == 0) | (wcscmp(wargv[1],L"-c") == 0) | (wcscmp(wargv[1],L"/c") == 0) )
+        else if( WARGV_CMP(1,L"run") | WARGV_CMP(1,L"-c") | WARGV_CMP(1,L"/c") )
         {
             wchar_t rArgs[500] = L"";
             int i;
@@ -119,11 +120,11 @@ int main()
             }
             hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
         }
-        else if(wcscmp(wargv[1],L"config") == 0)
+        else if(WARGV_CMP(1,L"config"))
         {
             if(wargc == 4)
             {
-                if(wcscmp(wargv[2],L"--default-user") == 0)
+                if(WARGV_CMP(2,L"--default-user"))
                 {
                     unsigned long uid;
                     uid = QueryUser(TargetName,wargv[3]);
@@ -132,7 +133,7 @@ int main()
                         hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
                     }
                 }
-                else if(wcscmp(wargv[2],L"--default-uid") == 0)
+                else if(WARGV_CMP(2,L"--default-uid"))
                 {
                     unsigned long uid;
                     if(swscanf_s(wargv[3],L"%d",&uid)==1)
@@ -144,7 +145,7 @@ int main()
                         hr = E_INVALIDARG;
                     }
                 }
-                else if(wcscmp(wargv[2],L"--append-path") == 0)
+                else if(WARGV_CMP(2,L"--append-path"))
                 {
                     if(wcscmp(wargv[3],L"on") == 0)
                         distributionFlags |= 0x2;
@@ -158,7 +159,7 @@ int main()
                         hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                     }
                 }
-                else if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                else if(WARGV_CMP(2,L"--mount-drive"))
                 {
                     if(wcscmp(wargv[3],L"on") == 0)
                         distributionFlags |= 0x4;
@@ -182,16 +183,16 @@ int main()
                 hr = E_INVALIDARG;
             }
         }
-        else if(wcscmp(wargv[1],L"get") == 0)
+        else if(WARGV_CMP(1,L"get"))
         {
             if(wargc == 3)
             {
-                if(wcscmp(wargv[2],L"--default-uid") == 0)
+                if(WARGV_CMP(2,L"--default-uid"))
                 {
                     wprintf(L"%d",defaultUID);
                     hr = S_OK;
                 }
-                else if(wcscmp(wargv[2],L"--append-path") == 0)
+                else if(WARGV_CMP(2,L"--append-path"))
                 {
                     if(distributionFlags & 0x2)
                         wprintf(L"on");
@@ -199,7 +200,7 @@ int main()
                         wprintf(L"off");
                     hr = S_OK;
                 }
-                else if(wcscmp(wargv[2],L"--mount-drive") == 0)
+                else if(WARGV_CMP(2,L"--mount-drive"))
                 {
                     if(distributionFlags & 0x4)
                         wprintf(L"on");
@@ -207,7 +208,7 @@ int main()
                         wprintf(L"off");
                     hr = S_OK;
                 }
-                else if(wcscmp(wargv[2],L"--lxuid") == 0)
+                else if(WARGV_CMP(2,L"--lxuid"))
                 {
                     struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
                     if(wsl.uuid == NULL)
@@ -227,7 +228,7 @@ int main()
                 hr = E_INVALIDARG;
             }
         }
-        else if((wcscmp(wargv[1],L"backup") == 0)&&(wargc == 2))
+        else if(WARGV_CMP(1,L"backup"))
         {
             if(distributionFlags & 0x4)
             {
@@ -245,11 +246,11 @@ int main()
             }
             
         }
-        else if(wcscmp(wargv[1],L"clean") == 0)
+        else if(WARGV_CMP(1,L"clean"))
         {
             hr = RemoveDist(TargetName);
         }
-        else if( (wcscmp(wargv[1],L"help")==0) | (wcscmp(wargv[1],L"-h")==0) | (wcscmp(wargv[1],L"/h")==0) )
+        else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
         {
             show_usage();
             hr = S_OK;
