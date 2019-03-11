@@ -122,60 +122,53 @@ int main()
         }
         else if(WARGV_CMP(1,L"config"))
         {
-            if(wargc == 4)
+            if((WARGV_CMP(2,L"--default-user"))&(wargc == 4))
             {
-                if(WARGV_CMP(2,L"--default-user"))
+                unsigned long uid;
+                uid = QueryUser(TargetName,wargv[3]);
+                if(uid != E_FAIL)
                 {
-                    unsigned long uid;
-                    uid = QueryUser(TargetName,wargv[3]);
-                    if(uid != E_FAIL)
-                    {
-                        hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
-                    }
+                    hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
                 }
-                else if(WARGV_CMP(2,L"--default-uid"))
+            }
+            else if((WARGV_CMP(2,L"--default-uid"))&(wargc == 4))
+            {
+                unsigned long uid;
+                if(swscanf_s(wargv[3],L"%d",&uid)==1)
                 {
-                    unsigned long uid;
-                    if(swscanf_s(wargv[3],L"%d",&uid)==1)
-                    {
-                        hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
-                    }
-                    else
-                    {
-                        hr = E_INVALIDARG;
-                    }
-                }
-                else if(WARGV_CMP(2,L"--append-path"))
-                {
-                    if(wcscmp(wargv[3],L"on") == 0)
-                        distributionFlags |= 0x2;
-                    else if(wcscmp(wargv[3],L"off") == 0)
-                        distributionFlags &= ~0x2;
-                    else
-                        hr = E_INVALIDARG;
-                    
-                    if(hr != E_INVALIDARG)
-                    {
-                        hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
-                    }
-                }
-                else if(WARGV_CMP(2,L"--mount-drive"))
-                {
-                    if(wcscmp(wargv[3],L"on") == 0)
-                        distributionFlags |= 0x4;
-                    else if(wcscmp(wargv[3],L"off") == 0)
-                        distributionFlags &= ~0x4;
-                    else
-                        hr = E_INVALIDARG;
-
-                    if(hr != E_INVALIDARG)
-                    {
-                        hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
-                    }
+                    hr = WslConfigureDistribution(TargetName,uid,distributionFlags);
                 }
                 else
                 {
                     hr = E_INVALIDARG;
+                }
+            }
+            else if((WARGV_CMP(2,L"--append-path"))&(wargc == 4))
+            {
+                if(wcscmp(wargv[3],L"on") == 0)
+                    distributionFlags |= 0x2;
+                else if(wcscmp(wargv[3],L"off") == 0)
+                    distributionFlags &= ~0x2;
+                else
+                    hr = E_INVALIDARG;
+
+                if(hr != E_INVALIDARG)
+                {
+                    hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                }
+            }
+            else if((WARGV_CMP(2,L"--mount-drive"))&(wargc == 4))
+            {
+                if(wcscmp(wargv[3],L"on") == 0)
+                    distributionFlags |= 0x4;
+                else if(wcscmp(wargv[3],L"off") == 0)
+                    distributionFlags &= ~0x4;
+                else
+                    hr = E_INVALIDARG;
+
+                if(hr != E_INVALIDARG)
+                {
+                    hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                 }
             }
             else
@@ -185,43 +178,36 @@ int main()
         }
         else if(WARGV_CMP(1,L"get"))
         {
-            if(wargc == 3)
+            if(WARGV_CMP(2,L"--default-uid"))
             {
-                if(WARGV_CMP(2,L"--default-uid"))
-                {
-                    wprintf(L"%d",defaultUID);
-                    hr = S_OK;
-                }
-                else if(WARGV_CMP(2,L"--append-path"))
-                {
-                    if(distributionFlags & 0x2)
-                        wprintf(L"on");
-                    else
-                        wprintf(L"off");
-                    hr = S_OK;
-                }
-                else if(WARGV_CMP(2,L"--mount-drive"))
-                {
-                    if(distributionFlags & 0x4)
-                        wprintf(L"on");
-                    else
-                        wprintf(L"off");
-                    hr = S_OK;
-                }
-                else if(WARGV_CMP(2,L"--lxuid"))
-                {
-                    struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
-                    if(wsl.uuid == NULL)
-                    {
-                        hr = E_FAIL;
-                    }
-                    wprintf(L"%.*s",UUID_SIZE,wsl.uuid);
-                    hr = S_OK;
-                }
+                wprintf(L"%d",defaultUID);
+                hr = S_OK;
+            }
+            else if(WARGV_CMP(2,L"--append-path"))
+            {
+                if(distributionFlags & 0x2)
+                    wprintf(L"on");
                 else
+                    wprintf(L"off");
+                hr = S_OK;
+            }
+            else if(WARGV_CMP(2,L"--mount-drive"))
+            {
+                if(distributionFlags & 0x4)
+                    wprintf(L"on");
+                else
+                    wprintf(L"off");
+                hr = S_OK;
+            }
+            else if(WARGV_CMP(2,L"--lxuid"))
+            {
+                struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                if(wsl.uuid == NULL)
                 {
-                    hr = E_INVALIDARG;
+                    hr = E_FAIL;
                 }
+                wprintf(L"%.*s",UUID_SIZE,wsl.uuid);
+                hr = S_OK;
             }
             else
             {
