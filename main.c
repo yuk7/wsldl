@@ -143,11 +143,11 @@ int main()
                     hr = E_INVALIDARG;
                 }
             }
-            else if((WARGV_CMP(2,L"--append-path"))&(wargc == 4))
+            else if(WARGV_CMP(2,L"--append-path"))
             {
-                if(wcscmp(wargv[3],L"on") == 0)
+                if(WARGV_CMP(3,L"on"))
                     distributionFlags |= 0x2;
-                else if(wcscmp(wargv[3],L"off") == 0)
+                else if(WARGV_CMP(3,L"off"))
                     distributionFlags &= ~0x2;
                 else
                     hr = E_INVALIDARG;
@@ -157,11 +157,11 @@ int main()
                     hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                 }
             }
-            else if((WARGV_CMP(2,L"--mount-drive"))&(wargc == 4))
+            else if(WARGV_CMP(2,L"--mount-drive"))
             {
-                if(wcscmp(wargv[3],L"on") == 0)
+                if(WARGV_CMP(3,L"on"))
                     distributionFlags |= 0x4;
-                else if(wcscmp(wargv[3],L"off") == 0)
+                else if(WARGV_CMP(3,L"off"))
                     distributionFlags &= ~0x4;
                 else
                     hr = E_INVALIDARG;
