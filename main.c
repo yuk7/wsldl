@@ -46,6 +46,8 @@ int main()
         return 1;
     wchar_t TargetName[MAX_PATH];
     _wsplitpath_s(efpath,NULL,0,NULL,0,TargetName,MAX_PATH,NULL,0);
+    
+    SetConsoleTitleW(TargetName);
 
     WslApiInit();
 
