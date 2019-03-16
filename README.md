@@ -26,6 +26,8 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5))
 
+[CentOS](https://github.com/yuk7/CentWSL)
+
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
