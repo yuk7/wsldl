@@ -46,8 +46,6 @@ int main()
         return 1;
     wchar_t TargetName[MAX_PATH];
     _wsplitpath_s(efpath,NULL,0,NULL,0,TargetName,MAX_PATH,NULL,0);
-    
-    SetConsoleTitleW(TargetName);
 
     WslApiInit();
 
@@ -109,7 +107,10 @@ int main()
                 hr = E_ABORT;
             }
             else
+            {
+                SetConsoleTitleW(TargetName);
                 hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+            }
         }
         else if( WARGV_CMP(1,L"run") | WARGV_CMP(1,L"-c") | WARGV_CMP(1,L"/c") )
         {
