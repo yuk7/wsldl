@@ -237,7 +237,15 @@ int main()
         }
         else if(WARGV_CMP(1,L"clean"))
         {
-            hr = RemoveDist(TargetName);
+            if(WARGV_CMP(2,L"-y"))
+            {
+                hr = WslUnregisterDistribution(TargetName);
+                return hr;
+            }
+            else
+            {
+                hr = RemoveDist(TargetName);
+            }
         }
         else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
         {
