@@ -17,7 +17,7 @@
 #include "version.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
-#define WARGV_CMP(a,b) (wargc>a)?wcscmp(wargv[a],b)==0:false
+#define WARGV_CMP(a,b) ((wargc>a)?wcscmp(wargv[a],b)==0:false)
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 bool dirExists(const char* dirName);
