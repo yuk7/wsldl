@@ -49,6 +49,11 @@ int main()
 
     WslApiInit();
 
+    if(WARGV_CMP(1,L"isregd"))
+    {
+        return (!WslIsDistributionRegistered(TargetName));
+    }
+
     if(!WslIsDistributionRegistered(TargetName))
     {
         bool InstSilent = false;
