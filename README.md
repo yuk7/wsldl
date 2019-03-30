@@ -49,6 +49,7 @@ If you rename it, you can register with a different name.
 #### 3. Put your rootfs.tar.gz in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
+Note: You can distribute your distribution including wsldl exe.
 
 ## 📝How-to-Use(for Installed Instance)
 #### exe Usage
