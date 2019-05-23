@@ -90,7 +90,7 @@ return 0;
 }
 
 struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
-    struct WslInstallation wslInstallation = {.uuid = 0, .basePath = 0};
+    struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}};
 
     wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
     HKEY hKey;
