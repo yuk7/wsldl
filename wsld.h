@@ -128,7 +128,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
                 // TODO: this helps for diagnostic, but we should implement a better error handling in the future
                 fwprintf(stderr,L"ERROR:[%i] Could not read registry key\n", rres);
             }
-            if((subKeySz == UUID_SIZE) && (wcscmp(regDistName,DistributionName)==0))
+            if((subKeySz == UUID_SIZE) && (_wcsicmp(regDistName,DistributionName)==0))
             {
                 // SUCCESS: Distribution found
                 wcscpy_s(wslInstallation.uuid, UUID_SIZE*2, subKey);
