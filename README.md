@@ -31,6 +31,8 @@ General Purpose WSL Distribution Installer & Launcher
 
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
+[Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
+
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
 [Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [am11](https://github.com/am11))
