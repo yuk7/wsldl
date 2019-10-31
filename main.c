@@ -7,6 +7,7 @@
  */
 
 
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -113,7 +114,8 @@ int main()
         }
         else if( WARGV_CMP(1,L"run") | WARGV_CMP(1,L"-c") | WARGV_CMP(1,L"/c") )
         {
-            wchar_t rArgs[500] = L"";
+            wchar_t rArgs[SHRT_MAX] = L"";  // The total maximum length of a command line on Windows (at least Windows 10+)
+                                            // is SHRT_MAX characters (see: https://devblogs.microsoft.com/oldnewthing/20031210-00/?p=41553)
             int i;
             for (i=2;i<wargc;i++)
             {
