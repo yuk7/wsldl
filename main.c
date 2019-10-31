@@ -322,8 +322,8 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
         return (unsigned long)E_FAIL;
     }
     
-    CloseHandle(hInTmp);
-    CloseHandle(hOutTmp);
+    CloseHandle(hIn);
+    CloseHandle(hOut);
     CloseHandle(hProcess);
 
     //read output
