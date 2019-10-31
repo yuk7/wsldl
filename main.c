@@ -61,8 +61,7 @@ int main()
         wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz";
         if(wargc >1)
         {
-            //"tgz" and "silent" will be discontinued in the future.
-            if( WARGV_CMP(1,L"install") | WARGV_CMP(1,L"tgz") | WARGV_CMP(1,L"silent") )
+            if(WARGV_CMP(1,L"install"))
             {
                 InstSilent = true;
                 if( (!WARGV_CMP(2,L"--root")) & (wargc>2) )
