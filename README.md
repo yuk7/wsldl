@@ -73,7 +73,7 @@ Usage :
       - `--default-uid`: Get the default user uid in this distro
       - `--append-path`: Get on/off status of Append Windows PATH to $PATH
       - `--mount-drive`: Get on/off status of Mount drives
-      - `--lxuid`: Get LxUID key for this distro
+      - `--lxguid`: Get WSL GUID key for this distro
 
     backup
       - Output backup.tar.gz to the current directory using tar command.
