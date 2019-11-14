@@ -202,7 +202,7 @@ int main()
                     wprintf(L"off");
                 hr = S_OK;
             }
-            else if(WARGV_CMP(2,L"--lxuid"))
+            else if(WARGV_CMP(2,L"--lxguid") | WARGV_CMP(2,L"--lxuid"))
             {
                 struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
                 if(wsl.uuid == NULL)
@@ -387,7 +387,7 @@ void show_usage()
     wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
-    wprintf(L"      - `--lxuid`: Get LxUID key for this distro\n\n");
+    wprintf(L"      - `--lxguid`: Get WSL GUID key for this distro\n\n");
     wprintf(L"    backup\n");
     wprintf(L"      - Output backup.tar.gz to the current directory using tar command.\n\n");
     wprintf(L"    clean\n");
