@@ -100,7 +100,6 @@ int main()
             wchar_t buffer[MAX_BASEPATH_SIZE];
 
             wmemcpy_s(buffer,MAX_BASEPATH_SIZE,wslInstallation.basePath,MAX_BASEPATH_SIZE);
-            wprintf(buffer);
 
             if (!dirExists(buffer))
             {
@@ -212,6 +211,7 @@ int main()
                     hr = E_FAIL;
                 }
                 wprintf(L"%.*s",UUID_SIZE,wsl.uuid);
+
                 hr = S_OK;
             }
             else

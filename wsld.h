@@ -36,6 +36,7 @@ WSLGETDISTRIBUTIONCONFIGURATION WslGetDistributionConfiguration;
 WSLLAUNCHINTERACTIVE WslLaunchInteractive;
 WSLLAUNCH WslLaunch;
 
+#define LXSS_BASE_RKEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
 #define MAX_DISTRO_NAME_SIZE 50
 #define MAX_BASEPATH_SIZE 128
 #define UUID_SIZE 38
@@ -92,16 +93,15 @@ return 0;
 struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}};
 
-    wchar_t RKey[]=L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss";
     HKEY hKey;
     LONG rres;
-    if(RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
+    if(RegOpenKeyExW(HKEY_CURRENT_USER,LXSS_BASE_RKEY, 0, KEY_READ, &hKey) == ERROR_SUCCESS)
     {
         int i;
         for(i=0;;i++)
         {
             wchar_t subKeyF[200];
-            wcscpy_s(subKeyF,(sizeof(subKeyF)/sizeof(subKeyF[0])),RKey);
+            wcscpy_s(subKeyF,(sizeof(subKeyF)/sizeof(subKeyF[0])),LXSS_BASE_RKEY);
 
             wchar_t subKey[200];
             DWORD subKeySz = 100;
