@@ -8,6 +8,7 @@
 
 
 #include <limits.h>
+#include <shlwapi.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 bool dirExists(const wchar_t* dirName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
+int ResettingDir(wchar_t *uuid,wchar_t *dirPath);
 void show_usage();
 void show_version();
 
@@ -45,8 +47,15 @@ int main()
     wchar_t efpath[MAX_PATH];
     if(GetModuleFileNameW(NULL,efpath,ARRAY_LENGTH(efpath)-1) == 0)
         return 1;
+    
+    wchar_t efFullDir[MAX_PATH];
+    wchar_t efDir[MAX_PATH];
     wchar_t TargetName[MAX_PATH];
-    _wsplitpath_s(efpath,NULL,0,NULL,0,TargetName,MAX_PATH,NULL,0);
+    _wsplitpath_s(efpath,efFullDir,MAX_PATH,efDir,MAX_PATH,TargetName,MAX_PATH,NULL,0);
+
+    PathAppendW(efFullDir,efDir);
+    PathRemoveBackslashW(efFullDir);
+
 
     WslApiInit();
 
@@ -94,35 +103,46 @@ int main()
         unsigned long defaultEnvCnt;
         WslGetDistributionConfiguration(TargetName,&distributionVersion,&defaultUID,&distributionFlags,&defaultEnv,&defaultEnvCnt);
 
-        if(wargc == 1)
+        if( (wargc == 1) |  WARGV_CMP(1,L"run") | WARGV_CMP(1,L"-c") | WARGV_CMP(1,L"/c") )
         {
             struct WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
-            wchar_t buffer[MAX_BASEPATH_SIZE];
 
-            wmemcpy_s(buffer,MAX_BASEPATH_SIZE,wslInstallation.basePath,MAX_BASEPATH_SIZE);
-
-            if (!dirExists(buffer))
+            if (!dirExists(wslInstallation.basePath))
             {
                 fwprintf(stderr,L"ERROR:\nInstallation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
-                hr = E_ABORT;
+
+                wchar_t efFullDirRootfs[MAX_PATH];
+                wcscpy_s(efFullDirRootfs,MAX_PATH,efFullDir);
+                PathAppendW(efFullDirRootfs,L"rootfs");
+
+                if(dirExists(efFullDirRootfs))
+                {
+                    wchar_t uuid[UUID_SIZE];
+                    wmemcpy_s(uuid,UUID_SIZE,wslInstallation.uuid,UUID_SIZE);
+                    ResettingDir(uuid,efFullDir);
+
+                    hr = S_OK;
+                }
             }
             else
             {
-                SetConsoleTitleW(TargetName);
-                hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+                if(wargc == 1)
+                {
+                    SetConsoleTitleW(TargetName);
+                    hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+                }
+                else //run with arguments
+                {
+                    wchar_t rArgs[SHRT_MAX] = L"";
+                    int i;
+                    for (i=2;i<wargc;i++)
+                    {
+                        wcscat_s(rArgs,ARRAY_LENGTH(rArgs),L" ");
+                        wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
+                    }
+                    hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
+                }
             }
-        }
-        else if( WARGV_CMP(1,L"run") | WARGV_CMP(1,L"-c") | WARGV_CMP(1,L"/c") )
-        {
-            wchar_t rArgs[SHRT_MAX] = L"";  // The total maximum length of a command line on Windows (at least Windows 10+)
-                                            // is SHRT_MAX characters (see: https://devblogs.microsoft.com/oldnewthing/20031210-00/?p=41553)
-            int i;
-            for (i=2;i<wargc;i++)
-            {
-                wcscat_s(rArgs,ARRAY_LENGTH(rArgs),L" ");
-                wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
-            }
-            hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
         }
         else if(WARGV_CMP(1,L"config"))
         {
@@ -384,6 +404,22 @@ HRESULT RemoveDist(wchar_t *TargetName)
         fwprintf(stderr,L"Accepting is required to proceed.\n\n");
         return S_OK;
     }
+}
+
+int ResettingDir(wchar_t *uuid,wchar_t *dirPath)
+{
+    HRESULT hr;
+    char yn;
+    wprintf(L"\n-----------------------------------------\n");
+    wprintf(L"Rootfs data found in executable directory.\n");
+    wprintf(L"If you moved the executable directory, you can resetting the path.\n");
+    wprintf(L"Do you want to resetting path?(y/n):");
+    scanf_s("%c",&yn,1);
+    if(yn == 'y')
+    {
+        WslSetInstallationPathInfo(uuid,dirPath);
+    }
+    return 0;
 }
 
 void show_usage()
