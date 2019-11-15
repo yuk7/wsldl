@@ -222,7 +222,7 @@ int main()
             if(distributionFlags & 0x4)
             {
                 WslConfigureDistribution(TargetName,0,distributionFlags);
-                wprintf(L"Running backup command.\n");
+                wprintf(L"Running backup Script.\n");
                 wprintf(L"If a password is requested, please enter the root password.\n\n");
 
                 hr = WslLaunchInteractive(TargetName,
