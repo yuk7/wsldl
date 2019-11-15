@@ -227,7 +227,7 @@ int main()
 
                 hr = WslLaunchInteractive(TargetName,
                 L"wsl_bak_args=$(mount --show-labels|awk 'BEGIN{ORS=\"/*\\\" \"}NR>1{print \"--exclude \\\"\" substr($3, 2) }') \n"
-                L"su root -c \"tar -zcpf backup.tar.gz ${wsl_bak_args} /\" \n"
+                L"su root -c \"tar -zcpf backup.tar.gz ${wsl_bak_args} --exclude \"mnt/*\" /\" \n"
                 , true, &exitCode);
 
                 WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
