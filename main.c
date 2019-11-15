@@ -253,6 +253,13 @@ int main()
                 hr = RemoveDist(TargetName);
             }
         }
+        else if(WARGV_CMP(1,L"install"))
+        {
+            fwprintf(stderr,L"ERROR: This instance is already installed.\n");
+            fwprintf(stderr,L"If you want to reinstall it, you can remove it with the \"clean\" command.\n");
+
+            return E_ABORT;
+        }
         else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
         {
             show_usage();
