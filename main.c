@@ -21,7 +21,7 @@
 #define WARGV_CMP(a,b) ((wargc>a)?wcscmp(wargv[a],b)==0:false)
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
-bool dirExists(const char* dirName);
+bool dirExists(const wchar_t* dirName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
 void show_usage();
@@ -97,12 +97,14 @@ int main()
         if(wargc == 1)
         {
             struct WslInstallation wslInstallation = WslGetInstallationInfo(TargetName);
-            char buffer[MAX_BASEPATH_SIZE];
-            size_t *retSize = 0;
-            wcstombs_s(retSize, buffer, MAX_BASEPATH_SIZE, wslInstallation.basePath, MAX_BASEPATH_SIZE);
+            wchar_t buffer[MAX_BASEPATH_SIZE];
+
+            wmemcpy_s(buffer,MAX_BASEPATH_SIZE,wslInstallation.basePath,MAX_BASEPATH_SIZE);
+            wprintf(buffer);
+
             if (!dirExists(buffer))
             {
-                fwprintf(stderr,L"Installation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
+                fwprintf(stderr,L"ERROR:\nInstallation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
                 hr = E_ABORT;
             }
             else
@@ -298,9 +300,9 @@ int main()
     }
 }
 
-bool dirExists(const char* dirName)
+bool dirExists(const wchar_t* dirName)
 {
-    DWORD ftyp = GetFileAttributesA(dirName);
+    DWORD ftyp = GetFileAttributesW(dirName);
     return (ftyp != INVALID_FILE_ATTRIBUTES) && (ftyp & FILE_ATTRIBUTE_DIRECTORY);
 }
 
