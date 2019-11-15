@@ -408,7 +408,6 @@ HRESULT RemoveDist(wchar_t *TargetName)
 
 int ResettingDir(wchar_t *uuid,wchar_t *dirPath)
 {
-    HRESULT hr;
     char yn;
     wprintf(L"\n-----------------------------------------\n");
     wprintf(L"Rootfs data found in executable directory.\n");
