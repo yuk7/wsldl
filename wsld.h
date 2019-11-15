@@ -150,6 +150,25 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     return wslInstallation;
 }
 
+ int WslSetInstallationPathInfo(wchar_t *uuid,wchar_t *basePath)
+ {
+    LONG rres;
+    HKEY hKey;
+    wchar_t RKey[200];
+    wcscpy_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),LXSS_BASE_RKEY);
+    wcscat_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),L"\\");
+    wcscat_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),uuid);
+
+    RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_SET_VALUE, &hKey);
+    rres = RegSetValueExW(hKey,L"BasePath",0,REG_SZ,(const BYTE*)basePath,MAX_BASEPATH_SIZE);
+    if (rres != ERROR_SUCCESS)
+    {
+        fwprintf(stderr,L"ERROR:[%i] Write registory key failed\n", rres);
+        return 1;
+    }
+    return 0;
+ }
+
 #ifdef __cplusplus
 }
 #endif
