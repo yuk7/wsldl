@@ -181,7 +181,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     
     CreatePipe(&hOut, &hOutTmp, &sa, 0);
     CreatePipe(&hIn, &hInTmp, &sa, 0);
-    if(WslLaunch(DistroName, command, 0, hInTmp, hOutTmp, hOutTmp, &hProcess))
+    if(WslLaunch(DistroName, command, 1, hInTmp, hOutTmp, hOutTmp, &hProcess))
     {
         return 1;
     }
