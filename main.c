@@ -357,8 +357,8 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     wchar_t idcmd[30] = L"id -u ";
     wcscat_s(idcmd,ARRAY_LENGTH(idcmd),username);
     
-    char buf[300];
-    long unsigned int len = 0;
+    char buf[300] = "";
+    long unsigned int len = 30;
     WslExec(TargetName, idcmd, buf, &len);
 
     //read output
