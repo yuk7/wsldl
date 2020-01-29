@@ -188,7 +188,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     CloseHandle(hInTmp);
     CloseHandle(hOutTmp);
 
-    if(!ReadFile(hOut, result, sizeof(result), len, NULL))
+    if(!ReadFile(hOut, result, *len, len, NULL))
     {
         return 2;
     }
