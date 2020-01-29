@@ -389,7 +389,7 @@ wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
     long unsigned int len = SHRT_MAX;
     WslExec(TargetName, pathcmd, buf, &len);
 
-    mbstowcs(out, buf, sizeof(buf));
+    MultiByteToWideChar(CP_UTF8, 0, buf, -1, out, SHRT_MAX);
     return out;
 }
 
