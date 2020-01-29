@@ -452,6 +452,8 @@ void show_usage()
     wprintf(L"      - Open a new shell with your default settings.\n\n");
     wprintf(L"    run <command line>\n");
     wprintf(L"      - Run the given command line in that distro. Inherit current directory.\n\n");
+    wprintf(L"    runp <command line (includes windows path)>\n");
+    wprintf(L"      - Run the path translated command line in that distro.\n\n");
     wprintf(L"    config [setting [value]]\n");
     wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
     wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
