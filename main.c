@@ -26,6 +26,7 @@
 #define WARGV_CMP(a,b) ((wargc>a)?wcscmp(wargv[a],b)==0:false)
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
+wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out);
 bool dirExists(const wchar_t* dirName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
@@ -147,6 +148,26 @@ int main()
                     hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
                 }
             }
+        }
+        else if( WARGV_CMP(1,L"runp") | WARGV_CMP(1,L"-p") | WARGV_CMP(1,L"/p") )
+        {
+            wchar_t rArgs[SHRT_MAX] = L"";
+            int i;
+            for (i=2;i<wargc;i++)
+            {
+                wcscat_s(rArgs,ARRAY_LENGTH(rArgs),L" ");
+                if(wcsstr(wargv[i], L"\\") != NULL)
+                {
+                    wchar_t buf[SHRT_MAX];
+                    QueryWslPath(TargetName, wargv[i], buf);
+                    wcscat_s(rArgs,ARRAY_LENGTH(rArgs),buf);
+                }
+                else
+                {
+                    wcscat_s(rArgs,ARRAY_LENGTH(rArgs),wargv[i]);
+                }
+            }
+            hr = WslLaunchInteractive(TargetName,rArgs, true, &exitCode);
         }
         else if(WARGV_CMP(1,L"config"))
         {
@@ -346,6 +367,30 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
         return uid;
     }
     return (unsigned long)E_FAIL;
+}
+
+wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
+{
+    wchar_t pathtmp[SHRT_MAX];
+    wcscpy_s(pathtmp, ARRAY_LENGTH(pathtmp), path);
+
+    for(int i = 0; i < (ARRAY_LENGTH(pathtmp)); i++)
+    {
+        if(pathtmp[i] == L'\\')
+        {
+            pathtmp[i] = L'/';
+        }
+    }
+
+    wchar_t pathcmd[SHRT_MAX] = L"wslpath -u ";
+    wcscat_s(pathcmd, ARRAY_LENGTH(pathcmd), pathtmp);
+    char buf[SHRT_MAX] = "";
+    
+    long unsigned int len = SHRT_MAX;
+    WslExec(TargetName, pathcmd, buf, &len);
+
+    mbstowcs(out, buf, sizeof(buf));
+    return out;
 }
 
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
