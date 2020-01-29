@@ -192,6 +192,11 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     {
         return 2;
     }
+
+    if(result[(strrchr(result, '\0') - result) - 1] == '\n')
+    {
+        result[(strrchr(result, '\0') - result) - 1] = '\0';
+    }
     
     CloseHandle(hIn);
     CloseHandle(hOut);
