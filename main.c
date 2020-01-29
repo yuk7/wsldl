@@ -332,38 +332,13 @@ bool dirExists(const wchar_t* dirName)
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
 {
-    HANDLE hProcess;
-    HANDLE hOutTmp,hOut;
-    HANDLE hInTmp,hIn;
-    SECURITY_ATTRIBUTES sa;
-    sa.nLength = sizeof(sa);
-    sa.bInheritHandle = TRUE;
-    sa.lpSecurityDescriptor = NULL;
     unsigned long uid;
     wchar_t idcmd[30] = L"id -u ";
     wcscat_s(idcmd,ARRAY_LENGTH(idcmd),username);
     
-    CreatePipe(&hOut, &hOutTmp, &sa, 0);
-    CreatePipe(&hIn, &hInTmp, &sa, 0);
-    if(WslLaunch(TargetName,idcmd,0,hInTmp,hOutTmp,hOutTmp,&hProcess))
-    {
-        fwprintf(stderr,L"ERROR:Failed to execute id command.\n");
-        return (unsigned long)E_FAIL;
-    }
-    CloseHandle(hInTmp);
-    CloseHandle(hOutTmp);
-
     char buf[300];
-    DWORD len = 0;
-    if(!ReadFile(hOut, &buf, sizeof(buf), &len, NULL))
-    {
-        fwprintf(stderr,L"ERROR:Failed to read result.\n");
-        return (unsigned long)E_FAIL;
-    }
-    
-    CloseHandle(hIn);
-    CloseHandle(hOut);
-    CloseHandle(hProcess);
+    long unsigned int len = 0;
+    WslExec(TargetName, idcmd, buf, &len);
 
     //read output
     if(sscanf_s(buf,"%d",&uid)==1)
