@@ -169,6 +169,37 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     return 0;
  }
 
+ int WslExec(wchar_t *DistroName, wchar_t *command, char *result, long unsigned int *len)
+ {
+     HANDLE hProcess;
+     HANDLE hOutTmp,hOut;
+     HANDLE hInTmp,hIn;
+     SECURITY_ATTRIBUTES sa;
+     sa.nLength = sizeof(sa);
+     sa.bInheritHandle = TRUE;
+     sa.lpSecurityDescriptor = NULL;
+    
+    CreatePipe(&hOut, &hOutTmp, &sa, 0);
+    CreatePipe(&hIn, &hInTmp, &sa, 0);
+    if(WslLaunch(DistroName, command, 0, hInTmp, hOutTmp, hOutTmp, &hProcess))
+    {
+        return 1;
+    }
+    CloseHandle(hInTmp);
+    CloseHandle(hOutTmp);
+
+    if(!ReadFile(hOut, result, sizeof(result), len, NULL))
+    {
+        return 2;
+    }
+    
+    CloseHandle(hIn);
+    CloseHandle(hOut);
+    CloseHandle(hProcess);
+
+    return 0;
+ }
+
 #ifdef __cplusplus
 }
 #endif
