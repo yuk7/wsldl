@@ -266,25 +266,46 @@ int main()
         }
         else if(WARGV_CMP(1,L"backup"))
         {
-            if(distributionFlags & 0x4)
+            hr = E_INVALIDARG;
+            if(WARGV_CMP(2,L"--reg")|(wargc < 3))
             {
-                WslConfigureDistribution(TargetName,0,distributionFlags);
-                wprintf(L"Running backup Script.\n");
-                wprintf(L"If a password is requested, please enter the root password.\n\n");
+                struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                if(wsl.uuid == NULL)
+                {
+                    hr = E_FAIL;
+                }
+                wchar_t Rcmd[200] = L"reg export HKEY_CURRENT_USER\\";
+                wcscat_s(Rcmd,ARRAY_LENGTH(Rcmd),LXSS_BASE_RKEY);
+                wcscat_s(Rcmd,ARRAY_LENGTH(Rcmd),L"\\");
+                wcscat_s(Rcmd,ARRAY_LENGTH(Rcmd),wsl.uuid);
+                wcscat_s(Rcmd,ARRAY_LENGTH(Rcmd),L" backup.reg /y");
 
-                hr = WslLaunchInteractive(TargetName,
-                L"bakarg_drv=$(mount --show-labels|awk '{if(!match($3,/(^\\/$)|(^\\/dev)|(^\\/sys)|(^\\/proc)|(^\\/run)/)){print \"--exclude \\\"\" substr($3, 2) \"\\\"\"} }') \n"
-                L"bakarg_sys=\"--exclude \\\"dev/*\\\" --exclude \\\"sys/*\\\" --exclude \\\"proc/*\\\" --exclude \\\"run/*\\\" \" \n"
-                L"su root -c \"tar -zcpf backup.tar.gz ${bakarg_sys} ${bakarg_drv} /\" \n"
-                , true, &exitCode);
-
-                WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                _wsystem(Rcmd);
+                hr = S_OK;
             }
-            else
+            if(WARGV_CMP(2,L"--tgz")|(wargc < 3))
             {
-                fwprintf(stderr,L"ERROR:Mount drive feature is not enabled.\n");
-                fwprintf(stderr,L"Please enable it and retry.\n");
-                hr = E_FAIL;
+                if(distributionFlags & 0x4)
+                {
+                    WslConfigureDistribution(TargetName,0,distributionFlags);
+                    wprintf(L"Running backup Script.\n");
+                    wprintf(L"If a password is requested, please enter the root password.\n\n");
+
+                    hr = WslLaunchInteractive(TargetName,
+                    L"bakarg_drv=$(mount --show-labels|awk '{if(!match($3,/(^\\/$)|(^\\/dev)|(^\\/sys)|(^\\/proc)|(^\\/run)/)){print \"--exclude \\\"\" substr($3, 2) \"\\\"\"} }') \n"
+                    L"bakarg_sys=\"--exclude \\\"dev/*\\\" --exclude \\\"sys/*\\\" --exclude \\\"proc/*\\\" --exclude \\\"run/*\\\" \" \n"
+                    L"su root -c \"tar -zcpf backup.tar.gz ${bakarg_sys} ${bakarg_drv} /\" \n"
+                    , true, &exitCode);
+
+                    WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
+                    hr = S_OK;
+                }
+                else
+                {
+                    fwprintf(stderr,L"ERROR:Mount drive feature is not enabled.\n");
+                    fwprintf(stderr,L"Please enable it and retry.\n");
+                    hr = E_FAIL;
+                }
             }
             
         }
@@ -464,8 +485,9 @@ void show_usage()
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
     wprintf(L"      - `--lxguid`: Get WSL GUID key for this distro\n\n");
-    wprintf(L"    backup\n");
-    wprintf(L"      - Output backup.tar.gz to the current directory using tar command.\n\n");
+    wprintf(L"    backup [contents]\n");
+    wprintf(L"      - `--tgz`: Output backup.tar.gz to the current directory using tar command\n");
+    wprintf(L"      - `--reg`: Output settings registry file to the current directory\n\n");
     wprintf(L"    clean\n");
     wprintf(L"      - Uninstall the distro.\n\n");
     wprintf(L"    help\n");
