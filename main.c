@@ -26,7 +26,7 @@
 #define WARGV_CMP(a,b) ((wargc>a)?wcscmp(wargv[a],b)==0:false)
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
-wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out);
+int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out);
 bool dirExists(const wchar_t* dirName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
@@ -157,7 +157,11 @@ int main()
                 if(wcsstr(wargv[i], L"\\") != NULL)
                 {
                     wchar_t buf[SHRT_MAX];
-                    QueryWslPath(TargetName, wargv[i], buf);
+                    if(QueryWslPath(TargetName, wargv[i], buf))
+                    {
+                        fwprintf(stderr,L"ERROR: Path translation failed.\n");
+                        return E_FAIL;
+                    }
                     wcscat_s(rArgs,ARRAY_LENGTH(rArgs),buf);
                 }
                 else
@@ -388,7 +392,7 @@ unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
     return (unsigned long)E_FAIL;
 }
 
-wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
+int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
 {
     wchar_t pathtmp[SHRT_MAX];
     wcscpy_s(pathtmp, ARRAY_LENGTH(pathtmp), path);
@@ -406,10 +410,12 @@ wchar_t *QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
     char buf[SHRT_MAX] = "";
     
     long unsigned int len = SHRT_MAX;
-    WslExec(TargetName, pathcmd, buf, &len);
+    if(WslExec(TargetName, pathcmd, buf, &len) != 0) {
+        return 1;
+    }
 
     MultiByteToWideChar(CP_UTF8, 0, buf, -1, out, SHRT_MAX);
-    return out;
+    return 0;
 }
 
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
