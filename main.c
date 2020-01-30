@@ -294,6 +294,7 @@ int main()
                     wprintf(L"If a password is requested, please enter the root password.\n\n");
 
                     hr = WslLaunchInteractive(TargetName,
+                    L"LANG=C \n"
                     L"bakarg_drv=$(mount --show-labels|awk '{if(!match($3,/(^\\/$)|(^\\/dev)|(^\\/sys)|(^\\/proc)|(^\\/run)/)){print \"--exclude \\\"\" substr($3, 2) \"\\\"\"} }') \n"
                     L"bakarg_sys=\"--exclude \\\"dev/*\\\" --exclude \\\"sys/*\\\" --exclude \\\"proc/*\\\" --exclude \\\"run/*\\\" \" \n"
                     L"su root -c \"tar -zcpf backup.tar.gz ${bakarg_sys} ${bakarg_drv} /\" \n"
