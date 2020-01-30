@@ -169,7 +169,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     return 0;
  }
 
- int WslExec(wchar_t *DistroName, wchar_t *command, char *result, long unsigned int *len)
+ unsigned long WslExec(wchar_t *DistroName, wchar_t *command, char *result, long unsigned int *len)
  {
      HANDLE hProcess;
      HANDLE hOutTmp,hOut;
@@ -183,14 +183,18 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     CreatePipe(&hIn, &hInTmp, &sa, 0);
     if(WslLaunch(DistroName, command, 1, hInTmp, hOutTmp, hOutTmp, &hProcess))
     {
-        return 1;
+        return 100000;
     }
     CloseHandle(hInTmp);
     CloseHandle(hOutTmp);
 
+    WaitForSingleObject(hProcess, INFINITE);
+    unsigned long exitcode;
+    GetExitCodeProcess(hProcess, &exitcode);
+
     if(!ReadFile(hOut, result, *len, len, NULL))
     {
-        return 2;
+        return 200000;
     }
 
     if(result[(strrchr(result, '\0') - result) - 1] == '\n')
@@ -202,7 +206,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     CloseHandle(hOut);
     CloseHandle(hProcess);
 
-    return 0;
+    return exitcode;
  }
 
 #ifdef __cplusplus
