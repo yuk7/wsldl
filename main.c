@@ -122,9 +122,7 @@ int main()
 
                 if(dirExists(efFullDirRootfs))
                 {
-                    wchar_t uuid[UUID_SIZE];
-                    wmemcpy_s(uuid,UUID_SIZE,wslInstallation.uuid,UUID_SIZE);
-                    ResettingDir(uuid,efFullDir);
+                    ResettingDir(wslInstallation.uuid,efFullDir);
 
                     hr = S_OK;
                 }
@@ -255,7 +253,7 @@ int main()
                 {
                     hr = E_FAIL;
                 }
-                wprintf(L"%.*s",UUID_SIZE,wsl.uuid);
+                wprintf(L"%s",wsl.uuid);
 
                 hr = S_OK;
             }
