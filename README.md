@@ -99,7 +99,12 @@ Usage :
 ```cmd
 >{InstanceName}.exe run uname -r
 4.4.0-43-Microsoft
+```
 
+#### Run with command line with path translation
+```cmd
+>{InstanceName}.exe runp echo C:\Windows\System32\cmd.exe
+/mnt/c/Windows/System32/cmd.exe
 ```
 
 #### Change Default User(id command required)
