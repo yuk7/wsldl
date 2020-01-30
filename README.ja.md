@@ -57,6 +57,9 @@ Usage :
     run <command line>
       - 与えられたコマンドラインをインスタンス内で実行します。 カレントディレクトリが引き継がれます。
 
+    runp <command line (windowsのパスを含む)>
+      - 与えられたコマンドラインのパスを変換した上でインスタンス内で実行します。
+
     config [setting [value]]
       - `--default-user <user>`: インスタンスのデフォルトユーザーを<user>に設定します。
       - `--default-uid <uid>`: インスタンスのデフォルトユーザーのuidを<uid>に設定します。
@@ -69,8 +72,9 @@ Usage :
       - `--mount-drive`: Windowsのドライブをマウントする機能のon/offを確認します。
       - `--lxuid`: システム内部で使用されているLxUIDを取得します。
 
-    backup
-      - tarコマンドを使用したバックアップを実行します。
+    backup [contents]
+      - `--tgz`: tarを使用し、カレントディレクトリにbackup.tar.gzを出力します。
+      - `--reg`: 設定のレジストリファイルをbackup.regとしてカレントディレクトリに出力します。
       
     clean
       - インスタンスをアンインストールします。
@@ -91,6 +95,12 @@ Usage :
 ```cmd
 >{インスタンス名}.exe run uname -r
 4.4.0-43-Microsoft
+```
+
+#### 任意のコマンドをパス変換し実行させる
+```cmd
+>{インスタンス名}.exe runp echo C:\Windows\cmd.exe
+/mnt/c/Windows/cmd.exe
 
 ```
 
@@ -150,14 +160,14 @@ x86_64のMSYS2( https://www.msys2.org )をインストール
 以下のようなコマンドをmsys2シェルで実行します
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # ツールチェインをインストール
-$ gcc -std=c99 --static main.c -o Launcher.exe # ソースコードをコンパイル
+$ gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # ソースコードをコンパイル
 ```
 
 exeにアイコンを付ける場合は、リソースファイルとリンクします
 ```bash
 YourDistroName=Fedora
 $ windres res/$YourDistroName/res.rc res.o # リソースをコンパイル
-$ gcc -std=c99 --static main.c -o Launcher.exe res.o # ソースコードをコンパイル
+$ gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe res.o # ソースコードをコンパイル
 ```
 
 ### Linux (クロスコンパイル)
@@ -165,7 +175,7 @@ gcc-mingw-w64-x86-64が含まれるmingw-w64ツールチェインをインスト
 
 以下のようなコマンドを実行します
 ```bash
- $ x86_64-w64-mingw32-gcc -std=c99 --static main.c -o Launcher.exe # ソースコードをコンパイル
+ $ x86_64-w64-mingw32-gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # ソースコードをコンパイル
 ```
 ## 📄ライセンス
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
