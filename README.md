@@ -62,6 +62,9 @@ Usage :
     run <command line>
       - Run the given command line in that distro. Inherit current directory.
 
+    runp <command line (includes windows path)>
+      - Run the path translated command line in that distro.
+
     config [setting [value]]
       - `--default-user <user>`: Set the default user for this distro to <user>
       - `--default-uid <uid>`: Set the default user uid for this distro to <uid>
@@ -74,9 +77,10 @@ Usage :
       - `--mount-drive`: Get on/off status of Mount drives
       - `--lxguid`: Get WSL GUID key for this distro
 
-    backup
-      - Output backup.tar.gz to the current directory using tar command.
-      
+    backup [contents]
+      - `--tgz`: Output backup.tar.gz to the current directory using tar command
+      - `--reg`: Output settings registry file to the current directory
+
     clean
       - Uninstall the distro.
 
@@ -154,14 +158,14 @@ Install x86_64 version of MSYS2(https://www.msys2.org).
 Run these commands in msys shell
 ```bash
 $ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ gcc -std=c99 --static main.cpp -o Launcher.exe # compile main.c
+$ gcc -std=c99 --static -lshlwapi main.cpp -o Launcher.exe # compile main.c
 ```
 
 Optionally, to add an icon to the exe, create and link a resource with
 ```bash
 YourDistroName=Fedora
 $ windres res/$YourDistroName/res.rc res.o # compile resource
-$ gcc -std=c99 --static main.cpp -o Launcher.exe res.o # compile main.cpp
+$ gcc -std=c99 --static -lshlwapi main.cpp -o Launcher.exe res.o # compile main.cpp
 ```
 
 ### Linux (cross compile)
@@ -169,7 +173,7 @@ Install mingw-w64 toolchain include gcc-mingw-w64-x86-64.
 
 Run this command in shell
 ```bash
- $ x86_64-w64-mingw32-gcc -std=c99 --static main.c -o Launcher.exe # compile main.c
+ $ x86_64-w64-mingw32-gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # compile main.c
 ```
 ## 📄License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
