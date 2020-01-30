@@ -42,7 +42,7 @@ WSLLAUNCH WslLaunch;
 #define UUID_SIZE 38
 
 struct WslInstallation {
-    wchar_t uuid[UUID_SIZE];
+    wchar_t uuid[UUID_SIZE+1];
     wchar_t basePath[MAX_BASEPATH_SIZE];
 } WslInstallation;
 
