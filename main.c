@@ -295,8 +295,8 @@ int main()
 
                     hr = WslLaunchInteractive(TargetName,
                     L"LANG=C \n"
-                    L"bakarg_drv=$(mount --show-labels|awk '{if(!match($3,/(^\\/$)|(^\\/dev)|(^\\/sys)|(^\\/proc)|(^\\/run)/)){print \"--exclude \\\"\" substr($3, 2) \"\\\"\"} }') \n"
-                    L"bakarg_sys=\"--exclude \\\"dev/*\\\" --exclude \\\"sys/*\\\" --exclude \\\"proc/*\\\" --exclude \\\"run/*\\\" \" \n"
+                    L"bakarg_drv=$(mount --show-labels|cut -d ' ' -f3|cut -c 2-|grep -v -e '^\\s*$' -e '^\\s*dev' -e '^\\s*sys' -e '^\\s*proc' -e '^\\s*run'|sed 's/^/--exclude=\\\"/g'|sed 's/$/\\\"/'|tr '\\n' ' ') \n"
+                    L"bakarg_sys=\"--exclude=\\\"dev/*\\\" --exclude=\\\"sys/*\\\" --exclude=\\\"proc/*\\\" --exclude=\\\"run/*\\\" \" \n"
                     L"su root -c \"tar -zcpf backup.tar.gz ${bakarg_sys} ${bakarg_drv} /\" \n"
                     , true, &exitCode);
 
