@@ -406,8 +406,9 @@ int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
         }
     }
 
-    wchar_t pathcmd[SHRT_MAX] = L"wslpath -u ";
+    wchar_t pathcmd[SHRT_MAX] = L"wslpath -u \"";
     wcscat_s(pathcmd, ARRAY_LENGTH(pathcmd), pathtmp);
+    wcscat_s(pathcmd, ARRAY_LENGTH(pathcmd), L"\"");
     char buf[SHRT_MAX] = "";
     
     long unsigned int len = SHRT_MAX;
