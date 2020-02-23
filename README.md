@@ -22,6 +22,8 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Alpine Linux with Git-LFS and Sphinx](https://github.com/binarylandscapes/AlpineWSL) (by [binarylandscapes](https://github.com/binarylandscapes))
 
+[Amazon Linux 2](https://github.com/yosukes-dev/AmazonWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
+
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
 [Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5))
@@ -31,6 +33,8 @@ General Purpose WSL Distribution Installer & Launcher
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
 [Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
+
+[Fedora](https://github.com/yosukes-dev/FedoraWSL2) (by [yosukes-dev](https://github.com/yosukes-dev))
 
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
