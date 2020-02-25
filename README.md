@@ -34,7 +34,9 @@ General Purpose WSL Distribution Installer & Launcher
 
 [Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
 
-[Fedora](https://github.com/yosukes-dev/FedoraWSL2) (by [yosukes-dev](https://github.com/yosukes-dev))
+[Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
+
+[Red hat(UBI)](https://github.com/yosukes-dev/RHWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
 
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
