@@ -1,7 +1,7 @@
-os: Visual Studio 2017
+os: Visual Studio 2019
 
 build_script:
-- call "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
+- call "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64
 - IF defined APPVEYOR_REPO_COMMIT ( SET VersionDefinition=/DSW_VER=L\"dev-%APPVEYOR_REPO_COMMIT:~0,7%\" )
 - IF defined APPVEYOR_REPO_TAG_NAME ( SET VersionDefinition=/DSW_VER=L\"%APPVEYOR_REPO_TAG_NAME%\" )
 - mkdir out
@@ -10,10 +10,19 @@ build_script:
     rc /nologo res\%%~nxD\res.rc &&
     cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\%%~nxD.exe Advapi32.lib Shell32.lib res\%%~nxD\res.res %VersionDefinition%)
 - ps: Compress-Archive -DestinationPath out\icons.zip -Path  (Get-ChildItem -Path out -Exclude Launcher.exe)
+- call "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64_arm64
+- mkdir out-arm64
+- cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\Launcher_arm64.exe Advapi32.lib Shell32.lib %VersionDefinition%
+- FOR /D /r %%D in ("res/*") DO (
+    rc /nologo res\%%~nxD\res.rc &&
+    cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\%%~nxD.exe Advapi32.lib Shell32.lib res\%%~nxD\res.res %VersionDefinition%)
+- ps: Compress-Archive -DestinationPath out-arm64\icons_arm64.zip -Path  (Get-ChildItem -Path out-arm64 -Exclude Launcher_arm64.exe)
 
 artifacts:
   - path: 'out\icons.zip'
   - path: 'out\Launcher.exe'
+  - path: 'out-arm64\icons_arm64.zip'
+  - path: 'out-arm64\Launcher_arm64.exe'
 
 #deploy:
 # - provider: GitHub
