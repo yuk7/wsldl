@@ -24,9 +24,9 @@ artifacts:
   - path: 'out-arm64\icons_arm64.zip'
   - path: 'out-arm64\Launcher_arm64.exe'
 
-#deploy:
-# - provider: GitHub
-#   auth_token:
-#     secure: rCqOyJBPSWdF3bF/UbVvDFT+VRukRKDBR1Kk0W6viw8BjXJYTxZcyrWTUyIMBtJR
-#   on:
-#     appveyor_repo_tag: true       # deploy on tag push only
+deploy:
+ - provider: GitHub
+   auth_token:
+     secure: 30zYhu56OWBUmac85epZskJHKBlIMZ1fQ5N68zQ3eYzekuMulqoufur/TLeBoa6F
+   on:
+     appveyor_repo_tag: true       # deploy on tag push only
