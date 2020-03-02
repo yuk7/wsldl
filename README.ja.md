@@ -139,7 +139,7 @@ CALL "%vsBase%\vc\Auxiliary\Build\vcvarsall.bat" x64
 
 Launcher.exeをコンパイル
 ```cmd
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib
+cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib
 ```
 
 exeにアイコンを付ける場合は、リソースファイルとリンクします
@@ -151,7 +151,7 @@ rc /nologo res\%YourDistroName%\res.rc
 
 :: %YourDistroName%.exeにコンパイル
 cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:%YourDistroName%.exe ^
-  Advapi32.lib Shell32.lib res\%YourDistroName%\res.res
+  Advapi32.lib Shell32.lib shlwapi.lib res\%YourDistroName%\res.res
 ```
 
 #### MinGW

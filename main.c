@@ -18,10 +18,6 @@
 #include "wsld.h"
 #include "version.h"
 
-#ifdef  _MSC_VER
-#pragma comment(lib, "shlwapi.lib")
-#endif
-
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 #define WARGV_CMP(a,b) ((wargc>a)?wcscmp(wargv[a],b)==0:false)
 

@@ -148,7 +148,7 @@ CALL "%vsBase%\vc\Auxiliary\Build\vcvarsall.bat" x64
 
 To compile Launcher.exe
 ```cmd
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib
+cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib
 ```
 
 Optionally, to add an icon to the exe, create and link a resource with
@@ -160,7 +160,7 @@ rc /nologo res\%YourDistroName%\res.rc
 
 :: compile to %YourDistroName%.exe
 cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:%YourDistroName%.exe ^
-  Advapi32.lib Shell32.lib res\%YourDistroName%\res.res
+  Advapi32.lib Shell32.lib shlwapi.lib res\%YourDistroName%\res.res
 ```
 
 #### MinGW
