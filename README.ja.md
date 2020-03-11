@@ -180,4 +180,4 @@ gcc-mingw-w64-x86-64が含まれるmingw-w64ツールチェインをインスト
 ## 📄ライセンス
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
 
-Copyright (c) 2017-2019 yuk7
+Copyright (c) 2017-2020 yuk7
