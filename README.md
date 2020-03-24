@@ -128,64 +128,8 @@ Usage :
 ```
 
 ## 🛠How-to-Build
-### Windows
+Please see [DEVELOPERS.md](https://github.com/yuk7/wsldl/blob/master/DEVELOPERS.md)
 
-#### Visual Studio or Build Tools 2017+
-
-Use `Developer Command Prompt for Visual Studio` or run these in the Windows Command Prompt
-```cmd
-:: locate VS base installation path using vswhere
-SET vswherePath=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe
-FOR /F "tokens=*" %i IN ('
-      "%vswherePath%" -latest -prerelease -products *               ^
-        -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
-        -property installationPath'
-      ) DO SET vsBase=%i
-
-:: initialize x64 build environment
-CALL "%vsBase%\vc\Auxiliary\Build\vcvarsall.bat" x64
-```
-
-To compile Launcher.exe
-```cmd
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib
-```
-
-Optionally, to add an icon to the exe, create and link a resource with
-```cmd
-SET YourDistroName=Fedora
-
-:: create resources
-rc /nologo res\%YourDistroName%\res.rc
-
-:: compile to %YourDistroName%.exe
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:%YourDistroName%.exe ^
-  Advapi32.lib Shell32.lib shlwapi.lib res\%YourDistroName%\res.res
-```
-
-#### MinGW
-Install x86_64 version of MSYS2(https://www.msys2.org).
-
-Run these commands in msys shell
-```bash
-$ pacman -S mingw-w64-x86_64-toolchain # install tool chain
-$ gcc -std=c99 --static -lshlwapi main.cpp -o Launcher.exe # compile main.c
-```
-
-Optionally, to add an icon to the exe, create and link a resource with
-```bash
-YourDistroName=Fedora
-$ windres res/$YourDistroName/res.rc res.o # compile resource
-$ gcc -std=c99 --static -lshlwapi main.cpp -o Launcher.exe res.o # compile main.cpp
-```
-
-### Linux (cross compile)
-Install mingw-w64 toolchain include gcc-mingw-w64-x86-64.
-
-Run this command in shell
-```bash
- $ x86_64-w64-mingw32-gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # compile main.c
-```
 ## 📄License
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
 

@@ -118,65 +118,6 @@ Usage :
 
 ```
 
-## 🛠ビルド方法
-### Windows
-
-#### Visual Studio または Build Tools 2017+
-
-`開発者コマンドプロンプト for Visual Studio`を使うか、以下のコマンドをコマンドプロンプトで実行
-```cmd
-:: locate VS base installation path using vswhere
-SET vswherePath=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe
-FOR /F "tokens=*" %i IN ('
-      "%vswherePath%" -latest -prerelease -products *               ^
-        -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
-        -property installationPath'
-      ) DO SET vsBase=%i
-
-:: initialize x64 build environment
-CALL "%vsBase%\vc\Auxiliary\Build\vcvarsall.bat" x64
-```
-
-Launcher.exeをコンパイル
-```cmd
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib
-```
-
-exeにアイコンを付ける場合は、リソースファイルとリンクします
-```cmd
-SET YourDistroName=Fedora
-
-:: リソースをコンパイル
-rc /nologo res\%YourDistroName%\res.rc
-
-:: %YourDistroName%.exeにコンパイル
-cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:%YourDistroName%.exe ^
-  Advapi32.lib Shell32.lib shlwapi.lib res\%YourDistroName%\res.res
-```
-
-#### MinGW
-x86_64のMSYS2( https://www.msys2.org )をインストール
-
-以下のようなコマンドをmsys2シェルで実行します
-```bash
-$ pacman -S mingw-w64-x86_64-toolchain # ツールチェインをインストール
-$ gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # ソースコードをコンパイル
-```
-
-exeにアイコンを付ける場合は、リソースファイルとリンクします
-```bash
-YourDistroName=Fedora
-$ windres res/$YourDistroName/res.rc res.o # リソースをコンパイル
-$ gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe res.o # ソースコードをコンパイル
-```
-
-### Linux (クロスコンパイル)
-gcc-mingw-w64-x86-64が含まれるmingw-w64ツールチェインをインストールします
-
-以下のようなコマンドを実行します
-```bash
- $ x86_64-w64-mingw32-gcc -std=c99 --static -lshlwapi main.c -o Launcher.exe # ソースコードをコンパイル
-```
 ## 📄ライセンス
 [MIT](https://github.com/yuk7/wsldl/blob/master/LICENSES.md)
 
