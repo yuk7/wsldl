@@ -37,6 +37,7 @@ WSLLAUNCHINTERACTIVE WslLaunchInteractive;
 WSLLAUNCH WslLaunch;
 
 #define LXSS_BASE_RKEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
+#define WSLDL_TERM_KEY L"wsldl-term"
 #define MAX_DISTRO_NAME_SIZE 50
 #define MAX_BASEPATH_SIZE 128
 #define UUID_SIZE 38
@@ -138,6 +139,7 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
                 {
                     fwprintf(stderr,L"ERROR:[%i] Could not read registry key\n", rres);
                 }
+
                 RegCloseKey(hKey);
                 RegCloseKey(hKeyS);
                 return wslInstallation;
@@ -168,6 +170,20 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     }
     return 0;
  }
+
+int WsldlSetTerminalInfo(wchar_t *uuid ,long id)
+{
+    LONG rres;
+    HKEY hKey;
+    wchar_t RKey[200];
+    wcscpy_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),LXSS_BASE_RKEY);
+    wcscat_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),L"\\");
+    wcscat_s(RKey,(sizeof(RKey)/sizeof(RKey[0])),uuid);
+
+    RegOpenKeyExW(HKEY_CURRENT_USER,RKey, 0, KEY_SET_VALUE, &hKey);
+    rres = RegSetValueExW(hKey, WSLDL_TERM_KEY, 0, REG_DWORD, (const BYTE*)&id, (int)sizeof(id));
+    return rres;
+}
 
  unsigned long WslExec(wchar_t *DistroName, wchar_t *command, char *result, long unsigned int *len)
  {
