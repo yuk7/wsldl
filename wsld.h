@@ -45,6 +45,7 @@ WSLLAUNCH WslLaunch;
 struct WslInstallation {
     wchar_t uuid[UUID_SIZE+1];
     wchar_t basePath[MAX_BASEPATH_SIZE];
+    long termInfo;
 } WslInstallation;
 
 void WslApiFree()
@@ -92,7 +93,7 @@ return 0;
 }
 
 struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
-    struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}};
+    struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}, .termInfo = 0};
 
     HKEY hKey;
     LONG rres;
@@ -139,6 +140,8 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
                 {
                     fwprintf(stderr,L"ERROR:[%i] Could not read registry key\n", rres);
                 }
+                DWORD tiSize = (int)sizeof(wslInstallation.termInfo);
+                RegQueryValueExW(hKeyS, WSLDL_TERM_KEY, NULL, NULL, (LPBYTE)&wslInstallation.termInfo, &tiSize);
 
                 RegCloseKey(hKey);
                 RegCloseKey(hKeyS);
