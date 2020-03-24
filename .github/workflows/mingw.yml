@@ -1,0 +1,21 @@
+name: Mingw-w64 Cross CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: setup mingw
+      run: |
+        sudo apt update
+        sudo apt install gcc-mingw-w64-x86-64 binutils-mingw-w64-x86-64
+    - name: make
+      run: |
+        mkdir out
+        x86_64-w64-mingw32-gcc -std=c99 --pedantic -Wall -Wno-implicit-function-declaration --static main.c -lshlwapi -o out/Launcher.exe
+        find  ./res/* -maxdepth 1 -type d -printf '%f\n' > resl.txt
+        xargs -a resl.txt -I{} x86_64-w64-mingw32-windres res/{}/res.rc -o res/{}.o
+        xargs -a resl.txt -I{} x86_64-w64-mingw32-gcc -std=c99 --pedantic -Wall -Wno-implicit-function-declaration --static main.c -lshlwapi res/{}.o -o out/{}.exe
