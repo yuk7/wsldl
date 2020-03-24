@@ -320,6 +320,14 @@ int main()
 
                 hr = S_OK;
             }
+            else if(WARGV_CMP(2,L"--wsl-version"))
+            {
+                if(distributionFlags & 0x8)
+                    wprintf(L"2");
+                else
+                    wprintf(L"1");
+                hr = S_OK;
+            }
             else
             {
                 hr = E_INVALIDARG;
@@ -550,6 +558,7 @@ void show_usage()
     wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
+    wprintf(L"      - `--wsl-version`: Get WSL Version 1/2 for this distro\n");
     wprintf(L"      - `--default-term`: Get Default Terminal for this distro launcher\n");
     wprintf(L"      - `--lxguid`: Get WSL GUID key for this distro\n\n");
     wprintf(L"    backup [contents]\n");
