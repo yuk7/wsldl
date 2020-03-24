@@ -21,11 +21,21 @@
 
 [Alpine Linux with Git-LFS and Sphinx](https://github.com/binarylandscapes/AlpineWSL) (by [binarylandscapes](https://github.com/binarylandscapes))
 
+[Amazon Linux 2](https://github.com/yosukes-dev/AmazonWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
+
 [Arch Linux](https://github.com/yuk7/ArchWSL)
 
 [Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5))
 
+[CentOS](https://github.com/yuk7/CentWSL)
+
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
+
+[Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
+
+[Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
+
+[Red hat(UBI)](https://github.com/yosukes-dev/RHWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
 
 [Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
 
@@ -48,8 +58,8 @@ exeのファイル名はインストール名に使用されます。
 
 
 ## 📝使い方(インストール後)
-#### exe Usage
-```cmd
+#### exeの使い方
+```
 Usage :
     <引数なし>
       - デフォルト設定で新しいシェルを起動します
@@ -65,11 +75,14 @@ Usage :
       - `--default-uid <uid>`: インスタンスのデフォルトユーザーのuidを<uid>に設定します。
       - `--append-path <on|off>`: Windows側のPATH設定をLinux側に引き継ぐ機能のon/offを設定します。
       - `--mount-drive <on|off>`: Windowsのドライブをマウントする機能のon/offを設定します。
+      - `--default-term <default|wt|flute>`: デフォルトのターミナルを設定します。
 
     get [setting]
       - `--default-uid`: インスタンスのデフォルトユーザーのuidを取得します。
       - `--append-path`: Windows側のPATH設定をLinux側に引き継ぐ機能のon/offを確認します。
       - `--mount-drive`: Windowsのドライブをマウントする機能のon/offを確認します。
+      - `--wsl-version`: WSLのバージョン(1/2)を確認します。
+      - `--default-term`: このランチャーに設定されたデフォルトのターミナルを確認します。
       - `--lxuid`: システム内部で使用されているLxUIDを取得します。
 
     backup [contents]
@@ -110,6 +123,11 @@ Usage :
 
 >{インスタンス名}.exe
 [user@PC-NAME dir]$
+```
+
+#### "Windows Terminal"をデフォルトのターミナルに設定する
+```cmd
+>{InstanceName}.exe config --default-term wt
 ```
 
 #### インスタンスをアンインストール
