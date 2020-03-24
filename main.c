@@ -127,8 +127,33 @@ int main()
             {
                 if(wargc == 1)
                 {
-                    SetConsoleTitleW(TargetName);
-                    hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+                    if (wslInstallation.termInfo == 1) //Windows Terminal
+                    {
+                        wchar_t Ecmd[200] = L"wt.exe \"";
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" run");
+
+                        FreeConsole();
+                        STARTUPINFOW si = {0};
+                        PROCESS_INFORMATION pi = {0};
+                        return CreateProcessW(NULL, Ecmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+                    }
+                    else if (wslInstallation.termInfo == 2) //Fluent Terminal
+                    {
+                        wchar_t Ecmd[200] = L"flute.exe run \"";
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" run\"");
+
+                        FreeConsole();
+                        STARTUPINFOW si = {0};
+                        PROCESS_INFORMATION pi = {0};
+                        return CreateProcessW(NULL, Ecmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
+                    }
+                    else
+                    {
+                        SetConsoleTitleW(TargetName);
+                        hr = WslLaunchInteractive(TargetName,L"", false, &exitCode);
+                    }
                 }
                 else //run with arguments
                 {
