@@ -243,6 +243,22 @@ int main()
                     hr = WslConfigureDistribution(TargetName,defaultUID,distributionFlags);
                 }
             }
+            else if(WARGV_CMP(2,L"--default-term"))
+            {
+                struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                if(wsl.uuid == NULL)
+                {
+                    hr = E_FAIL;
+                }
+                if(WARGV_CMP(3,L"default"))
+                    hr = WsldlSetTerminalInfo(wsl.uuid, 0);
+                else if(WARGV_CMP(3,L"wt"))
+                    hr = WsldlSetTerminalInfo(wsl.uuid, 1);
+                else if(WARGV_CMP(3,L"flute"))
+                    hr = WsldlSetTerminalInfo(wsl.uuid, 2);
+                else
+                    hr = E_INVALIDARG;
+            }
             else
             {
                 hr = E_INVALIDARG;
@@ -279,6 +295,28 @@ int main()
                     hr = E_FAIL;
                 }
                 wprintf(L"%s",wsl.uuid);
+
+                hr = S_OK;
+            }
+            else if(WARGV_CMP(2,L"--default-term"))
+            {
+                struct WslInstallation wsl = WslGetInstallationInfo(TargetName);
+                if(wsl.uuid == NULL)
+                {
+                    hr = E_FAIL;
+                }
+                if(wsl.termInfo == 1)
+                {
+                    wprintf(L"wt");
+                }
+                else if(wsl.termInfo == 1)
+                {
+                    wprintf(L"flute");
+                }
+                else
+                {
+                    wprintf(L"default");
+                }
 
                 hr = S_OK;
             }
@@ -506,11 +544,13 @@ void show_usage()
     wprintf(L"      - `--default-user <user>`: Set the default user for this distro to <user>\n");
     wprintf(L"      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>\n");
     wprintf(L"      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH\n");
-    wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n\n");
+    wprintf(L"      - `--mount-drive <on|off>`: Switch of Mount drives\n");
+    wprintf(L"      - `--default-term <default|wt|flute>`: Set default terminal window\n\n");
     wprintf(L"    get [setting]\n");
     wprintf(L"      - `--default-uid`: Get the default user uid in this distro\n");
     wprintf(L"      - `--append-path`: Get on/off status of Append Windows PATH to $PATH\n");
     wprintf(L"      - `--mount-drive`: Get on/off status of Mount drives\n");
+    wprintf(L"      - `--default-term`: Get Default Terminal for this distro launcher\n");
     wprintf(L"      - `--lxguid`: Get WSL GUID key for this distro\n\n");
     wprintf(L"    backup [contents]\n");
     wprintf(L"      - `--tgz`: Output backup.tar.gz to the current directory using tar command\n");
