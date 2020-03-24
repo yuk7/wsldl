@@ -45,6 +45,7 @@ WSLLAUNCH WslLaunch;
 struct WslInstallation {
     wchar_t uuid[UUID_SIZE+1];
     wchar_t basePath[MAX_BASEPATH_SIZE];
+    wchar_t distroName[MAX_DISTRO_NAME_SIZE];
     long termInfo;
 } WslInstallation;
 
@@ -93,7 +94,7 @@ return 0;
 }
 
 struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
-    struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}, .termInfo = 0};
+    struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}, .distroName = {0}, .termInfo = 0};
 
     HKEY hKey;
     LONG rres;
@@ -134,6 +135,8 @@ struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
             {
                 // SUCCESS: Distribution found
                 wcscpy_s(wslInstallation.uuid, UUID_SIZE*2, subKey);
+                DWORD dnSize = MAX_DISTRO_NAME_SIZE*2;
+                RegQueryValueExW(hKeyS, L"DistributionName", NULL, &dwType, (LPBYTE)&wslInstallation.distroName, &dnSize);
                 DWORD pathSize = MAX_BASEPATH_SIZE*2;
                 rres = RegQueryValueExW(hKeyS, L"BasePath", NULL, &dwType, (LPBYTE)&wslInstallation.basePath, &pathSize);
                 if (rres != ERROR_SUCCESS)

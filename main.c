@@ -129,9 +129,9 @@ int main()
                 {
                     if (wslInstallation.termInfo == 1) //Windows Terminal
                     {
-                        wchar_t Ecmd[200] = L"wt.exe \"";
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" run");
+                        wchar_t Ecmd[200] = L"wt.exe -p \"";
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), wslInstallation.distroName);
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" -d .");
 
                         FreeConsole();
                         STARTUPINFOW si = {0};
