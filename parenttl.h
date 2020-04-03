@@ -23,9 +23,9 @@ extern "C" {
 bool isParentCmdLine()
 {
     HANDLE hSnapshot;
-    long procs[PROC_LIST_SIZE];
+    DWORD procs[PROC_LIST_SIZE];
     int procsCnt = 0;
-    long procID = GetCurrentProcessId();
+    DWORD procID = GetCurrentProcessId();
     
     if((hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0)) != INVALID_HANDLE_VALUE)
     {
