@@ -48,7 +48,7 @@ bool isParentCmdLine()
                 }
                 if (pe32.th32ProcessID == procID)
                 {
-                    for(int i = 0; i <= procsCnt; i++)
+                    for(int i = 0; i < procsCnt; i++)
                     {
                         if(procs[i] == pe32.th32ParentProcessID)
                         {
