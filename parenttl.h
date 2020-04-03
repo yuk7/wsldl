@@ -23,7 +23,7 @@ extern "C" {
 bool isParentCmdLine()
 {
     HANDLE hSnapshot;
-    long procs[PROC_LIST_SIZE] = {};
+    long procs[PROC_LIST_SIZE];
     int procsCnt = 0;
     long procID = GetCurrentProcessId();
     
