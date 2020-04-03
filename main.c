@@ -15,6 +15,7 @@
 #include <string.h>
 #include <wchar.h>
 #include <windows.h>
+#include "parenttl.h"
 #include "wsld.h"
 #include "version.h"
 
@@ -127,7 +128,8 @@ int main()
             {
                 if(wargc == 1)
                 {
-                    if (wslInstallation.termInfo == 1) //Windows Terminal
+                    bool iscmdline = isParentCmdLine();
+                    if ((wslInstallation.termInfo == 1) && (!iscmdline)) //Windows Terminal
                     {
                         wchar_t Ecmd[200] = L"wt.exe -p \"";
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), wslInstallation.distroName);
@@ -138,7 +140,7 @@ int main()
                         PROCESS_INFORMATION pi = {0};
                         return CreateProcessW(NULL, Ecmd, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi);
                     }
-                    else if (wslInstallation.termInfo == 2) //Fluent Terminal
+                    else if ((wslInstallation.termInfo == 2) && (!iscmdline)) //Fluent Terminal
                     {
                         wchar_t Ecmd[200] = L"flute.exe run \"";
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
