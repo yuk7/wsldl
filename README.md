@@ -16,8 +16,7 @@ Advanced WSL Distribution Launcher / Installer
 * Windows 10 1709 Fall Creators Update 64bit or later.
 * Windows Subsystem for Linux feature is enabled.
 
-## 📦Install with prebuilt rootfs
-#### 1. Download installer zip
+## 📦Install with Prebuilt Packages
 [Alpine Linux](https://github.com/yuk7/AlpineWSL)
 
 [Alpine Linux with Git-LFS and Sphinx](https://github.com/binarylandscapes/AlpineWSL) (by [binarylandscapes](https://github.com/binarylandscapes))
@@ -30,8 +29,6 @@ Advanced WSL Distribution Launcher / Installer
 
 [CentOS](https://github.com/yuk7/CentWSL)
 
-[CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
-
 [Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
 
 [Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
@@ -42,9 +39,7 @@ Advanced WSL Distribution Launcher / Installer
 
 [Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [am11](https://github.com/am11))
 
-#### 2. Extract all files in zip file to same directory
-
-#### 3.Run exe to Extract rootfs and Register to WSL
+**Note:**
 Exe filename is using to the instance name to register.
 If you rename it, you can register with a different name.
 
