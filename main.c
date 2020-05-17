@@ -25,6 +25,7 @@
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username);
 int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out);
 bool dirExists(const wchar_t* dirName);
+bool fileExists(const wchar_t* fileName);
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname);
 HRESULT RemoveDist(wchar_t *TargetName);
 int ResettingDir(wchar_t *uuid,wchar_t *dirPath);
@@ -120,7 +121,16 @@ int main()
                 if(dirExists(efFullDirRootfs))
                 {
                     ResettingDir(wslInstallation.uuid,efFullDir);
+                    hr = S_OK;
+                }
 
+                wchar_t efFullDirVhdx[MAX_PATH];
+                wcscpy_s(efFullDirVhdx,MAX_PATH,efFullDir);
+                PathAppendW(efFullDirVhdx,L"ext4.vhdx");
+                
+                if(fileExists(efFullDirVhdx))
+                {
+                    ResettingDir(wslInstallation.uuid,efFullDir);
                     hr = S_OK;
                 }
             }
@@ -442,6 +452,12 @@ bool dirExists(const wchar_t* dirName)
 {
     DWORD ftyp = GetFileAttributesW(dirName);
     return (ftyp != INVALID_FILE_ATTRIBUTES) && (ftyp & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+bool fileExists(const wchar_t* fileName)
+{
+    DWORD ftyp = GetFileAttributesW(fileName);
+    return (ftyp != INVALID_FILE_ATTRIBUTES) && !(ftyp & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 unsigned long QueryUser(wchar_t *TargetName,wchar_t *username)
