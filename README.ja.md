@@ -31,6 +31,8 @@
 
 [CentOS](https://github.com/fbigun/WSL-Distro-Rootfs) (by [fbigun](https://github.com/fbigun))
 
+[CentOS](https://github.com/mishamosher/CentOS-WSL) (by [mishamosher](https://github.com/mishamosher))
+
 [Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
 
 [Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
