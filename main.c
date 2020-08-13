@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sec_api/stdlib_s.h>
 #include <string.h>
 #include <wchar.h>
 #include <windows.h>
@@ -141,7 +142,15 @@ int main()
                     bool iscmdline = isParentCmdLine();
                     if ((wslInstallation.termInfo == 1) && (!iscmdline)) //Windows Terminal
                     {
-                        wchar_t Ecmd[200] = L"wt.exe -p \"";
+                        wchar_t Epath[MAX_PATH];
+                        size_t Epath_sz = 0;
+                        _wgetenv_s(&Epath_sz, Epath, MAX_PATH, L"LOCALAPPDATA");
+                        PathAppendW(Epath, L"Microsoft\\WindowsApps\\wt.exe");
+
+                        wchar_t Ecmd[MAX_PATH + 200];
+                        wcscpy_s(Ecmd, MAX_PATH + 200, Epath);
+
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" -p \"");
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), wslInstallation.distroName);
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" -d .");
 
@@ -152,7 +161,15 @@ int main()
                     }
                     else if ((wslInstallation.termInfo == 2) && (!iscmdline)) //Fluent Terminal
                     {
-                        wchar_t Ecmd[200] = L"flute.exe run \"";
+                        wchar_t Epath[MAX_PATH];
+                        size_t Epath_sz = 0;
+                        _wgetenv_s(&Epath_sz, Epath, MAX_PATH, L"LOCALAPPDATA");
+                        PathAppendW(Epath, L"Microsoft\\WindowsApps\\flute.exe");
+
+                        wchar_t Ecmd[MAX_PATH *2 + 20];
+                        wcscpy_s(Ecmd, MAX_PATH *2 + 20, Epath);
+
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" run \"");
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" run\"");
 
