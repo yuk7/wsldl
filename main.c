@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sec_api/stdlib_s.h>
 #include <string.h>
 #include <wchar.h>
 #include <windows.h>
