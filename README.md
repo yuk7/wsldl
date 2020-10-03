@@ -33,9 +33,11 @@ Advanced WSL Distribution Launcher / Installer
 
 [Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
 
-[Devuan Linux](https://github.com/VPraharsha3/DevuanWSL) (by [VPraharsha3](https://github.com/VPraharsha3))
+[Devuan Linux](https://github.com/VPraharsha3/DevuanWSL) (by [VPraharsha03](https://github.com/VPraharsha03))
 
 [Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
+
+[Gentoo](https://github.com/VPraharsha03/GentooWSL2) (by [VPraharsha03](https://github.com/VPraharsha03))
 
 [Red hat(UBI)](https://github.com/yosukes-dev/RHWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
 
