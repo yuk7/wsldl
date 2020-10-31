@@ -5,17 +5,19 @@ build_script:
 - IF defined APPVEYOR_REPO_COMMIT ( SET VersionDefinition=/DSW_VER=L\"dev-%APPVEYOR_REPO_COMMIT:~0,7%\" )
 - IF defined APPVEYOR_REPO_TAG_NAME ( SET VersionDefinition=/DSW_VER=L\"%APPVEYOR_REPO_TAG_NAME%\" )
 - mkdir out
-- cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib %VersionDefinition%
+- lib /nologo /def:wslapi.def /machine:X64
+- cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\Launcher.exe Advapi32.lib Shell32.lib shlwapi.lib wslapi.lib %VersionDefinition%
 - FOR /D /r %%D in ("res/*") DO (
     rc /nologo res\%%~nxD\res.rc &&
-    cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\%%~nxD.exe Advapi32.lib Shell32.lib shlwapi.lib res\%%~nxD\res.res %VersionDefinition%)
+    cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out\%%~nxD.exe Advapi32.lib Shell32.lib shlwapi.lib wslapi.lib res\%%~nxD\res.res %VersionDefinition%)
 - ps: Compress-Archive -DestinationPath out\icons.zip -Path  (Get-ChildItem -Path out -Exclude Launcher.exe)
 - call "%ProgramFiles(x86)%\\Microsoft Visual Studio\\2019\\Community\\VC\\Auxiliary\\Build\\vcvarsall.bat" x64_arm64
 - mkdir out-arm64
-- cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\Launcher_arm64.exe Advapi32.lib Shell32.lib shlwapi.lib %VersionDefinition%
+- lib /nologo /def:wslapi.def /machine:ARM64
+- cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\Launcher_arm64.exe Advapi32.lib Shell32.lib shlwapi.lib wslapi.lib %VersionDefinition%
 - FOR /D /r %%D in ("res/*") DO (
     rc /nologo res\%%~nxD\res.rc &&
-    cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\%%~nxD.exe Advapi32.lib Shell32.lib shlwapi.lib res\%%~nxD\res.res %VersionDefinition%)
+    cl /nologo /O2 /W4 /WX /Ob2 /Oi /Oy /Gs- /GF /Gy /Tc main.c /Fe:out-arm64\%%~nxD.exe Advapi32.lib Shell32.lib shlwapi.lib wslapi.lib res\%%~nxD\res.res %VersionDefinition%)
 - ps: Compress-Archive -DestinationPath out-arm64\icons_arm64.zip -Path  (Get-ChildItem -Path out-arm64 -Exclude Launcher_arm64.exe)
 
 artifacts:
