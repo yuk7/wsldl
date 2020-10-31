@@ -19,22 +19,14 @@
 extern "C" {
 #endif
 
-typedef HRESULT (WINAPI *WSLISDISTRIBUTIONREBISTERED)(PCWSTR);
-typedef HRESULT (WINAPI *WSLREGISTERDISTRIBUTION)(PCWSTR,PCWSTR);
-typedef HRESULT (WINAPI *WSLUNREGISTERDISTRIBUTION)(PCWSTR);
-typedef HRESULT (WINAPI *WSLCONFIGUREDISTRIBUTION)(PCWSTR,ULONG,INT);
-typedef HRESULT (WINAPI *WSLGETDISTRIBUTIONCONFIGURATION)(PCWSTR,ULONG*,ULONG*,INT*,PSTR*,ULONG*);
-typedef HRESULT (WINAPI *WSLLAUNCHINTERACTIVE)(PCWSTR,PCWSTR,BOOL,DWORD*);
-typedef HRESULT (WINAPI *WSLLAUNCH)(PCWSTR,PCWSTR,BOOL,HANDLE,HANDLE,HANDLE,HANDLE*);
-
-HMODULE WslHmod;
-WSLISDISTRIBUTIONREBISTERED WslIsDistributionRegistered;
-WSLREGISTERDISTRIBUTION WslRegisterDistribution;
-WSLUNREGISTERDISTRIBUTION WslUnregisterDistribution;
-WSLCONFIGUREDISTRIBUTION WslConfigureDistribution;
-WSLGETDISTRIBUTIONCONFIGURATION WslGetDistributionConfiguration;
-WSLLAUNCHINTERACTIVE WslLaunchInteractive;
-WSLLAUNCH WslLaunch;
+// WSL APIs declarations. Old mingw-w64 may not have wslapi.h
+HRESULT WINAPI WslIsDistributionRegistered (PCWSTR);
+HRESULT WINAPI WslRegisterDistribution (PCWSTR,PCWSTR);
+HRESULT WINAPI WslUnregisterDistribution (PCWSTR);
+HRESULT WINAPI WslConfigureDistribution (PCWSTR,ULONG,INT);
+HRESULT WINAPI WslGetDistributionConfiguration (PCWSTR,ULONG*,ULONG*,INT*,PSTR*,ULONG*);
+HRESULT WINAPI WslLaunchInteractive (PCWSTR,PCWSTR,BOOL,DWORD*);
+HRESULT WINAPI WslLaunch (PCWSTR,PCWSTR,BOOL,HANDLE,HANDLE,HANDLE,HANDLE*);
 
 #define LXSS_BASE_RKEY L"Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
 #define WSLDL_TERM_KEY L"wsldl-term"
@@ -48,50 +40,6 @@ struct WslInstallation {
     wchar_t distroName[MAX_DISTRO_NAME_SIZE];
     long termInfo;
 } WslInstallation;
-
-void WslApiFree()
-{
-    FreeLibrary(WslHmod);
-}
-
-int WslApiInit()
-{
-    WslHmod = LoadLibraryExW(L"wslapi.dll", NULL, LOAD_LIBRARY_SEARCH_SYSTEM32);
-    if (WslHmod == NULL)
-    {
-        fwprintf(stderr,L"ERROR: LoadLibraryEx() failed to load wslapi.dll\n");
-
-        BOOL isWow64 = FALSE;
-        if (IsWow64Process(GetCurrentProcess(), &isWow64))
-        {
-            if (isWow64)
-            {
-                fwprintf(stderr,L"       wslapi.dll is only known to support 64-bit executables but this executable is not.\n");
-            }
-        }
-        wprintf(L"Press any key to exit...");
-        getchar();
-        exit(EXIT_FAILURE);
-    }
-
-    WslIsDistributionRegistered = (WSLISDISTRIBUTIONREBISTERED)GetProcAddress(WslHmod, "WslIsDistributionRegistered");
-    WslRegisterDistribution = (WSLREGISTERDISTRIBUTION)GetProcAddress(WslHmod, "WslRegisterDistribution");
-    WslUnregisterDistribution = (WSLUNREGISTERDISTRIBUTION)GetProcAddress(WslHmod, "WslUnregisterDistribution");
-    WslConfigureDistribution = (WSLCONFIGUREDISTRIBUTION)GetProcAddress(WslHmod, "WslConfigureDistribution");
-    WslGetDistributionConfiguration = (WSLGETDISTRIBUTIONCONFIGURATION)GetProcAddress(WslHmod, "WslGetDistributionConfiguration");
-    WslLaunchInteractive = (WSLLAUNCHINTERACTIVE)GetProcAddress(WslHmod, "WslLaunchInteractive");
-    WslLaunch = (WSLLAUNCH)GetProcAddress(WslHmod, "WslLaunch");
-    if (WslIsDistributionRegistered == NULL || WslRegisterDistribution == NULL || WslUnregisterDistribution == NULL
-        || WslConfigureDistribution == NULL || WslGetDistributionConfiguration == NULL || WslLaunchInteractive == NULL || WslLaunch == NULL)
-    {
-        FreeLibrary(WslHmod);
-        fwprintf(stderr,L"ERROR: GetProcAddress() failed to get function address\n");
-        wprintf(L"Press any key to exit...");
-        getchar();
-        exit(EXIT_FAILURE);
-    }
-return 0;
-}
 
 struct WslInstallation WslGetInstallationInfo(wchar_t *DistributionName) {
     struct WslInstallation wslInstallation = {.uuid = {0}, .basePath = {0}, .distroName = {0}, .termInfo = 0};
