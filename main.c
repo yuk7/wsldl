@@ -59,9 +59,6 @@ int main()
     PathAppendW(efFullDir,efDir);
     PathRemoveBackslashW(efFullDir);
 
-
-    WslApiInit();
-
     if(WARGV_CMP(1,L"isregd"))
     {
         return (!WslIsDistributionRegistered(TargetName));
