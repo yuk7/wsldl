@@ -11,39 +11,14 @@ Advanced WSL Distribution Launcher / Installer
 ![License](https://img.shields.io/github/license/yuk7/wsldl.svg?style=flat-square)
 
 
+[Detailed documentation is here](https://github.com/wsldl-pg/docs/blob/main/README.md)
 
 ## 💻Requirements
 * Windows 10 1709 Fall Creators Update 64bit or later.
 * Windows Subsystem for Linux feature is enabled.
 
 ## 📦Install with Prebuilt Packages
-[Alpine Linux](https://github.com/yuk7/AlpineWSL)
-
-[Alpine Linux with Git-LFS and Sphinx](https://github.com/binarylandscapes/AlpineWSL) (by [binarylandscapes](https://github.com/binarylandscapes))
-
-[Amazon Linux 2](https://github.com/yosukes-dev/AmazonWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
-
-[Arch Linux](https://github.com/yuk7/ArchWSL)
-
-[Artix Linux](https://github.com/hdk5/ArtixWSL) (by [hdk5](https://github.com/hdk5))
-
-[CentOS](https://github.com/yuk7/CentWSL)
-
-[CentOS](https://github.com/mishamosher/CentOS-WSL) (by [mishamosher](https://github.com/mishamosher))
-
-[Clear Linux](https://github.com/wight554/ClearWSL/) (by [wight554](https://github.com/wight554))
-
-[Devuan Linux](https://github.com/VPraharsha3/DevuanWSL) (by [VPraharsha03](https://github.com/VPraharsha03))
-
-[Fedora](https://github.com/yosukes-dev/FedoraWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
-
-[Gentoo](https://github.com/VPraharsha03/GentooWSL2) (by [VPraharsha03](https://github.com/VPraharsha03))
-
-[Red hat(UBI)](https://github.com/yosukes-dev/RHWSL) (by [yosukes-dev](https://github.com/yosukes-dev))
-
-[Void Linux (glibc)](https://github.com/am11/VoidWSL) (by [am11](https://github.com/am11))
-
-[Void Linux (musl-libc)](https://github.com/am11/VoidMuslWSL) (by [am11](https://github.com/am11))
+[You can see List on docs](https://github.com/wsldl-pg/docs/blob/main/Using-wsldl.md#distros)
 
 **Note:**
 Exe filename is using to the instance name to register.
