@@ -11,14 +11,14 @@ Advanced WSL Distribution Launcher / Installer
 ![License](https://img.shields.io/github/license/yuk7/wsldl.svg?style=flat-square)
 
 
-### [Detailed documentation is here](https://github.com/wsldl-pg/docs/blob/main/README.md)
+### [Detailed documentation is here](https://git.io/wsldl-doc)
 
 ## 💻Requirements
 * Windows 10 1709 Fall Creators Update 64bit or later.
 * Windows Subsystem for Linux feature is enabled.
 
 ## 📦Install with Prebuilt Packages
-[**You can see List on docs**](https://github.com/wsldl-pg/docs/blob/main/Using-wsldl.md#distros)
+[**You can see List on docs**](https://wsldl-pg.github.io/docs/Using-wsldl/#distros#distros)
 
 **Note:**
 Exe filename is using to the instance name to register.
