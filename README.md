@@ -18,7 +18,7 @@ Advanced WSL Distribution Launcher / Installer
 * Windows Subsystem for Linux feature is enabled.
 
 ## 📦Install with Prebuilt Packages
-[**You can see List on docs**](https://wsldl-pg.github.io/docs/Using-wsldl/#distros#distros)
+[**You can see List on docs**](https://wsldl-pg.github.io/docs/Using-wsldl/#distros)
 
 **Note:**
 Exe filename is using to the instance name to register.
