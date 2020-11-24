@@ -55,6 +55,8 @@ int main()
     wchar_t efDir[MAX_PATH];
     wchar_t TargetName[MAX_PATH];
     _wsplitpath_s(efpath,efFullDir,MAX_PATH,efDir,MAX_PATH,TargetName,MAX_PATH,NULL,0);
+    
+    wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz"; //used for install or reset
 
     PathAppendW(efFullDir,efDir);
     PathRemoveBackslashW(efFullDir);
@@ -63,11 +65,10 @@ int main()
     {
         return (!WslIsDistributionRegistered(TargetName));
     }
-
+    
     if(!WslIsDistributionRegistered(TargetName))
     {
         bool InstSilent = false;
-        wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz";
         if(wargc >1)
         {
             if(WARGV_CMP(1,L"install"))
@@ -422,6 +423,24 @@ int main()
             fwprintf(stderr,L"If you want to reinstall it, you can remove it with the \"clean\" command.\n");
 
             return E_ABORT;
+        }
+        else if(WARGV_CMP(1,L"reset"))
+        {
+            if(WARGV_CMP(2,L"-y"))
+            {
+                hr = WslUnregisterDistribution(TargetName);
+                return hr;
+            }
+            else
+            {
+                hr = RemoveDist(TargetName);
+                if(SUCCEEDED(hr))
+                {
+                    // this does remove old installation regardless if the following installation will work
+                    hr = WslUnregisterDistribution(TargetName);
+                    hr = WslRegisterDistribution(TargetName,tgzname);
+                }
+            }
         }
         else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
         {
