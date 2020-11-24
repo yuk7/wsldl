@@ -429,17 +429,15 @@ int main()
             if(WARGV_CMP(2,L"-y"))
             {
                 hr = WslUnregisterDistribution(TargetName);
-                return hr;
             }
             else
             {
                 hr = RemoveDist(TargetName);
-                if(SUCCEEDED(hr))
-                {
-                    // this does remove old installation regardless if the following installation will work
-                    hr = WslUnregisterDistribution(TargetName);
-                    hr = WslRegisterDistribution(TargetName,tgzname);
-                }
+            }
+            // the old installation was removed regardless if the following installation will work
+            if(SUCCEEDED(hr))
+            {
+                hr = WslRegisterDistribution(TargetName,tgzname);
             }
         }
         else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
