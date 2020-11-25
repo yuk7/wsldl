@@ -55,11 +55,30 @@ int main()
     wchar_t efDir[MAX_PATH];
     wchar_t TargetName[MAX_PATH];
     _wsplitpath_s(efpath,efFullDir,MAX_PATH,efDir,MAX_PATH,TargetName,MAX_PATH,NULL,0);
-    
-    wchar_t tgzname[MAX_PATH] = L"rootfs.tar.gz"; //used for install or reset
-
     PathAppendW(efFullDir,efDir);
     PathRemoveBackslashW(efFullDir);
+
+    wchar_t tgzname[MAX_PATH] = L"";
+    wchar_t tgzlist[][MAX_PATH] = {
+        L"install.tar",
+        L"install.tar.gz",
+        L"rootfs.tar",
+        L"rootfs.tar.gz"
+    };
+    for (int i = 0;i<ARRAY_LENGTH(tgzlist); i++)
+    {
+        wcscpy_s(tgzname,MAX_PATH,efFullDir);
+        PathAppendW(tgzname,tgzlist[i]);
+
+        if(fileExists(tgzname))
+        {
+            break;
+        }
+	}
+
+
+
+
 
     if(WARGV_CMP(1,L"isregd"))
     {
@@ -537,6 +556,7 @@ int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
 
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
 {
+    wprintf(L"Using: %s\n",tgzname);
     wprintf(L"Installing...\n");
     HRESULT hr = WslRegisterDistribution(TargetName,tgzname);
     if(FAILED(hr))
