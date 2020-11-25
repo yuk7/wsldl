@@ -397,7 +397,17 @@ int main()
                 _wsystem(Rcmd);
                 hr = S_OK;
             }
-            if(WARGV_CMP(2,L"--tgz")|(wargc < 3))
+            if(WARGV_CMP(2,L"--tar")|(wargc < 3))
+            {
+                wchar_t Wcmd[200] = L"wsl --export \"";
+                wcscat_s(Wcmd,ARRAY_LENGTH(Wcmd),TargetName);
+                wcscat_s(Wcmd,ARRAY_LENGTH(Wcmd),L"\" ");
+                wcscat_s(Wcmd,ARRAY_LENGTH(Wcmd),L" backup.tar");
+
+                _wsystem(Wcmd);
+                hr = S_OK;
+            }
+            if(WARGV_CMP(2,L"--tgz"))
             {
                 if(distributionFlags & 0x4)
                 {
@@ -630,7 +640,7 @@ void show_usage()
     wprintf(L"      - `--default-term`: Get Default Terminal for this distro launcher\n");
     wprintf(L"      - `--lxguid`: Get WSL GUID key for this distro\n\n");
     wprintf(L"    backup [contents]\n");
-    wprintf(L"      - `--tgz`: Output backup.tar.gz to the current directory using tar command\n");
+    wprintf(L"      - `--tar`: Output backup.tar to the current directory\n");
     wprintf(L"      - `--reg`: Output settings registry file to the current directory\n\n");
     wprintf(L"    clean\n");
     wprintf(L"      - Uninstall the distro.\n\n");
