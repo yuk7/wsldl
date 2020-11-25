@@ -38,7 +38,8 @@ bool isParentCmdLine()
             {
                 if ((strcmp(pe32.szExeFile, "cmd.exe") == 0) ||
                 (strcmp(pe32.szExeFile, "powershell.exe") == 0) ||
-                (strcmp(pe32.szExeFile, "wsl.exe") == 0) )
+                (strcmp(pe32.szExeFile, "wsl.exe") == 0) ||
+                (strcmp(pe32.szExeFile, "wt.exe") == 0) )
                 {
                     if(procsCnt < PROC_LIST_SIZE)
                     {
