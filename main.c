@@ -147,9 +147,9 @@ int main()
                         wchar_t Ecmd[MAX_PATH + 200];
                         wcscpy_s(Ecmd, MAX_PATH + 200, Epath);
 
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" -p \"");
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), wslInstallation.distroName);
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" -d .");
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" \"");
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" run");
 
                         FreeConsole();
                         STARTUPINFOW si = {0};
