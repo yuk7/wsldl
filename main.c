@@ -100,7 +100,7 @@ int main()
             }
             else
             {
-                fwprintf(stderr,L"ERROR:[%s] is not installed.\nRun with no arguments to install\n",TargetName);
+                fwprintf(stderr,L"ERROR:[%ls] is not installed.\nRun with no arguments to install\n",TargetName);
                 return 1;
             }
         }
@@ -129,7 +129,7 @@ int main()
 
             if (!dirExists(wslInstallation.basePath))
             {
-                fwprintf(stderr,L"ERROR:\nInstallation directory not found: %s.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
+                fwprintf(stderr,L"ERROR:\nInstallation directory not found: %ls.\nMake sure it exists or reinstall.\n",wslInstallation.basePath);
 
                 wchar_t efFullDirRootfs[MAX_PATH];
                 wcscpy_s(efFullDirRootfs,MAX_PATH,efFullDir);
@@ -339,7 +339,7 @@ int main()
                 {
                     hr = E_FAIL;
                 }
-                wprintf(L"%s",wsl.uuid);
+                wprintf(L"%ls",wsl.uuid);
 
                 hr = S_OK;
             }
@@ -566,7 +566,7 @@ int QueryWslPath(wchar_t *TargetName, wchar_t *path, wchar_t *out)
 
 int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
 {
-    wprintf(L"Using: %s\n",tgzname);
+    wprintf(L"Using: %ls\n",tgzname);
     wprintf(L"Installing...\n");
     HRESULT hr = WslRegisterDistribution(TargetName,tgzname);
     if(FAILED(hr))
@@ -585,7 +585,7 @@ int InstallDist(wchar_t *TargetName,wchar_t *tgzname)
 HRESULT RemoveDist(wchar_t *TargetName)
 {
     char yn;
-    wprintf(L"This will remove this distro (%s) from the filesystem.\n",TargetName);
+    wprintf(L"This will remove this distro (%ls) from the filesystem.\n",TargetName);
     wprintf(L"Are you sure you would like to proceed? (This cannot be undone)\n");
     wprintf(L"Type \"y\" to continue:");
     scanf_s("%c",&yn,1);
@@ -651,6 +651,6 @@ void show_usage()
 
 void show_version()
 {
-    wprintf(L"%s, version %s\n",SW_NAME,SW_VER);
-    wprintf(L"%s\n",SW_URL);
+    wprintf(L"%ls, version %ls\n",SW_NAME,SW_VER);
+    wprintf(L"%ls\n",SW_URL);
 }
