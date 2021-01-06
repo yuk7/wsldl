@@ -10,8 +10,8 @@ var (
 	url     string = "https://git.io/wsldl"
 )
 
-// Print version infomation
-func Print() {
+//Execute is default version entrypoint. prints version infomation
+func Execute() {
 	fmt.Printf("%s, version %s\n", project, version)
 	fmt.Printf("%s\n", url)
 }
