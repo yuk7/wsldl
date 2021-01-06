@@ -1,11 +1,15 @@
-#Executable Files
+# Binaries for programs and plugins
 *.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-#Library Files
-*.a
-*.exp
-*.lib
+# Test binary, built with `go test -c`
+*.test
 
-#Object Files
-*.o
-*.obj
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories
+vendor/
