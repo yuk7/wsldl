@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/version"
@@ -21,6 +22,9 @@ func main() {
 
 		case "isregd":
 			isregd.Execute(name)
+
+		case "install":
+			install.Execute(name, os.Args[2:])
 
 		default:
 			fmt.Println("Invalid Arg.")
