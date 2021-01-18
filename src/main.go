@@ -30,8 +30,10 @@ func main() {
 			fmt.Println("Invalid Arg.")
 		}
 	} else {
-
-		fmt.Println(name)
-		fmt.Println(wslapi.WslIsDistributionRegistered(name))
+		if !wslapi.WslIsDistributionRegistered(name) {
+			install.Execute(name, nil)
+		} else {
+			fmt.Println("installed.")
+		}
 	}
 }

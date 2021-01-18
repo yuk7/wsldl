@@ -13,13 +13,37 @@ var (
 )
 
 //Execute is default install entrypoint
-func Execute(name string, arg []string) {
-	Install("", true)
+func Execute(name string, args []string) {
+	if !wslapi.WslIsDistributionRegistered(name) {
+		var rootPath string
+		var showProgress bool
+		switch len(args) {
+		case 0:
+			rootPath = detectRootfsFiles()
+			showProgress = true
+
+		case 1:
+			showProgress = false
+			if args[0] == "--root" {
+				rootPath = detectRootfsFiles()
+			} else {
+				rootPath = args[0]
+			}
+
+		default:
+			fmt.Println("Invalid Arg.")
+			os.Exit(1)
+		}
+
+		Install(name, rootPath, showProgress)
+
+	} else {
+		fmt.Printf("ERR: [%s] is already installed.\n", name)
+	}
 }
 
 //Install installs distribution with default rootfs file names
-func Install(name string, showProgress bool) {
-	rootPath := detectRootfsFiles()
+func Install(name string, rootPath string, showProgress bool) {
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
 		fmt.Println("Installing...")
@@ -38,7 +62,6 @@ func Install(name string, showProgress bool) {
 func detectRootfsFiles() string {
 	efPath, _ := os.Executable()
 	efDir := filepath.Dir(efPath)
-	fmt.Println(efDir)
 	for _, rootFile := range defaultRootFiles {
 		rootPath := filepath.Join(efDir, rootFile)
 		_, err := os.Stat(rootPath)
