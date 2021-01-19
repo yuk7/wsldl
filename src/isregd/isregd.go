@@ -8,6 +8,7 @@ import (
 
 //Execute is default isregd entrypoint. Exits with registerd status
 func Execute(name string) {
+
 	if wslapi.WslIsDistributionRegistered(name) {
 		os.Exit(0)
 	}

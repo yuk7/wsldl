@@ -31,7 +31,7 @@ func main() {
 		}
 	} else {
 		if !wslapi.WslIsDistributionRegistered(name) {
-			install.Execute(name, nil)
+			//run
 		} else {
 			fmt.Println("installed.")
 		}

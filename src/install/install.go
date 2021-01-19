@@ -1,9 +1,12 @@
 package install
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/yuk7/wsldl/lib/wslapi"
 )
@@ -48,11 +51,15 @@ func Install(name string, rootPath string, showProgress bool) {
 		fmt.Printf("Using: %s\n", rootPath)
 		fmt.Println("Installing...")
 	}
-	res := wslapi.WslRegisterDistribution(name, rootPath)
+	err := wslapi.WslRegisterDistribution(name, rootPath)
 	if showProgress {
-		if res != 0 {
+		if err != nil {
 			fmt.Println("ERR: Failed to Install")
-			fmt.Printf("Error code 0x%x", res)
+			var errno syscall.Errno
+			if errors.As(err, &errno) {
+				fmt.Printf("Code: 0x%x\n", int(errno))
+				log.Fatal(err)
+			}
 		} else {
 			fmt.Println("Installation complete")
 		}
