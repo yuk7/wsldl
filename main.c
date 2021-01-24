@@ -168,7 +168,7 @@ int main()
 
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" \"");
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\" run");
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\"");
 
                         FreeConsole();
                         STARTUPINFOW si = {0};
@@ -187,7 +187,7 @@ int main()
 
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" run \"");
                         wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), efpath);
-                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L" run\"");
+                        wcscat_s(Ecmd, ARRAY_LENGTH(Ecmd), L"\"");
 
                         FreeConsole();
                         STARTUPINFOW si = {0};
