@@ -467,6 +467,10 @@ int main()
             if(SUCCEEDED(hr))
             {
                 hr = WslRegisterDistribution(TargetName,tgzname);
+                if (SUCCEEDED(hr))
+                {
+                    wprintf(L"Reset completed.");
+                }
             }
         }
         else if( WARGV_CMP(1,L"help") | WARGV_CMP(1,L"-h") | WARGV_CMP(1,L"/h") )
