@@ -9,7 +9,7 @@
 ---
 [BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause)
 
-* [res/Rocky/Rocky.ico](https://github.com/rocky-linux/branding)
+* [res/Rocky/icon.ico](https://github.com/rocky-linux/branding)
 
 ---
 [Creative Commons (Attribution 3.0 Unported)](https://creativecommons.org/licenses/by/3.0/)
