@@ -14,10 +14,9 @@ Advanced WSL Distribution Launcher / Installer
 ### [Detailed documentation is here](https://git.io/wsldl-doc)
 
 ## 💻Requirements
-* Windows 10 1903 May 2019 Update x64 or later.
-* Windows 11
+* Windows 10 1709 Fall Creators Update or later(x64/arm64).
+* Windows 11 (x64/arm64)
 * Windows Subsystem for Linux feature is enabled.
-* WSL2 and Linux kernel package
 
 ## 📦Install with Prebuilt Packages
 [**You can see List on docs**](https://wsldl-pg.github.io/docs/Using-wsldl/#distros)
