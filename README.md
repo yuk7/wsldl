@@ -15,7 +15,6 @@ Advanced WSL Distribution Launcher / Installer
 
 ## 💻Requirements
 * Windows 10 1709 Fall Creators Update or later(x64/arm64).
-* Windows 11 (x64/arm64)
 * Windows Subsystem for Linux feature is enabled.
 
 ## 📦Install with Prebuilt Packages
