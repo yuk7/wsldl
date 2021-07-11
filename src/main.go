@@ -8,6 +8,7 @@ import (
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsldl/version"
 )
 
@@ -26,14 +27,17 @@ func main() {
 		case "install":
 			install.Execute(name, os.Args[2:])
 
+		case "run":
+			run.Execute(name, os.Args[2:])
+
 		default:
 			fmt.Println("Invalid Arg.")
 		}
 	} else {
 		if !wslapi.WslIsDistributionRegistered(name) {
-			//run
+			install.Execute(name, nil)
 		} else {
-			fmt.Println("installed.")
+			run.Execute(name, nil)
 		}
 	}
 }

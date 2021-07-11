@@ -41,12 +41,25 @@ var (
 	modwslapi = windows.NewLazySystemDLL("wslapi.dll")
 
 	procWslIsDistributionRegistered = modwslapi.NewProc("WslIsDistributionRegistered")
+	procWslLaunch                   = modwslapi.NewProc("WslLaunch")
 	procWslRegisterDistribution     = modwslapi.NewProc("WslRegisterDistribution")
 )
 
 func _WslIsDistributionRegistered(distributionName *uint16) (res bool) {
 	r0, _, _ := syscall.Syscall(procWslIsDistributionRegistered.Addr(), 1, uintptr(unsafe.Pointer(distributionName)), 0, 0)
 	res = r0 != 0
+	return
+}
+
+func _WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle, process *syscall.Handle, exitCode *uintptr) (err error) {
+	var _p0 uint32
+	if useCurrentWorkingDirectory {
+		_p0 = 1
+	}
+	r1, _, e1 := syscall.Syscall9(procWslLaunch.Addr(), 8, uintptr(unsafe.Pointer(distributionName)), uintptr(unsafe.Pointer(command)), uintptr(_p0), uintptr(stdIn), uintptr(stdOut), uintptr(stdErr), uintptr(unsafe.Pointer(process)), uintptr(unsafe.Pointer(exitCode)), 0)
+	if r1 == 0 {
+		err = errnoErr(e1)
+	}
 	return
 }
 
