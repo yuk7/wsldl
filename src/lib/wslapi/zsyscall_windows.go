@@ -40,11 +40,29 @@ func errnoErr(e syscall.Errno) error {
 var (
 	modwslapi = windows.NewLazySystemDLL("wslapi.dll")
 
-	procWslIsDistributionRegistered = modwslapi.NewProc("WslIsDistributionRegistered")
-	procWslLaunch                   = modwslapi.NewProc("WslLaunch")
-	procWslRegisterDistribution     = modwslapi.NewProc("WslRegisterDistribution")
-	procWslUnregisterDistribution   = modwslapi.NewProc("WslUnregisterDistribution")
+	procWslConfigureDistribution        = modwslapi.NewProc("WslConfigureDistribution")
+	procWslGetDistributionConfiguration = modwslapi.NewProc("WslGetDistributionConfiguration")
+	procWslIsDistributionRegistered     = modwslapi.NewProc("WslIsDistributionRegistered")
+	procWslLaunch                       = modwslapi.NewProc("WslLaunch")
+	procWslRegisterDistribution         = modwslapi.NewProc("WslRegisterDistribution")
+	procWslUnregisterDistribution       = modwslapi.NewProc("WslUnregisterDistribution")
 )
+
+func _WslConfigureDistribution(distributionName *uint16, defaultUID uint64, wslDistributionFlags uint32) (res error) {
+	r0, _, _ := syscall.Syscall(procWslConfigureDistribution.Addr(), 3, uintptr(unsafe.Pointer(distributionName)), uintptr(defaultUID), uintptr(wslDistributionFlags))
+	if r0 != 0 {
+		res = syscall.Errno(r0)
+	}
+	return
+}
+
+func _WslGetDistributionConfiguration(distributionName *uint16, distributionVersion *uint32, defaultUID *uint64, wslDistributionFlags *uint32, defaultEnv ***uint16, defaultEnvCnt *uint64) (res error) {
+	r0, _, _ := syscall.Syscall6(procWslGetDistributionConfiguration.Addr(), 6, uintptr(unsafe.Pointer(distributionName)), uintptr(unsafe.Pointer(distributionVersion)), uintptr(unsafe.Pointer(defaultUID)), uintptr(unsafe.Pointer(wslDistributionFlags)), uintptr(unsafe.Pointer(defaultEnv)), uintptr(unsafe.Pointer(defaultEnvCnt)))
+	if r0 != 0 {
+		res = syscall.Errno(r0)
+	}
+	return
+}
 
 func _WslIsDistributionRegistered(distributionName *uint16) (res bool) {
 	r0, _, _ := syscall.Syscall(procWslIsDistributionRegistered.Addr(), 1, uintptr(unsafe.Pointer(distributionName)), 0, 0)

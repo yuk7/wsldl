@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/yuk7/wsldl/clean"
+	"github.com/yuk7/wsldl/config"
+	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/wslapi"
@@ -33,6 +35,12 @@ func main() {
 
 		case "runp":
 			run.ExecuteP(name, os.Args[2:])
+
+		case "config":
+			config.Execute(name, os.Args[2:])
+
+		case "get":
+			get.Execute(name, os.Args[2:])
 
 		case "clean":
 			clean.Execute(name, os.Args[2:])

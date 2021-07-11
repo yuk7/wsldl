@@ -1,0 +1,73 @@
+package config
+
+import (
+	"errors"
+	"log"
+	"strconv"
+
+	"github.com/yuk7/wsldl/get"
+	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/run"
+)
+
+//Execute is default install entrypoint
+func Execute(name string, args []string) {
+	var err error
+	uid, flags := get.WslGetConfig(name)
+	if len(args) == 2 {
+		switch args[0] {
+		case "--default-uid":
+			var intUID int
+			intUID, err = strconv.Atoi(args[1])
+			uid = uint64(intUID)
+
+		case "--default-user":
+			str, _, errtmp := run.ExecRead(name, "id -u "+utils.DQEscapeString(args[1]))
+			err = errtmp
+			if err == nil {
+				var intUID int
+				intUID, err = strconv.Atoi(str)
+				uid = uint64(intUID)
+				if err != nil {
+					err = errors.New(str)
+				}
+			}
+
+		case "--append-path":
+			var b bool
+			b, err = strconv.ParseBool(args[1])
+			if b {
+				flags |= wslapi.FlagAppendNTPath
+			} else {
+				flags ^= wslapi.FlagAppendNTPath
+			}
+
+		case "--mount-drive":
+			var b bool
+			b, err = strconv.ParseBool(args[1])
+			if b {
+				flags |= wslapi.FlagEnableDriveMounting
+			} else {
+				flags ^= wslapi.FlagEnableDriveMounting
+			}
+
+		case "--flags-val":
+			var intFlags int
+			intFlags, err = strconv.Atoi(args[1])
+			flags = uint32(intFlags)
+
+		default:
+			err = errors.New("invalid args")
+		}
+		if err != nil {
+			println("ERR: Failed to parse your argument")
+			log.Fatal(err)
+		}
+		wslapi.WslConfigureDistribution(name, uid, flags)
+	} else {
+		println("ERR: Invalid argument")
+		err = errors.New("invalid args")
+		log.Fatal(err)
+	}
+}

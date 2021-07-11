@@ -5,6 +5,40 @@ import (
 	"syscall"
 )
 
+const (
+	//FlagEnableInterop is flag of interop feature
+	FlagEnableInterop = 1
+	//FlagAppendNTPath is flag of appending windows path
+	FlagAppendNTPath = 2
+	//FlagEnableDriveMounting is flag of mounting windows drive
+	FlagEnableDriveMounting = 4
+	//FlagEnableWsl2 is flag of enabled wsl2, read only
+	FlagEnableWsl2 = 8
+)
+
+//sys	_WslGetDistributionConfiguration(distributionName *uint16, distributionVersion *uint32, defaultUID *uint64,  wslDistributionFlags *uint32, defaultEnv ***uint16, defaultEnvCnt *uint64) (res error) = wslapi.WslGetDistributionConfiguration
+
+// WslGetDistributionConfiguration gets distribution configuration
+func WslGetDistributionConfiguration(distributionName string) (distributionVersion uint32, defaultUID uint64, flags uint32, err error) {
+	pDistributionName, _ := syscall.UTF16PtrFromString(distributionName)
+
+	var pEnv **uint16
+	var envCnt uint64
+
+	err = _WslGetDistributionConfiguration(pDistributionName, &distributionVersion, &defaultUID, &flags, &pEnv, &envCnt)
+
+	return
+}
+
+//sys	_WslConfigureDistribution(distributionName *uint16, defaultUID uint64, wslDistributionFlags uint32) (res error) = wslapi.WslConfigureDistribution
+
+// WslConfigureDistribution configures distribution configuration
+func WslConfigureDistribution(distributionName string, defaultUID uint64, wslDistributionFlags uint32) (err error) {
+	pDistributionName, _ := syscall.UTF16PtrFromString(distributionName)
+
+	return _WslConfigureDistribution(pDistributionName, defaultUID, wslDistributionFlags)
+}
+
 //sys	_WslIsDistributionRegistered(distributionName *uint16) (res bool) = wslapi.WslIsDistributionRegistered
 
 // WslIsDistributionRegistered determines if a distribution is already registered
