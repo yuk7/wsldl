@@ -62,3 +62,15 @@ func WslGetConfig(distributionName string) (uid uint64, flags uint32) {
 	}
 	return
 }
+
+// ShowHelp shows help message
+func ShowHelp(showTitle bool) {
+	if showTitle {
+		println("Usage:")
+	}
+	println("    get [setting [value]]")
+	println("      - `--default-uid`: Get the default user uid in this distro")
+	println("      - `--append-path`: Get true/false status of Append Windows PATH to $PATH")
+	println("      - `--mount-drive`: Get true/false status of Mount drives")
+	println("      - `--wsl-version`: Get WSL Version 1/2 for this distro")
+}

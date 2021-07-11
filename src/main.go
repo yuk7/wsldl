@@ -8,6 +8,7 @@ import (
 	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/config"
 	"github.com/yuk7/wsldl/get"
+	"github.com/yuk7/wsldl/help"
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/wslapi"
@@ -44,6 +45,9 @@ func main() {
 
 		case "clean":
 			clean.Execute(name, os.Args[2:])
+
+		case "help", "-h", "--help":
+			help.Execute()
 
 		default:
 			fmt.Println("Invalid Arg.")

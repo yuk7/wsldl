@@ -85,3 +85,18 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 	}
 	return
 }
+
+// ShowHelp shows help message
+func ShowHelp(showTitle bool) {
+	if showTitle {
+		println("Usage:")
+	}
+	println("    <no args>")
+	println("      - Open a new shell with your default settings.")
+	println()
+	println("    run <command line>")
+	println("      - Run the given command line in that distro. Inherit current directory.")
+	println()
+	println("    runp <command line (includes windows path)>")
+	println("      - Run the path translated command line in that distro.")
+}

@@ -71,3 +71,15 @@ func Execute(name string, args []string) {
 		log.Fatal(err)
 	}
 }
+
+// ShowHelp shows help message
+func ShowHelp(showTitle bool) {
+	if showTitle {
+		println("Usage:")
+	}
+	println("    config [setting [value]]")
+	println("      - `--default-user <user>`: Set the default user for this distro to <user>")
+	println("      - `--default-uid <uid>`: Set the default user for this distro to <uid>")
+	println("      - `--append-path <true|false>`: Switch of Append Windows PATH to $PATH")
+	println("      - `--mount-drive <on|off>`: Switch of Mount drives")
+}
