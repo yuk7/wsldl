@@ -22,13 +22,19 @@ func WslRegisterDistribution(distributionName, tarGzFilename string) error {
 	return _WslRegisterDistribution(pDistributionName, pTarGzFilename)
 }
 
-//sys	_WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle, process *syscall.Handle, exitCode *uintptr) (err error) = wslapi.WslLaunch
+//sys	_WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle, process *syscall.Handle) (err error) = wslapi.WslLaunch
 
-// WslLaunchInteractive launches the distribution with interactive shell
-func WslLaunchInteractive(distributionName string, command string, useCurrentWorkingDirectory bool) (exitCode uintptr, err error) {
+// WslLaunch launches the distribution with handle
+func WslLaunch(distributionName string, command string, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle) (process syscall.Handle, err error) {
 	pDistributionName, _ := syscall.UTF16PtrFromString(distributionName)
 	pCommand, _ := syscall.UTF16PtrFromString(command)
 
+	_WslLaunch(pDistributionName, pCommand, useCurrentWorkingDirectory, stdIn, stdOut, stdErr, &process)
+	return
+}
+
+// WslLaunchInteractive launches the distribution with interactive shell
+func WslLaunchInteractive(distributionName string, command string, useCurrentWorkingDirectory bool) (exitCode uint32, err error) {
 	p, _ := syscall.GetCurrentProcess()
 	stdin := syscall.Handle(0)
 	stdout := syscall.Handle(0)
@@ -38,9 +44,9 @@ func WslLaunchInteractive(distributionName string, command string, useCurrentWor
 	syscall.DuplicateHandle(p, syscall.Handle(os.Stdout.Fd()), p, &stdout, 0, true, syscall.DUPLICATE_SAME_ACCESS)
 	syscall.DuplicateHandle(p, syscall.Handle(os.Stderr.Fd()), p, &stderr, 0, true, syscall.DUPLICATE_SAME_ACCESS)
 
-	handle := syscall.Handle(0)
-	_WslLaunch(pDistributionName, pCommand, useCurrentWorkingDirectory, stdin, stdout, stderr, &handle, &exitCode)
+	handle, err := WslLaunch(distributionName, command, useCurrentWorkingDirectory, stdin, stdout, stderr)
 	syscall.WaitForSingleObject(handle, syscall.INFINITE)
+	syscall.GetExitCodeProcess(handle, &exitCode)
 	return
 }
 

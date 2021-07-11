@@ -52,12 +52,12 @@ func _WslIsDistributionRegistered(distributionName *uint16) (res bool) {
 	return
 }
 
-func _WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle, process *syscall.Handle, exitCode *uintptr) (err error) {
+func _WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDirectory bool, stdIn syscall.Handle, stdOut syscall.Handle, stdErr syscall.Handle, process *syscall.Handle) (err error) {
 	var _p0 uint32
 	if useCurrentWorkingDirectory {
 		_p0 = 1
 	}
-	r1, _, e1 := syscall.Syscall9(procWslLaunch.Addr(), 8, uintptr(unsafe.Pointer(distributionName)), uintptr(unsafe.Pointer(command)), uintptr(_p0), uintptr(stdIn), uintptr(stdOut), uintptr(stdErr), uintptr(unsafe.Pointer(process)), uintptr(unsafe.Pointer(exitCode)), 0)
+	r1, _, e1 := syscall.Syscall9(procWslLaunch.Addr(), 7, uintptr(unsafe.Pointer(distributionName)), uintptr(unsafe.Pointer(command)), uintptr(_p0), uintptr(stdIn), uintptr(stdOut), uintptr(stdErr), uintptr(unsafe.Pointer(process)), 0, 0)
 	if r1 == 0 {
 		err = errnoErr(e1)
 	}
