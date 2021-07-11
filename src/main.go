@@ -31,6 +31,9 @@ func main() {
 		case "run":
 			run.Execute(name, os.Args[2:])
 
+		case "runp":
+			run.ExecuteP(name, os.Args[2:])
+
 		case "clean":
 			clean.Execute(name, os.Args[2:])
 
