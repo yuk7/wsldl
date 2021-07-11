@@ -43,6 +43,7 @@ var (
 	procWslIsDistributionRegistered = modwslapi.NewProc("WslIsDistributionRegistered")
 	procWslLaunch                   = modwslapi.NewProc("WslLaunch")
 	procWslRegisterDistribution     = modwslapi.NewProc("WslRegisterDistribution")
+	procWslUnregisterDistribution   = modwslapi.NewProc("WslUnregisterDistribution")
 )
 
 func _WslIsDistributionRegistered(distributionName *uint16) (res bool) {
@@ -65,6 +66,14 @@ func _WslLaunch(distributionName *uint16, command *uint16, useCurrentWorkingDire
 
 func _WslRegisterDistribution(distributionName *uint16, tarGzFilename *uint16) (res error) {
 	r0, _, _ := syscall.Syscall(procWslRegisterDistribution.Addr(), 2, uintptr(unsafe.Pointer(distributionName)), uintptr(unsafe.Pointer(tarGzFilename)), 0)
+	if r0 != 0 {
+		res = syscall.Errno(r0)
+	}
+	return
+}
+
+func _WslUnregisterDistribution(distributionName *uint16) (res error) {
+	r0, _, _ := syscall.Syscall(procWslUnregisterDistribution.Addr(), 1, uintptr(unsafe.Pointer(distributionName)), 0, 0)
 	if r0 != 0 {
 		res = syscall.Errno(r0)
 	}

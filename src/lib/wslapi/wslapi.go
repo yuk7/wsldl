@@ -43,3 +43,11 @@ func WslLaunchInteractive(distributionName string, command string, useCurrentWor
 	syscall.WaitForSingleObject(handle, syscall.INFINITE)
 	return
 }
+
+//sys	_WslUnregisterDistribution(distributionName *uint16) (res error) = wslapi.WslUnregisterDistribution
+
+// WslUnregisterDistribution unregisters the specified distribution
+func WslUnregisterDistribution(distributionName string) error {
+	pDistributionName, _ := syscall.UTF16PtrFromString(distributionName)
+	return _WslUnregisterDistribution(pDistributionName)
+}

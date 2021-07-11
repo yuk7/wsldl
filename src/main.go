@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/wslapi"
@@ -29,6 +30,9 @@ func main() {
 
 		case "run":
 			run.Execute(name, os.Args[2:])
+
+		case "clean":
+			clean.Execute(name, os.Args[2:])
 
 		default:
 			fmt.Println("Invalid Arg.")
