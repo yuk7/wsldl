@@ -14,7 +14,7 @@ Advanced WSL Distribution Launcher / Installer
 ### [Detailed documentation is here](https://git.io/wsldl-doc)
 
 ## 💻Requirements
-* Windows 10 1709 Fall Creators Update 64bit or later.
+* Windows 10 1709 Fall Creators Update or later(x64/arm64).
 * Windows Subsystem for Linux feature is enabled.
 
 ## 📦Install with Prebuilt Packages
@@ -29,7 +29,7 @@ If you rename it, you can register with a different name.
 #### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
 #### 2. Rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to use "Arch" for the Instance name)
-#### 3. Put your rootfs.tar.gz in same directory as exe (Installation directory)
+#### 3. Put your rootfs.tar(.gz) in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
 ## 🔗Use as a Launcher for already installed distribution

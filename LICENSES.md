@@ -7,6 +7,11 @@
 * [res//res.rc](https://github.com/yuk7/wsldl)
 
 ---
+[BSD 3-Clause "New" or "Revised" License](https://opensource.org/licenses/BSD-3-Clause)
+
+* [res/Rocky/icon.ico](https://github.com/rocky-linux/branding)
+
+---
 [Creative Commons (Attribution 3.0 Unported)](https://creativecommons.org/licenses/by/3.0/)
 
 * [res/Arch/icon.ico](https://www.shareicon.net/archlinux-arch-linux-101867)
