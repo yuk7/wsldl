@@ -31,13 +31,13 @@ func main() {
 		case "install":
 			install.Execute(name, os.Args[2:])
 
-		case "run":
+		case "run", "-c", "/c":
 			run.Execute(name, os.Args[2:])
 
-		case "runp":
+		case "runp", "-p", "/p":
 			run.ExecuteP(name, os.Args[2:])
 
-		case "config":
+		case "config", "set":
 			config.Execute(name, os.Args[2:])
 
 		case "get":
