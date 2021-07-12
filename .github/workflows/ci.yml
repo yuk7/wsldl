@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - 'src/**'
+      - '.github/workflows/**'
   pull_request:
     paths:
       - 'src/**'
+      - '.github/workflows/**'
   
 jobs:
   compile-wsldl-windows:
@@ -19,7 +21,8 @@ jobs:
           cd src
           curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_windows_amd64.exe
           .\rsrc_windows_amd64.exe -ico ../res/Fedora/icon.ico -o wsldl.syso
-          go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-%GITHUB_SHA:~0,7%"
+          $short_sha = $env:GITHUB_SHA.SubString(0, 7)
+          go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-${short_sha}"
       - uses: actions/upload-artifact@v2
         with:
           name: Build results-Windows
@@ -37,8 +40,7 @@ jobs:
           curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_linux_amd64
           chmod +x rsrc_linux_amd64
           ./rsrc_linux_amd64 -ico ../res/Fedora/icon.ico -o wsldl.syso
-          echo ${github.sha}
-          env GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-Cross-${GITHUB_SHA:0:7}$"
+          env GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-Cross-${GITHUB_SHA:0:7}"
       - uses: actions/upload-artifact@v2
         with:
           name: Build results-Linux
