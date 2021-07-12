@@ -6,6 +6,7 @@ import (
 	"log"
 	"syscall"
 
+	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
 )
 
@@ -29,6 +30,13 @@ func Execute(name string, args []string) {
 			} else {
 				print("1")
 			}
+
+		case "--lxguid", "--lxuid":
+			guid, err := utils.WslGetUUID(name)
+			if err != nil {
+				log.Fatal(err)
+			}
+			print(guid)
 
 		case "--flags-val":
 			print(flags)
@@ -73,4 +81,5 @@ func ShowHelp(showTitle bool) {
 	println("      - `--append-path`: Get true/false status of Append Windows PATH to $PATH")
 	println("      - `--mount-drive`: Get true/false status of Mount drives")
 	println("      - `--wsl-version`: Get WSL Version 1/2 for this distro")
+	println("      - `- `--lxguid`: Get WSL GUID key for this distro")
 }
