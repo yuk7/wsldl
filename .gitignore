@@ -13,3 +13,10 @@
 
 # Dependency directories
 vendor/
+
+# Output directory
+out/
+# Tools directory
+tools/
+# Binary object file
+*.syso
