@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"io"
+	"os"
 	"strings"
 	"syscall"
 
@@ -143,5 +144,46 @@ func IsParentConsole() (res bool, err error) {
 	}
 
 	res = false
+	return
+}
+
+// CreateProcessAndWait creating process and wait it
+func CreateProcessAndWait(commandLine string) (res int, err error) {
+	pCommandLine, _ := syscall.UTF16PtrFromString(commandLine)
+	si := syscall.StartupInfo{}
+	pi := syscall.ProcessInformation{}
+
+	err = syscall.CreateProcess(nil, pCommandLine, nil, nil, false, 0, nil, nil, &si, &pi)
+	if err != nil {
+		return
+	}
+	_, err = syscall.WaitForSingleObject(pi.Process, syscall.INFINITE)
+	var exitCode = uint32(0)
+	syscall.GetExitCodeProcess(pi.Process, &exitCode)
+	res = int(exitCode)
+	return
+}
+
+// FreeConsole calls FreeConsole API in Windows kernel32
+func FreeConsole() error {
+	kernel32, _ := syscall.LoadDLL("Kernel32.dll")
+	proc, err := kernel32.FindProc("FreeConsole")
+	if err != nil {
+		return err
+	}
+	proc.Call()
+	return nil
+}
+
+// AllocConsole calls AllocConsole API in Windows kernel32
+func AllocConsole() {
+	kernel32, _ := syscall.LoadDLL("Kernel32.dll")
+	alloc, _ := kernel32.FindProc("AllocConsole")
+	alloc.Call()
+
+	hout, _ := syscall.GetStdHandle(syscall.STD_OUTPUT_HANDLE)
+	hin, _ := syscall.GetStdHandle(syscall.STD_INPUT_HANDLE)
+	os.Stdout = os.NewFile(uintptr(hout), "/dev/stdout")
+	os.Stdin = os.NewFile(uintptr(hin), "/dev/stdin")
 	return
 }

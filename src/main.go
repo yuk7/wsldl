@@ -56,7 +56,7 @@ func main() {
 		if !wslapi.WslIsDistributionRegistered(name) {
 			install.Execute(name, nil)
 		} else {
-			run.Execute(name, nil)
+			run.ExecuteNoArgs(name)
 		}
 	}
 }

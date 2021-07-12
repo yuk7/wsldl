@@ -1,6 +1,7 @@
 package run
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"log"
@@ -57,6 +58,57 @@ func ExecuteP(name string, args []string) {
 	}
 
 	Execute(name, convArgs)
+}
+
+// ExecuteNoArgs runs distro, but use terminal settings
+func ExecuteNoArgs(name string) {
+	efPath, _ := os.Executable()
+	b, err := utils.IsParentConsole()
+	if err != nil {
+		b = true
+	}
+	if !b {
+		uuid, err := utils.WslGetUUID(name)
+		if err != nil {
+			Execute(name, nil)
+		}
+		info, _ := utils.WsldlGetTerminalInfo(uuid)
+		switch info {
+		case utils.FlagWsldlTermWT:
+			utils.FreeConsole()
+			exe := os.Getenv("LOCALAPPDATA")
+			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\wt.exe")
+
+			cmd := exe + " " + utils.DQEscapeString(efPath) + " run"
+			res, err := utils.CreateProcessAndWait(cmd)
+			if err != nil {
+				utils.AllocConsole()
+				println("ERR: Failed to launch Terminal Process")
+				println(exe)
+				println(err.Error())
+				bufio.NewReader(os.Stdin).ReadString('\n')
+			}
+			os.Exit(res)
+
+		case utils.FlagWsldlTermFlute:
+			utils.FreeConsole()
+			exe := os.Getenv("LOCALAPPDATA")
+			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\flute.exe")
+
+			cmd := exe + " run " + utils.DQEscapeString(efPath) + " run"
+			res, err := utils.CreateProcessAndWait(cmd)
+			if err != nil {
+				utils.AllocConsole()
+				println("ERR: Failed to launch Terminal Process")
+				println(exe)
+				println(err.Error())
+				bufio.NewReader(os.Stdin).ReadString('\n')
+			}
+			os.Exit(res)
+
+		}
+	}
+	Execute(name, nil)
 }
 
 //ExecRead execs command and read output
