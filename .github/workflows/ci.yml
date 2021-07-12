@@ -9,18 +9,38 @@ on:
       - 'src/**'
   
 jobs:
-  compile-wsldl:
+  compile-wsldl-windows:
     name: Compile wsldl
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
-      - name: make
+      - name: Build
         run: |
           cd src
+          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_windows_amd64.exe
+          .\rsrc_windows_amd64.exe -ico ../res/Fedora/icon.ico -o wsldl.syso
           go build
       - uses: actions/upload-artifact@v2
         with:
-          name: Build results
+          name: Build results-Windows
+          path: |
+            src/wsldl.exe
+          if-no-files-found: error
+  compile-wsldl-linux:
+    name: Cross-compile wsldl from Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          cd src
+          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_linux_amd64
+          chmod +x rsrc_linux_amd64
+          ./rsrc_linux_amd64 -ico ../res/Fedora/icon.ico -o wsldl.syso
+          env GOOS=windows GOARCH=amd64 go build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Build results-Linux
           path: |
             src/wsldl.exe
           if-no-files-found: error
