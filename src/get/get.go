@@ -101,5 +101,6 @@ func ShowHelp(showTitle bool) {
 	println("      - `--append-path`: Get true/false status of Append Windows PATH to $PATH")
 	println("      - `--mount-drive`: Get true/false status of Mount drives")
 	println("      - `--wsl-version`: Get WSL Version 1/2 for this distro")
-	println("      - `- `--lxguid`: Get WSL GUID key for this distro")
+	println("      - `--default-term`: Get Default Terminal for this distro launcher")
+	println("      - `--lxguid`: Get WSL GUID key for this distro")
 }
