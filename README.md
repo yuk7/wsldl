@@ -120,9 +120,9 @@ Usage :
 ```
 
 ## 🛠How-to-Build
-Please see [DEVELOPERS.md](https://github.com/yuk7/wsldl/blob/main/DEVELOPERS.md)
+Please see [DEVELOPERS.md](DEVELOPERS.md)
 
 ## 📄License
-[MIT](https://github.com/yuk7/wsldl/blob/main/LICENSES.md)
+[MIT](LICENSES.md)
 
-Copyright (c) 2017-2020 yuk7
+Copyright (c) 2017-2021 [yuk7](https://github.com/yuk7)
