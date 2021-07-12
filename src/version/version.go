@@ -2,6 +2,7 @@ package version
 
 import (
 	"fmt"
+	"runtime"
 )
 
 var (
@@ -12,6 +13,6 @@ var (
 
 //Execute is default version entrypoint. prints version infomation
 func Execute() {
-	fmt.Printf("%s, version %s\n", project, version)
+	fmt.Printf("%s, version %s  (%s)\n", project, version, runtime.GOARCH)
 	fmt.Printf("%s\n", url)
 }
