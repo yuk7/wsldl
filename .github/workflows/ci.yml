@@ -1,0 +1,26 @@
+name: Continuous Integration
+
+on:
+  push:
+    paths:
+      - 'src/**'
+  pull_request:
+    paths:
+      - 'src/**'
+  
+jobs:
+  compile-wsldl:
+    name: Compile wsldl
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: make
+        run: |
+          cd src
+          go build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Build results
+          path: |
+            src/wsldl.exe
+          if-no-files-found: error
