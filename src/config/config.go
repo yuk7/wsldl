@@ -52,6 +52,25 @@ func Execute(name string, args []string) {
 				flags ^= wslapi.FlagEnableDriveMounting
 			}
 
+		case "--default-term":
+			value := 0
+			switch args[1] {
+			case "default", strconv.Itoa(utils.FlagWsldlTermDefault):
+				value = utils.FlagWsldlTermDefault
+			case "wt", strconv.Itoa(utils.FlagWsldlTermWT):
+				value = utils.FlagWsldlTermWT
+			case "flute", strconv.Itoa(utils.FlagWsldlTermFlute):
+				value = utils.FlagWsldlTermFlute
+			default:
+				err = errors.New("invalid args")
+				break
+			}
+			uuid, err := utils.WslGetUUID(name)
+			if err != nil {
+				break
+			}
+			err = utils.WsldlSetTerminalInfo(uuid, value)
+
 		case "--flags-val":
 			var intFlags int
 			intFlags, err = strconv.Atoi(args[1])
@@ -82,4 +101,5 @@ func ShowHelp(showTitle bool) {
 	println("      - `--default-uid <uid>`: Set the default user for this distro to <uid>")
 	println("      - `--append-path <true|false>`: Switch of Append Windows PATH to $PATH")
 	println("      - `--mount-drive <on|off>`: Switch of Mount drives")
+	println("      - `--default-term <default|wt|flute>`: Set default terminal window")
 }

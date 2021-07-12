@@ -4,7 +4,9 @@ import (
 	"errors"
 	"io"
 	"strings"
+	"syscall"
 
+	ps "github.com/mitchellh/go-ps"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -13,6 +15,16 @@ const (
 	LxssBaseRoot = registry.CURRENT_USER
 	// LxssBaseKey is path of lxss registry
 	LxssBaseKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
+	// ConsoleProcNames is console process list for detect parent console process
+	ConsoleProcNames = "cmd.exe,powershell.exe,wsl.exe,WindowsTerminal.exe,winpty-agent.exe"
+	// WsldlTermKey is registry key name used for wsldl terminal infomation
+	WsldlTermKey = "wsldl-term"
+	// FlagWsldlTermDefault is default terminal (conhost)
+	FlagWsldlTermDefault = 0
+	// FlagWsldlTermWT is Windows Terminal
+	FlagWsldlTermWT = 1
+	// FlagWsldlTermFlute is Fluent Terminal
+	FlagWsldlTermFlute = 2
 )
 
 // DQEscapeString is escape string with double quote
@@ -66,5 +78,70 @@ func WslGetUUIDList() (uuidList []string, err error) {
 		err = tmpErr
 		return
 	}
+	return
+}
+
+// WsldlSetTerminalInfo sets terminal number from registry
+func WsldlSetTerminalInfo(uuid string, value int) error {
+	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.SET_VALUE)
+	if tmpErr != nil && tmpErr != io.EOF {
+		return tmpErr
+	}
+	tmpErr = key.SetDWordValue(WsldlTermKey, uint32(value))
+	if tmpErr != nil && tmpErr != io.EOF {
+		return tmpErr
+	}
+	return nil
+}
+
+// WsldlGetTerminalInfo gets terminal number from registry
+func WsldlGetTerminalInfo(uuid string) (res int, err error) {
+	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.READ)
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	num, _, tmpErr := key.GetIntegerValue(WsldlTermKey)
+	if tmpErr == syscall.ERROR_FILE_NOT_FOUND {
+		// not found is okay, it's just unconfigured.
+		res = FlagWsldlTermDefault
+		return
+	}
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	res = int(num)
+	return
+}
+
+// IsParentConsole gets is parent process is console or not
+func IsParentConsole() (res bool, err error) {
+	list := strings.Split(ConsoleProcNames, ",")
+	info, err := ps.FindProcess(syscall.Getppid())
+	if err != nil {
+		return
+	}
+
+	parentName := info.Executable()
+	for _, item := range list {
+		if strings.EqualFold(parentName, item) {
+			res = true
+			return
+		}
+	}
+
+	info, err = ps.FindProcess(info.PPid())
+	if err != nil {
+		return
+	}
+	for _, item := range list {
+		if strings.EqualFold(parentName, item) {
+			res = true
+			return
+		}
+	}
+
+	res = false
 	return
 }

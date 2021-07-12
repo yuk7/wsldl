@@ -38,6 +38,26 @@ func Execute(name string, args []string) {
 			}
 			print(guid)
 
+		case "--default-term":
+			uuid, err := utils.WslGetUUID(name)
+			if err != nil {
+				println("ERR: Failed to get information")
+				log.Fatal(err)
+			}
+			info, err := utils.WsldlGetTerminalInfo(uuid)
+			if err != nil {
+				println("ERR: Failed to get information")
+				log.Fatal(err)
+			}
+			switch info {
+			case utils.FlagWsldlTermWT:
+				print("wt")
+			case utils.FlagWsldlTermFlute:
+				print("flute")
+			default:
+				print("default")
+			}
+
 		case "--flags-val":
 			print(flags)
 
