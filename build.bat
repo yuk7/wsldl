@@ -36,7 +36,7 @@ exit /b
 cd /d %~dp0
 mkdir tools >NUL 2>&1
 echo Downloading rsrc...
-curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_windows_amd64.exe -o tools\rsrc.exe
+curl -sSfL https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_windows_amd64.exe -o tools\rsrc.exe
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
     tools\rsrc.exe -ico res\%%~nxD\icon.ico -o res\%%~nxD\res.syso
