@@ -5,6 +5,9 @@
 @echo off
 cd /d %~dp0
 
+set PATH="%GOPATH%\bin";%PATH%
+set PATH="%USERPROFILE%\go\bin";%PATH%
+
 if "%~1"=="all" (
     echo Building everything
     call :resources
@@ -47,7 +50,6 @@ cd /d %~dp0
 mkdir tools >NUL 2>&1
 echo Installing goversioninfo...
 go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-set PATH="%GOPATH%\bin";%PATH%
 
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
@@ -74,7 +76,7 @@ cd /d %~dp0
 mkdir out >NUL 2>&1
 echo Installing goversioninfo...
 go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-set PATH="%GOPATH%\bin";%PATH%
+
 echo Compiling resource object...
 goversioninfo -o src\resource.syso src\versioninfo.json
 :singlewor
