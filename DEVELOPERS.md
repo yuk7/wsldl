@@ -5,14 +5,14 @@
 ### Windows
 
 #### Compile using `Go`(Manual build)
-Create wsldl.exe(Manual)
+Create wsldl.exe
 ```cmd
 cd src
 go build
 ```
 
 
-Optionally, to add an icon to exe run:(Manual)
+Optionally, to add an icon to exe run:
 ```cmd
 cd src
 go get github.com/akavel/rsrc
