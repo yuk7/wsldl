@@ -24,7 +24,7 @@ go build
 ```
 Usage:
     <no args>:
-        build single wsldl.exe
+        build default wsldl.exe
     all:
         build everything, including exe with icons and default wsldl.exe
     resources:
