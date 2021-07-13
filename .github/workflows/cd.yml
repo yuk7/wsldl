@@ -1,0 +1,46 @@
+name: Continuous Deployment
+
+on:
+  push:
+    tags:
+      - '*'
+  
+jobs:
+  publish-github:
+    name: Publish on Github
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          cd src
+          env GOOS=windows GOARCH=amd64 go build
+          touch distro.txt
+          for f in ../res/*;do
+            if [ -d "$f" ]; then
+              echo $f >> distro.txt
+            fi
+          done
+          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_linux_amd64
+          chmod +x rsrc_linux_amd64
+          cat distro.txt | while read line;do
+            distro="$(echo ${line} | cut -f 3 -d'/')"
+            ./rsrc_linux_amd64 -ico ${line}/icon.ico -o ${distro}.syso
+            env GOOS=windows GOARCH=amd64 go build -o ${distro}.exe
+            rm -rf ${distro}.syso
+          done
+      - name: move wsldl to ../
+        run: mv src/wsldl.exe wsldl.exe
+      - name: Zip package
+        run: cd src;7z a icons.zip *.exe;mv icons.zip ../icons.zip
+      - name: Release body
+        run: echo "![downloads](https://img.shields.io/github/downloads/yuk7/wsldl/${GITHUB_REF}/total?style=flat-square)" > body.txt
+      - name: Upload the release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: body.txt 
+          files: |
+            wsldl.exe
+            icons.zip
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
