@@ -13,20 +13,22 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: |
+          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
+          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+          export PATH=$PATH:~/go/bin
           cd src
-          env GOOS=windows GOARCH=amd64 go build
+          goversioninfo
+          env GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/yuk7/wsldl/version.version=${VERSION}"
           touch distro.txt
           for f in ../res/*;do
             if [ -d "$f" ]; then
               echo $f >> distro.txt
             fi
           done
-          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_linux_amd64
-          chmod +x rsrc_linux_amd64
           cat distro.txt | while read line;do
             distro="$(echo ${line} | cut -f 3 -d'/')"
-            ./rsrc_linux_amd64 -ico ${line}/icon.ico -o ${distro}.syso
-            env GOOS=windows GOARCH=amd64 go build -o ${distro}.exe
+            goversioninfo -icon ${line}/icon.ico -o ${distro}.syso
+            env GOOS=windows GOARCH=amd64 go build -o ${distro}.exe -ldflags "-X github.com/yuk7/wsldl/version.version=${VERSION}"
             rm -rf ${distro}.syso
           done
       - name: move wsldl to ../
