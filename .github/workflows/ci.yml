@@ -18,16 +18,16 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: |
-          cd src
-          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_windows_amd64.exe
-          .\rsrc_windows_amd64.exe -ico ../res/Fedora/icon.ico -o wsldl.syso
           $short_sha = $env:GITHUB_SHA.SubString(0, 7)
-          go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-${short_sha}"
+          $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=CI-${short_sha}`""
+          .\build.bat all
+          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
       - uses: actions/upload-artifact@v2
         with:
           name: Build results-Windows
           path: |
-            src/wsldl.exe
+            out/wsldl.exe
+            out/icons.zip
           if-no-files-found: error
   compile-wsldl-linux:
     name: Cross-compile wsldl from Linux
@@ -36,10 +36,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: |
+          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+          export PATH=$PATH:~/go/bin
           cd src
-          curl -sSfLO https://github.com/akavel/rsrc/releases/download/v0.10.2/rsrc_linux_amd64
-          chmod +x rsrc_linux_amd64
-          ./rsrc_linux_amd64 -ico ../res/Fedora/icon.ico -o wsldl.syso
+          goversioninfo
           env GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/yuk7/wsldl/version.version=CI-Cross-${GITHUB_SHA:0:7}"
       - uses: actions/upload-artifact@v2
         with:
