@@ -129,6 +129,14 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 
 // ExecWindowsTerminal executes Windows Terminal
 func ExecWindowsTerminal(name string) {
+	// Get the name from the registry to be case sensitive.
+	lxguid, err := utils.WslGetUUID(name)
+	if err == nil {
+		tmpName, err := utils.WslGetDistroName(lxguid)
+		if err == nil {
+			name = tmpName
+		}
+	}
 
 	profileName := ""
 	conf, err := wtutils.ReadParseWTConfig()

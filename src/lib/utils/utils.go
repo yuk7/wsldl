@@ -116,6 +116,21 @@ func WsldlGetTerminalInfo(uuid string) (res int, err error) {
 	return
 }
 
+// WslGetDistroName gets distro name from registry
+func WslGetDistroName(uuid string) (res string, err error) {
+	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.READ)
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	res, _, tmpErr = key.GetStringValue("DistributionName")
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	return
+}
+
 // IsParentConsole gets is parent process is console or not
 func IsParentConsole() (res bool, err error) {
 	list := strings.Split(ConsoleProcNames, ",")
