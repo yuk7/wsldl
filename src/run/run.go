@@ -11,6 +11,7 @@ import (
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wtutils"
 )
 
 //Execute is default run entrypoint.
@@ -76,19 +77,8 @@ func ExecuteNoArgs(name string) {
 		switch info {
 		case utils.FlagWsldlTermWT:
 			utils.FreeConsole()
-			exe := os.Getenv("LOCALAPPDATA")
-			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\wt.exe")
-
-			cmd := exe + " " + utils.DQEscapeString(efPath) + " run"
-			res, err := utils.CreateProcessAndWait(cmd)
-			if err != nil {
-				utils.AllocConsole()
-				println("ERR: Failed to launch Terminal Process")
-				println(exe)
-				println(err.Error())
-				bufio.NewReader(os.Stdin).ReadString('\n')
-			}
-			os.Exit(res)
+			ExecWindowsTerminal(name)
+			os.Exit(0)
 
 		case utils.FlagWsldlTermFlute:
 			utils.FreeConsole()
@@ -105,7 +95,6 @@ func ExecuteNoArgs(name string) {
 				bufio.NewReader(os.Stdin).ReadString('\n')
 			}
 			os.Exit(res)
-
 		}
 	}
 	Execute(name, nil)
@@ -136,6 +125,51 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 		out = out[:len(out)-1]
 	}
 	return
+}
+
+// ExecWindowsTerminal executes Windows Terminal
+func ExecWindowsTerminal(name string) {
+
+	profileName := ""
+	conf, err := wtutils.ReadParseWTConfig()
+	if err == nil {
+		guid := "{" + wtutils.CreateProfileGUID(name) + "}"
+		for _, profile := range conf.Profiles.ProfileList {
+			if profile.GUID == guid {
+				profileName = profile.Name
+				break
+			}
+		}
+		if profileName == "" {
+			for _, profile := range conf.Profiles.ProfileList {
+				if strings.EqualFold(profile.Name, name) {
+					profileName = profile.Name
+					break
+				}
+			}
+		}
+	}
+
+	exe := os.Getenv("LOCALAPPDATA")
+	exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\wt.exe")
+	cmd := exe
+
+	if profileName != "" {
+		cmd = cmd + " -p " + utils.DQEscapeString(profileName)
+	} else {
+		efPath, _ := os.Executable()
+		cmd = cmd + " " + utils.DQEscapeString(efPath) + " run"
+	}
+
+	res, err := utils.CreateProcessAndWait(cmd)
+	if err != nil {
+		utils.AllocConsole()
+		println("ERR: Failed to launch Terminal Process")
+		println(exe)
+		println(err.Error())
+		bufio.NewReader(os.Stdin).ReadString('\n')
+	}
+	os.Exit(res)
 }
 
 // ShowHelp shows help message
