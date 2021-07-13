@@ -83,7 +83,7 @@ func ExecuteNoArgs(name string) {
 		case utils.FlagWsldlTermFlute:
 			utils.FreeConsole()
 			exe := os.Getenv("LOCALAPPDATA")
-			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\flute.exe")
+			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
 			cmd := exe + " run " + utils.DQEscapeString(efPath) + " run"
 			res, err := utils.CreateProcessAndWait(cmd)
@@ -159,7 +159,7 @@ func ExecWindowsTerminal(name string) {
 	}
 
 	exe := os.Getenv("LOCALAPPDATA")
-	exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\wt.exe")
+	exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\" + wtutils.WTPackageName + "\\wt.exe")
 	cmd := exe
 
 	if profileName != "" {
