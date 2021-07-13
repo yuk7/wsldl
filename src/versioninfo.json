@@ -1,0 +1,43 @@
+{
+    "FixedFileInfo": {
+        "FileVersion": {
+            "Major": 2,
+            "Minor": 0,
+            "Patch": 0,
+            "Build": 0
+        },
+        "ProductVersion": {
+            "Major": 2,
+            "Minor": 0,
+            "Patch": 0,
+            "Build": 0
+        },
+        "FileFlagsMask": "3f",
+        "FileFlags ": "00",
+        "FileOS": "040004",
+        "FileType": "01",
+        "FileSubType": "00"
+    },
+    "StringFileInfo": {
+        "Comments": "",
+        "CompanyName": "wsldl authors",
+        "FileDescription": "wsldl, an advanced WSL launcher",
+        "FileVersion": "2.0.0.0",
+        "InternalName": "wsldl",
+        "LegalCopyright": "Copyright (C) 2017-2021 wsldl authors",
+        "LegalTrademarks": "",
+        "OriginalFilename": "wsldl.exe",
+        "PrivateBuild": "",
+        "ProductName": "wsldl",
+        "ProductVersion": "2.0.0.0",
+        "SpecialBuild": ""
+    },
+    "VarFileInfo": {
+        "Translation": {
+            "LangID": "0409",
+            "CharsetID": "04B0"
+        }
+    },
+    "IconPath": "",
+    "ManifestPath": ""
+}
