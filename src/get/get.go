@@ -60,7 +60,7 @@ func Execute(name string, args []string) {
 				print("default")
 			}
 
-		case "--wt-profname", "--wt-profilename", "--wt-pn":
+		case "--wt-profile-name", "--wt-profilename", "--wt-pn":
 			lxguid, err := utils.WslGetUUID(name)
 			if err != nil {
 				log.Fatal(err)
