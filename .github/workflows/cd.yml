@@ -16,12 +16,11 @@ jobs:
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
           $version = $env:GITHUB_SHA.Replace("refs/tags/","")
           $Env:GO_BUILD_OPTS = "-ldflags `"-w -s -X github.com/yuk7/wsldl/version.version=${version}`""
+          $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}" 
 
           echo AMD64 build
           .\build.bat all
-          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
           move out out_amd64
-          $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
 
           echo Download golang 1.17 RC1
           go get golang.org/dl/go1.17rc1
@@ -31,13 +30,12 @@ jobs:
           $Env:GOBIN="go1.17rc1"
           $Env:GOARCH="arm64"
           .\build.bat all
-          move .\out\wsldl.exe .\out\wsldl_arm64.exe
-          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons_arm64.zip
           move out out_arm64
-      - name: move wsldl to ../
-        run: mv src/wsldl.exe wsldl.exe
-      - name: Zip package
-        run: cd src;7z a icons.zip *.exe;mv icons.zip ../icons.zip
+      - name: Zip package and rename
+        run: |
+          Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out_amd64\icons.zip
+          move .\out_arm64\wsldl.exe wsldl_arm64.exe
+          Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out_arm64\icons_arm64.zip
       - name: Release body
         run: |
           $version = $env:GITHUB_SHA.Replace("refs/tags/","")
