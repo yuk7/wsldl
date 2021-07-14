@@ -8,41 +8,48 @@ on:
 jobs:
   publish-github:
     name: Publish on Github
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Build
         run: |
-          VERSION=$(echo ${{ github.ref }} | sed -e "s#refs/tags/##g")
-          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-          export PATH=$PATH:~/go/bin
-          cd src
-          goversioninfo
-          env GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/yuk7/wsldl/version.version=${VERSION}"
-          touch distro.txt
-          for f in ../res/*;do
-            if [ -d "$f" ]; then
-              echo $f >> distro.txt
-            fi
-          done
-          cat distro.txt | while read line;do
-            distro="$(echo ${line} | cut -f 3 -d'/')"
-            goversioninfo -icon ${line}/icon.ico -o ${distro}.syso
-            env GOOS=windows GOARCH=amd64 go build -o ${distro}.exe -ldflags "-X github.com/yuk7/wsldl/version.version=${VERSION}"
-            rm -rf ${distro}.syso
-          done
+          $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
+          $version = $env:GITHUB_SHA.Replace("refs/tags/","")
+          $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=${version}`""
+
+          echo AMD64 build
+          .\build.bat all
+          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
+          move out out_amd64
+          $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
+
+          echo Download golang 1.17 RC1
+          go get golang.org/dl/go1.17rc1
+          go1.17rc1 download
+
+          echo ARM64 build
+          $Env:GOBIN="go1.17rc1"
+          $Env:GOARCH="arm64"
+          .\build.bat all
+          move .\out\wsldl.exe .\out\wsldl_arm64.exe
+          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons_arm64.zip
+          move out out_arm64
       - name: move wsldl to ../
         run: mv src/wsldl.exe wsldl.exe
       - name: Zip package
         run: cd src;7z a icons.zip *.exe;mv icons.zip ../icons.zip
       - name: Release body
-        run: echo "![downloads](https://img.shields.io/github/downloads/yuk7/wsldl/${GITHUB_REF}/total?style=flat-square)" > body.txt
+        run: |
+          $version = $env:GITHUB_SHA.Replace("refs/tags/","")
+          echo "![downloads](https://img.shields.io/github/downloads/yuk7/wsldl/${version}/total?style=flat-square)" > body.txt
       - name: Upload the release
         uses: softprops/action-gh-release@v1
         with:
           body_path: body.txt 
           files: |
-            wsldl.exe
-            icons.zip
+            out_amd64/wsldl.exe
+            out_amd64/icons.zip
+            out_arm64/wsldl_arm64.exe
+            out_arm64/icons_arm64.zip
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
