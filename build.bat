@@ -53,31 +53,41 @@ if "%GOARCH%"=="arm64" (
 if "%~1"=="all" (
     echo Building everything
     call :dlgoversioninfo
+    if %ERRORLEVEL% NEQ 0 goto :failed
     call :resources
+    if %ERRORLEVEL% NEQ 0 goto :failed
     call :icons
+    if %ERRORLEVEL% NEQ 0 goto :failed
     call :single
+    if %ERRORLEVEL% NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="resources" (
     echo Building resources
     call :dlgoversioninfo
+    if %ERRORLEVEL% NEQ 0 goto :failed
     call :resources
+    if %ERRORLEVEL% NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="icons" (
     echo Building icon binaries
     call :icons
+    if %ERRORLEVEL% NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="single" (
     echo Building binary...
     call :dlgoversioninfo
+    if %ERRORLEVEL% NEQ 0 goto :failed
     call :single
+    if %ERRORLEVEL% NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="singlewor" (
     echo Building binary without resource...
     call :singlewor
+    if %ERRORLEVEL% NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="clean" (
@@ -86,20 +96,25 @@ if "%~1"=="clean" (
     exit /b
 )
 call :dlgoversioninfo
+if %ERRORLEVEL% NEQ 0 goto :failed
 call :single
+if %ERRORLEVEL% NEQ 0 goto :failed
 exit /b
 
 
 
 :resources
+set DOING=resources
 cd /d %~dp0
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
     tools\goversioninfo %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
+    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 )
 exit /b
 
 :icons
+set DOING=icons
 cd /d %~dp0
 echo Building wsldl with icons...
 mkdir out\icons >NUL 2>&1
@@ -108,22 +123,27 @@ FOR /D /r %%D in ("res/*") DO (
     cd src
     echo %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
     %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
+    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     cd ..
     del /f src\resource.syso
 )
 exit /b
 
 :single
+set DOING=single
 cd /d %~dp0
 echo Compiling resource object...
 tools\goversioninfo %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 :singlewor
+set DOING=singlewor
 cd /d %~dp0
 mkdir out >NUL 2>&1
 cd src
 echo Building default wsldl.exe...
 echo %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
 %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
+if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 cd ..
 :end
 exit /b
@@ -138,6 +158,7 @@ rmdir /s /q out tools
 exit /b
 
 :dlgoversioninfo
+set DOING=dlgoversioninfo
 cd /d %~dp0
 mkdir tools >NUL 2>&1
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
@@ -154,5 +175,9 @@ if "%PROCESSOR_ARCHITECTURE%"=="ARM" (
 if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
     curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm64.exe -o tools\goversioninfo.exe
 )
-
+if not exist tools\goversioninfo.exe exit /b 1
 exit /b
+
+:failed
+echo ERROR in %DOING%
+exit /b 1
