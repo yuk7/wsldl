@@ -14,7 +14,7 @@ jobs:
       - name: Build
         run: |
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
-          $version = $env:GITHUB_SHA.Replace("refs/tags/","")
+          $version = ${Env:GITHUB_REF}.Replace("refs/tags/","")
           $Env:GO_BUILD_OPTS = "-ldflags `"-w -s -X github.com/yuk7/wsldl/version.version=${version}`""
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}" 
 
@@ -34,11 +34,11 @@ jobs:
       - name: Zip package and rename
         run: |
           Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out_amd64\icons.zip
-          move .\out_arm64\wsldl.exe wsldl_arm64.exe
+          move .\out_arm64\wsldl.exe .\out\arm64\wsldl_arm64.exe
           Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out_arm64\icons_arm64.zip
       - name: Release body
         run: |
-          $version = $env:GITHUB_SHA.Replace("refs/tags/","")
+          $version = ${Env:GITHUB_REF}.Replace("refs/tags/","")
           echo "![downloads](https://img.shields.io/github/downloads/yuk7/wsldl/${version}/total?style=flat-square)" > body.txt
       - name: Upload the release
         uses: softprops/action-gh-release@v1
