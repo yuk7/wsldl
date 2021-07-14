@@ -2,55 +2,59 @@
 
 ## 🛠How-to-Build
 
+## Sidenote: To compile ARM binaries, Please install `Go` 1.17 by running this:
+```bash
+go get golang.org/dl/go1.17rc1
+#Additional step if you want to cross-compile from Linux/MacOS
+export PATH=$PATH:~/go/bin
+```
+
 ### Windows
 
-#### Compile using `Go`(Manual build)
-Create wsldl.exe
-```cmd
-cd src
-go build
-```
+#### Compile using `Go`
 
+##### Automatic `build.bat` usage
 
-Optionally, to add an icon to exe run:
-```cmd
-cd src
-go get github.com/akavel/rsrc
-rsrc -ico ../res/%YourDistroName%/icon.ico -o wsldl.syso
-go build
-```
-
-### Automatic `build.bat` usage
-```
+```dos
 Usage:
-    <no args>:
-        build default wsldl.exe
+    <no args>/single:
+        Build default wsldl.exe
     all:
-        build everything, including exe with icons and default wsldl.exe
+        Build everything, including exe with icons and default wsldl.exe
     resources:
-        build only .syso files
+        Build only .syso files
     icons:
-        build exe with icons(must be executed after running resources)
+        Build exe with icons(must be executed after running resources)
     clean:
-        clean(remove) .syso files after building exe with icons
+        Clean(remove) .syso files after building exe with icons
+    singlewor:
+        Build exe without any manifest/resources
 ```
+To cross-compile ARM64 from AMD64 or vice versa, run:
+```cmd
+set GOARCH=ArchitectureName
+```
+Architecture names can be:\
+`arm64`\
+`amd64`\
+`arm`\
+`386`
 
 
 
-**Note: Creating wsldl.exe for ARM is currently not supported since Go does not support cross-compiling for `windows/arm64`.**
 
 ### Linux (cross compile)
 
 Run this command in shell
 ```bash
 $ cd src
-$ env GOOS=windows GOARCH=amd64 go build
+$ env GOOS=windows GOARCH=amd64 go build -ldflags "-w -s"
 ```
 
 Optionally, to add an icon to the exe, create and link a resource with
 ```bash
-$ cd src
-$ go get github.com/akavel/rsrc
-$ rsrc -ico ../res/%YourDistroName%/icon.ico -o wsldl.syso
-$ env GOOS=windows GOARCH=amd64 go build
+$ go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+$ export PATH=$PATH:~/go/bin
+$ goversioninfo -icon res/DistroName/icon.ico -o src/DistroName.syso
+$ env GOOS=windows GOARCH=ArchitectureName go build -ldflags "-w -s" -o DistroName.exe
 ```
