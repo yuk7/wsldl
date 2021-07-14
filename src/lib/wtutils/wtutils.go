@@ -5,8 +5,8 @@ import (
 	"os"
 
 	uuid "github.com/satori/go.uuid"
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"golang.org/x/text/encoding/unicode"
+	"muzzammil.xyz/jsonc"
 )
 
 const (
@@ -47,7 +47,7 @@ func ReadWTConfigJSON() (res string, err error) {
 // ParseWTConfigJSON parses Windows Terminal configuration json string
 func ParseWTConfigJSON(str string) (res Config, err error) {
 	var c Config
-	err = json5.Unmarshal([]byte(str), &c)
+	err = jsonc.Unmarshal([]byte(str), &c)
 	if err != nil {
 		return
 	}
