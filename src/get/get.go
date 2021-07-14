@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"syscall"
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wtutils"
 )
 
 //Execute is default install entrypoint
@@ -38,7 +40,7 @@ func Execute(name string, args []string) {
 			}
 			print(guid)
 
-		case "--default-term":
+		case "--default-term", "--default-terminal":
 			uuid, err := utils.WslGetUUID(name)
 			if err != nil {
 				println("ERR: Failed to get information")
@@ -56,6 +58,35 @@ func Execute(name string, args []string) {
 				print("flute")
 			default:
 				print("default")
+			}
+
+		case "--wt-profname", "--wt-profilename", "--wt-pn":
+			lxguid, err := utils.WslGetUUID(name)
+			if err != nil {
+				log.Fatal(err)
+			}
+			name, err := utils.WslGetDistroName(lxguid)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			conf, err := wtutils.ReadParseWTConfig()
+			if err != nil {
+				log.Fatal(err)
+			}
+			guid := "{" + wtutils.CreateProfileGUID(name) + "}"
+			profileName := ""
+			for _, profile := range conf.Profiles.ProfileList {
+				if profile.GUID == guid {
+					profileName = profile.Name
+					break
+				}
+			}
+			if profileName != "" {
+				print(profileName)
+			} else {
+				println("ERR: Profile not found")
+				os.Exit(1)
 			}
 
 		case "--flags-val":
@@ -102,5 +133,6 @@ func ShowHelp(showTitle bool) {
 	println("      - `--mount-drive`: Get true/false status of Mount drives")
 	println("      - `--wsl-version`: Get WSL Version 1/2 for this distro")
 	println("      - `--default-term`: Get Default Terminal for this distro launcher")
+	println("      - `--wt-profile-name`: Get Profile Name from Windows Terminal")
 	println("      - `--lxguid`: Get WSL GUID key for this distro")
 }
