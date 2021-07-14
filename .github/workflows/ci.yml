@@ -29,6 +29,29 @@ jobs:
             out/wsldl.exe
             out/icons.zip
           if-no-files-found: error
+  compile-wsldl-windows-arm64:
+    name: Compile wsldl ARM64
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
+          go get golang.org/dl/go1.17rc1
+          go1.17rc1 download
+          $short_sha = $env:GITHUB_SHA.SubString(0, 7)
+          $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=CI-${short_sha}`""
+          $Env:GOBIN="go1.17rc1"
+          $Env:GOARCH="arm64"
+          .\build.bat all
+          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Build results-Windows-ARM64
+          path: |
+            out/wsldl.exe
+            out/icons.zip
+          if-no-files-found: error
   compile-wsldl-linux:
     name: Cross-compile wsldl from Linux
     runs-on: ubuntu-latest
