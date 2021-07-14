@@ -15,7 +15,7 @@ jobs:
         run: |
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
           $version = $env:GITHUB_SHA.Replace("refs/tags/","")
-          $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=${version}`""
+          $Env:GO_BUILD_OPTS = "-ldflags `"-w -s -X github.com/yuk7/wsldl/version.version=${version}`""
 
           echo AMD64 build
           .\build.bat all
