@@ -197,8 +197,11 @@ func AllocConsole() {
 	alloc.Call()
 
 	hout, _ := syscall.GetStdHandle(syscall.STD_OUTPUT_HANDLE)
+	herr, _ := syscall.GetStdHandle(syscall.STD_ERROR_HANDLE)
 	hin, _ := syscall.GetStdHandle(syscall.STD_INPUT_HANDLE)
 	os.Stdout = os.NewFile(uintptr(hout), "/dev/stdout")
+	os.Stderr = os.NewFile(uintptr(herr), "/dev/stderr")
 	os.Stdin = os.NewFile(uintptr(hin), "/dev/stdin")
+
 	return
 }
