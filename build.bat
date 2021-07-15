@@ -34,19 +34,31 @@ if not defined GOARCH (
 
 if "%GOARCH%"=="386" (
     echo GOARCH is 386
+    echo.
+    echo CAUTION! 386 32bit is not supported architecture
+    echo The output binary probably won't work.
+    echo To Cross Compile, you must set GOARCH environment variable
+    echo Supported architectures are amd64 and arm64
+    echo.
     set GOVERSIONINFO_OPTS=
-)
-if "%GOARCH%"=="amd64" (
+) else if "%GOARCH%"=="amd64" (
     echo GOARCH is amd64
     set GOVERSIONINFO_OPTS=-64
-)
-if "%GOARCH%"=="arm" (
+) else if "%GOARCH%"=="arm" (
     echo GOARCH is arm
+    echo.
+    echo CAUTION! arm 32bit is not supported architecture
+    echo The output binary probably won't work.
+    echo To Cross Compile, you must set GOARCH environment variable
+    echo Supported architectures are amd64 and arm64
+    echo.
     set GOVERSIONINFO_OPTS=-arm
-)
-if "%GOARCH%"=="arm64" (
+) else if "%GOARCH%"=="arm64" (
     echo GOARCH is arm64
     set GOVERSIONINFO_OPTS=-arm -64
+) else (
+    echo ERROR: %GOARCH% is not supported architecturefor build target.
+    exit /b 1
 )
 
 
@@ -164,16 +176,17 @@ mkdir tools >NUL 2>&1
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     echo Downaloding goversioninfo 386...
     curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_386.exe -o tools\goversioninfo.exe
-)
-if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
     echo Downaloding goversioninfo amd64...
     curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_amd64.exe -o tools\goversioninfo.exe
-)
-if "%PROCESSOR_ARCHITECTURE%"=="ARM" (
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM" (
+    echo Downaloding goversioninfo ARM...
     curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm.exe -o tools\goversioninfo.exe
-)
-if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    echo Downaloding goversioninfo ARM64...
     curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm64.exe -o tools\goversioninfo.exe
+) else (
+    echo ERROR: %PROCESSOR_ARCHITECTURE% is not supported for build environment
 )
 if not exist tools\goversioninfo.exe exit /b 1
 exit /b
