@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/yuk7/wsldl/help"
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
+	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsldl/version"
@@ -50,7 +50,7 @@ func main() {
 			help.Execute()
 
 		default:
-			fmt.Println("Invalid Arg.")
+			utils.ErrorExit(os.ErrInvalid, true, false)
 		}
 	} else {
 		if !wslapi.WslIsDistributionRegistered(name) {

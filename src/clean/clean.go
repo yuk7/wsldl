@@ -1,12 +1,10 @@
 package clean
 
 import (
-	"errors"
 	"fmt"
-	"log"
 	"os"
-	"syscall"
 
+	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
 )
 
@@ -22,8 +20,8 @@ func Execute(name string, args []string) {
 		fmt.Scan(&in)
 
 		if in != "y" {
-			fmt.Printf("Accepting is required to proceed.")
-			os.Exit(1)
+			fmt.Fprintf(os.Stderr, "Accepting is required to proceed.")
+			utils.ErrorExit(os.ErrInvalid, false, false)
 		}
 
 	case 1:
@@ -31,13 +29,11 @@ func Execute(name string, args []string) {
 		if args[0] == "-y" {
 			showProgress = false
 		} else {
-			fmt.Println("Invalid Arg.")
-			os.Exit(1)
+			utils.ErrorExit(os.ErrInvalid, true, false)
 		}
 
 	default:
-		fmt.Println("Invalid Arg.")
-		os.Exit(1)
+		utils.ErrorExit(os.ErrInvalid, true, false)
 	}
 
 	Clean(name, showProgress)
@@ -49,24 +45,8 @@ func Clean(name string, showProgress bool) {
 		fmt.Println("Unregistering...")
 	}
 	err := wslapi.WslUnregisterDistribution(name)
-	if showProgress {
-		if err != nil {
-			fmt.Println("ERR: Failed to Unregister")
-			var errno syscall.Errno
-			if errors.As(err, &errno) {
-				fmt.Printf("Code: 0x%x\n", int(errno))
-				log.Fatal(err)
-			}
-		} else {
-			fmt.Println("Unregistration complete")
-		}
-	}
 	if err != nil {
-		var errno syscall.Errno
-		if errors.As(err, &errno) {
-			os.Exit(int(errno))
-		}
-		os.Exit(1)
+		utils.ErrorExit(err, showProgress, false)
 	}
 	os.Exit(0)
 }

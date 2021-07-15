@@ -1,10 +1,7 @@
 package run
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"syscall"
@@ -22,11 +19,8 @@ func Execute(name string, args []string) {
 	}
 
 	exitCode, err := wslapi.WslLaunchInteractive(name, command, true)
-	var errno syscall.Errno
-	if errors.As(err, &errno) {
-		fmt.Printf("ERR: Launch Process failed\n")
-		fmt.Printf("Code: 0x%x\nExit Code:0x%x", int(errno), exitCode)
-		log.Fatal(err)
+	if err != nil {
+		utils.ErrorExit(err, true, false)
 	} else {
 		os.Exit(int(exitCode))
 	}
@@ -41,14 +35,10 @@ func ExecuteP(name string, args []string) {
 			s = utils.DQEscapeString(s)
 			out, exitCode, err := ExecRead(name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
-				fmt.Println("ERR: Failed to Path Translation")
-				var errno syscall.Errno
-				if errors.As(err, &errno) {
-					fmt.Printf("Code: 0x%x\n", int(errno))
-				}
-				fmt.Printf("ExitCode: 0x%x\n", exitCode)
+				fmt.Fprintln(os.Stderr, "ERR: Failed to Path Translation")
+				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
 				if err != nil {
-					log.Fatal(err)
+					utils.ErrorExit(err, true, false)
 				}
 				os.Exit(int(exitCode))
 			}
@@ -89,10 +79,9 @@ func ExecuteNoArgs(name string) {
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
-				println("ERR: Failed to launch Terminal Process")
-				println(exe)
-				println(err.Error())
-				bufio.NewReader(os.Stdin).ReadString('\n')
+				fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+				fmt.Fprintf(os.Stderr, "%s\n", exe)
+				utils.ErrorExit(err, true, true)
 			}
 			os.Exit(res)
 		}
@@ -172,10 +161,9 @@ func ExecWindowsTerminal(name string) {
 	res, err := utils.CreateProcessAndWait(cmd)
 	if err != nil {
 		utils.AllocConsole()
-		println("ERR: Failed to launch Terminal Process")
-		println(exe)
-		println(err.Error())
-		bufio.NewReader(os.Stdin).ReadString('\n')
+		fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+		fmt.Fprintln(os.Stderr, exe)
+		utils.ErrorExit(err, true, true)
 	}
 	os.Exit(res)
 }

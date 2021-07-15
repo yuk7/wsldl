@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"log"
+	"os"
 	"strconv"
 
 	"github.com/yuk7/wsldl/get"
@@ -62,7 +62,7 @@ func Execute(name string, args []string) {
 			case "flute", strconv.Itoa(utils.FlagWsldlTermFlute):
 				value = utils.FlagWsldlTermFlute
 			default:
-				err = errors.New("invalid args")
+				err = os.ErrInvalid
 				break
 			}
 			uuid, err := utils.WslGetUUID(name)
@@ -77,17 +77,14 @@ func Execute(name string, args []string) {
 			flags = uint32(intFlags)
 
 		default:
-			err = errors.New("invalid args")
+			err = os.ErrInvalid
 		}
 		if err != nil {
-			println("ERR: Failed to parse your argument")
-			log.Fatal(err)
+			utils.ErrorExit(err, true, false)
 		}
 		wslapi.WslConfigureDistribution(name, uid, flags)
 	} else {
-		println("ERR: Invalid argument")
-		err = errors.New("invalid args")
-		log.Fatal(err)
+		utils.ErrorExit(os.ErrInvalid, true, false)
 	}
 }
 

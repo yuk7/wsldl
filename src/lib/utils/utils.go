@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -204,4 +206,37 @@ func AllocConsole() {
 	os.Stdin = os.NewFile(uintptr(hin), "/dev/stdin")
 
 	return
+}
+
+// ErrorExit shows error message and exit
+func ErrorExit(err error, showmsg bool, pause bool) {
+	var errno syscall.Errno
+	if err == nil {
+		if showmsg {
+			fmt.Fprintf(os.Stderr, "ERR: Unknown error")
+			Exit(pause, 1)
+		}
+	}
+	fmt.Fprintf(os.Stderr, "ERR: %s\n", err)
+	if errors.As(err, &errno) {
+		if showmsg {
+			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
+			fmt.Fprintf(os.Stderr, "%#v\n", err)
+		}
+		Exit(pause, int(errno))
+	} else {
+		if showmsg {
+			fmt.Fprintf(os.Stderr, "%#v\n", err)
+		}
+		Exit(pause, 1)
+	}
+}
+
+// Exit exits program
+func Exit(pause bool, exitCode int) {
+	if pause {
+		fmt.Fprintf(os.Stdout, "Press enter to exit...")
+		bufio.NewReader(os.Stdin).ReadString('\n')
+	}
+	os.Exit(exitCode)
 }

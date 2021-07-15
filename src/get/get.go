@@ -3,9 +3,7 @@ package get
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
-	"syscall"
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
@@ -36,20 +34,18 @@ func Execute(name string, args []string) {
 		case "--lxguid", "--lxuid":
 			guid, err := utils.WslGetUUID(name)
 			if err != nil {
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 			print(guid)
 
 		case "--default-term", "--default-terminal":
 			uuid, err := utils.WslGetUUID(name)
 			if err != nil {
-				println("ERR: Failed to get information")
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 			info, err := utils.WsldlGetTerminalInfo(uuid)
 			if err != nil {
-				println("ERR: Failed to get information")
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 			switch info {
 			case utils.FlagWsldlTermWT:
@@ -63,16 +59,16 @@ func Execute(name string, args []string) {
 		case "--wt-profile-name", "--wt-profilename", "--wt-pn":
 			lxguid, err := utils.WslGetUUID(name)
 			if err != nil {
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 			name, err := utils.WslGetDistroName(lxguid)
 			if err != nil {
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 
 			conf, err := wtutils.ReadParseWTConfig()
 			if err != nil {
-				log.Fatal(err)
+				utils.ErrorExit(err, true, false)
 			}
 			guid := "{" + wtutils.CreateProfileGUID(name) + "}"
 			profileName := ""
@@ -85,8 +81,7 @@ func Execute(name string, args []string) {
 			if profileName != "" {
 				print(profileName)
 			} else {
-				println("ERR: Profile not found")
-				os.Exit(1)
+				utils.ErrorExit(errors.New("profile not found"), true, false)
 			}
 
 		case "--flags-val":
@@ -96,14 +91,10 @@ func Execute(name string, args []string) {
 			fmt.Printf("%04b", flags)
 
 		default:
-			println("ERR: Invalid argument")
-			err := errors.New("invalid args")
-			log.Fatal(err)
+			utils.ErrorExit(os.ErrInvalid, true, false)
 		}
 	} else {
-		println("ERR: Invalid argument")
-		err := errors.New("invalid args")
-		log.Fatal(err)
+		utils.ErrorExit(os.ErrInvalid, true, false)
 	}
 }
 
@@ -113,11 +104,7 @@ func WslGetConfig(distributionName string) (uid uint64, flags uint32) {
 	_, uid, flags, err = wslapi.WslGetDistributionConfiguration(distributionName)
 	if err != nil {
 		fmt.Println("ERR: Failed to GetDistributionConfiguration")
-		var errno syscall.Errno
-		if errors.As(err, &errno) {
-			fmt.Printf("Code: 0x%x\n", int(errno))
-		}
-		log.Fatal(err)
+		utils.ErrorExit(err, true, false)
 	}
 	return
 }
