@@ -46,7 +46,7 @@ func main() {
 		case "clean":
 			clean.Execute(name, os.Args[2:])
 
-		case "help", "-h", "--help":
+		case "help", "-h", "--help", "/?":
 			help.Execute()
 
 		default:

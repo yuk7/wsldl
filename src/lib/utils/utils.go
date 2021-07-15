@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"unsafe"
@@ -241,6 +242,13 @@ func ErrorExit(err error, showmsg bool, showcolor bool, pause bool) {
 			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
 		}
 		Exit(pause, int(errno))
+	} else if err == os.ErrInvalid {
+		if showmsg {
+			efPath, _ := os.Executable()
+			exeName := filepath.Base(efPath)
+			fmt.Fprintln(os.Stderr, "Your command may be incorrect.")
+			fmt.Fprintf(os.Stderr, "You can get help with `%s help`.\n", exeName)
+		}
 	} else {
 		if showmsg {
 			fmt.Fprintf(os.Stderr, "%#v\n", err)
