@@ -31,6 +31,8 @@ const (
 	FlagWsldlTermWT = 1
 	// FlagWsldlTermFlute is Fluent Terminal
 	FlagWsldlTermFlute = 2
+	// SpecialDirs is define path of special dirs
+	SpecialDirs = "SystemDrive:,SystemRoot:,SystemRoot:System32,USERPROFILE:"
 )
 
 // DQEscapeString is escape string with double quote
@@ -165,6 +167,30 @@ func IsParentConsole() (res bool, err error) {
 
 	res = false
 	return
+}
+
+// IsCurrentDirSpecial gets whether the current directory is special (Windows, USEPROFILE)
+func IsCurrentDirSpecial() bool {
+	cdir, err := filepath.Abs(".")
+	if err != nil {
+		return true
+	}
+	sdarr := strings.Split(SpecialDirs, ",")
+	for _, item := range sdarr {
+		splititem := strings.Split(item, ":")
+		itemdir := ""
+		if splititem[0] != "" {
+			itemdir = os.Getenv(splititem[0])
+		}
+		itemdir, err = filepath.Abs(itemdir + "\\" + splititem[1])
+		if err != nil {
+			return true
+		}
+		if strings.EqualFold(cdir, itemdir) {
+			return true
+		}
+	}
+	return false
 }
 
 // CreateProcessAndWait creating process and wait it

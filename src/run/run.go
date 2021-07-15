@@ -17,8 +17,11 @@ func Execute(name string, args []string) {
 	for _, s := range args {
 		command = command + " " + utils.DQEscapeString(s)
 	}
-
-	exitCode, err := wslapi.WslLaunchInteractive(name, command, true)
+	var inheritpath = true
+	if args == nil {
+		inheritpath = !utils.IsCurrentDirSpecial()
+	}
+	exitCode, err := wslapi.WslLaunchInteractive(name, command, inheritpath)
 	if err != nil {
 		utils.ErrorExit(err, true, true, false)
 	} else {
@@ -75,7 +78,7 @@ func ExecuteNoArgs(name string) {
 			exe := os.Getenv("LOCALAPPDATA")
 			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
-			cmd := exe + " run " + utils.DQEscapeString(efPath) + " run"
+			cmd := exe + " run " + utils.DQEscapeString(efPath)
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
