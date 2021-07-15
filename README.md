@@ -4,8 +4,7 @@ Advanced WSL Distribution Launcher / Installer
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/wsldl/img/Arch_Alpine_Cent.png)
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yuk7/wsldl/Mingw-w64%20Cross%20CI?logo=GitHub&style=flat-square)](https://github.com/yuk7/wsldl/actions?query=workflow%3A%22Mingw-w64+Cross+CI%22)
-[![AppVeyor](https://img.shields.io/appveyor/ci/yuk7/wsldl.svg?logo=AppVeyor&style=flat-square)](https://ci.appveyor.com/project/yuk7/wsldl)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yuk7/wsldl/Continuous%20Integration?logo=GitHub&style=flat-square)](https://github.com/yuk7/wsldl/actions?query=workflow%3A%22Continuous-Integration%22)
 [![Github All Releases](https://img.shields.io/github/downloads/yuk7/wsldl/total.svg?style=flat-square)](https://github.com/yuk7/wsldl/releases/latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 ![License](https://img.shields.io/github/license/yuk7/wsldl.svg?style=flat-square)
@@ -26,19 +25,21 @@ If you rename it, you can register with a different name.
 
 
 ## 🔧Install with any rootfs
-#### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
+#### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
+(wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
 #### 2. Rename it for distribution name to register.
 (Ex:Rename to Arch.exe if you want to use "Arch" for the Instance name)
 #### 3. Put your rootfs.tar(.gz) in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
 ## 🔗Use as a Launcher for already installed distribution
-#### 1. [Download Launcher.exe](https://github.com/yuk7/wsldl/releases/latest)
+#### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
+(wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
 #### 2. Rename it for registerd instance name.
 Please check the registered instance name of the distribution with `wslconfig /l` command.
-(Ex: If the instance name is "Ubuntu-20.04", rename `Launcher.exe` to `Ubuntu-20.04.exe`)
+(Ex: If the instance name is "Ubuntu-20.04", rename `wsldl.exe` to `Ubuntu-20.04.exe`)
 #### 4. Run exe to Launch instance or configuration.
-For details, please see the help. (`{InstanceName}.exe --help`)
+For details, please see the help. (`{InstanceName}.exe help`)
 
 Note: You can distribute your distribution including wsldl exe.
 
@@ -57,28 +58,22 @@ Usage :
 
     config [setting [value]]
       - `--default-user <user>`: Set the default user for this distro to <user>
-      - `--default-uid <uid>`: Set the default user uid for this distro to <uid>
-      - `--append-path <on|off>`: Switch of Append Windows PATH to $PATH
-      - `--mount-drive <on|off>`: Switch of Mount drives
+      - `--default-uid <uid>`: Set the default user for this distro to <uid>
+      - `--append-path <true|false>`: Switch of Append Windows PATH to $PATH
+      - `--mount-drive <true|false>`: Switch of Mount drives
       - `--default-term <default|wt|flute>`: Set default terminal window
 
-    get [setting]
+    get [setting [value]]
       - `--default-uid`: Get the default user uid in this distro
-      - `--append-path`: Get on/off status of Append Windows PATH to $PATH
-      - `--mount-drive`: Get on/off status of Mount drives
+      - `--append-path`: Get true/false status of Append Windows PATH to $PATH
+      - `--mount-drive`: Get true/false status of Mount drives
       - `--wsl-version`: Get WSL Version 1/2 for this distro
       - `--default-term`: Get Default Terminal for this distro launcher
+      - `--wt-profile-name`: Get Profile Name from Windows Terminal
       - `--lxguid`: Get WSL GUID key for this distro
-
-    backup [contents]
-      - `--tgz`: Output backup.tar.gz to the current directory using tar command
-      - `--reg`: Output settings registry file to the current directory
 
     clean
       - Uninstall the distro.
-
-    help
-      - Print this usage message.
 ```
 
 
