@@ -74,6 +74,9 @@ Usage :
 
     clean
       - Uninstall the distro.
+
+    help
+      - Print this usage message.
 ```
 
 
