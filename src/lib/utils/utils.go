@@ -9,6 +9,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/fatih/color"
 	ps "github.com/mitchellh/go-ps"
 	"golang.org/x/sys/windows/registry"
 )
@@ -213,15 +214,16 @@ func ErrorExit(err error, showmsg bool, pause bool) {
 	var errno syscall.Errno
 	if err == nil {
 		if showmsg {
-			fmt.Fprintf(os.Stderr, "ERR: Unknown error")
+			ErrorRedPrintln("ERR: unknown error")
 			Exit(pause, 1)
 		}
 	}
-	fmt.Fprintf(os.Stderr, "ERR: %s\n", err)
+	if showmsg {
+		ErrorRedPrintln("ERR: " + err.Error())
+	}
 	if errors.As(err, &errno) {
 		if showmsg {
 			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
-			fmt.Fprintf(os.Stderr, "%#v\n", err)
 		}
 		Exit(pause, int(errno))
 	} else {
@@ -239,4 +241,14 @@ func Exit(pause bool, exitCode int) {
 		bufio.NewReader(os.Stdin).ReadString('\n')
 	}
 	os.Exit(exitCode)
+}
+
+// ErrorRedPrintln shows red string to stderr
+func ErrorRedPrintln(str string) {
+	color.New(color.FgRed).Fprintln(color.Error, str)
+}
+
+// StdoutGreenPrintln shows green string to stdout
+func StdoutGreenPrintln(str string) {
+	color.New(color.FgGreen).Fprintln(color.Output, str)
 }

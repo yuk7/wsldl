@@ -38,7 +38,8 @@ func Execute(name string, args []string) {
 		Install(name, rootPath, showProgress)
 
 	} else {
-		fmt.Printf("ERR: [%s] is already installed.\n", name)
+		utils.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
+		utils.ErrorExit(os.ErrInvalid, false, false)
 	}
 }
 
@@ -53,7 +54,7 @@ func Install(name string, rootPath string, showProgress bool) {
 		if err != nil {
 			utils.ErrorExit(err, showProgress, showProgress)
 		} else {
-			fmt.Println("Installation complete")
+			utils.StdoutGreenPrintln("Installation complete")
 		}
 	}
 }

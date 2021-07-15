@@ -35,7 +35,7 @@ func ExecuteP(name string, args []string) {
 			s = utils.DQEscapeString(s)
 			out, exitCode, err := ExecRead(name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
-				fmt.Fprintln(os.Stderr, "ERR: Failed to Path Translation")
+				utils.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
 				if err != nil {
 					utils.ErrorExit(err, true, false)
@@ -79,7 +79,7 @@ func ExecuteNoArgs(name string) {
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
-				fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+				utils.ErrorRedPrintln("ERR: Failed to launch Terminal Process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
 				utils.ErrorExit(err, true, true)
 			}
@@ -161,7 +161,7 @@ func ExecWindowsTerminal(name string) {
 	res, err := utils.CreateProcessAndWait(cmd)
 	if err != nil {
 		utils.AllocConsole()
-		fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+		utils.ErrorRedPrintln("ERR: Failed to launch Terminal Process")
 		fmt.Fprintln(os.Stderr, exe)
 		utils.ErrorExit(err, true, true)
 	}

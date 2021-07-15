@@ -103,7 +103,7 @@ func WslGetConfig(distributionName string) (uid uint64, flags uint32) {
 	var err error
 	_, uid, flags, err = wslapi.WslGetDistributionConfiguration(distributionName)
 	if err != nil {
-		fmt.Println("ERR: Failed to GetDistributionConfiguration")
+		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		utils.ErrorExit(err, true, false)
 	}
 	return
