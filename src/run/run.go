@@ -85,8 +85,22 @@ func ExecuteNoArgs(name string) {
 			}
 			os.Exit(res)
 		}
+
+		// Parent isn't console, launch distro with default conhost
+		// Get the name from the registry to be case sensitive.
+		lxguid, err := utils.WslGetUUID(name)
+		if err == nil {
+			tmpName, err := utils.WslGetDistroName(lxguid)
+			if err == nil {
+				name = tmpName
+			}
+		}
+
+		utils.SetConsoleTitle(name)
+		Execute(name, nil)
+	} else {
+		Execute(name, nil)
 	}
-	Execute(name, nil)
 }
 
 //ExecRead execs command and read output

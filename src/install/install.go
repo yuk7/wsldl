@@ -1,6 +1,7 @@
 package install
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -35,7 +36,17 @@ func Execute(name string, args []string) {
 			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 
-		Install(name, rootPath, showProgress)
+		err := Install(name, rootPath, showProgress)
+		if err == nil {
+			utils.StdoutGreenPrintln("Installation complete")
+		} else {
+			utils.ErrorExit(err, showProgress, true, args == nil)
+		}
+
+		if args == nil {
+			fmt.Fprintf(os.Stdout, "Press enter to continue...")
+			bufio.NewReader(os.Stdin).ReadString('\n')
+		}
 
 	} else {
 		utils.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
@@ -44,19 +55,13 @@ func Execute(name string, args []string) {
 }
 
 //Install installs distribution with default rootfs file names
-func Install(name string, rootPath string, showProgress bool) {
+func Install(name string, rootPath string, showProgress bool) error {
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
 		fmt.Println("Installing...")
 	}
 	err := wslapi.WslRegisterDistribution(name, rootPath)
-	if showProgress {
-		if err != nil {
-			utils.ErrorExit(err, showProgress, true, showProgress)
-		} else {
-			utils.StdoutGreenPrintln("Installation complete")
-		}
-	}
+	return err
 }
 
 func detectRootfsFiles() string {

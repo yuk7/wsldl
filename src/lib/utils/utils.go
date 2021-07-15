@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"syscall"
+	"unsafe"
 
 	"github.com/fatih/color"
 	ps "github.com/mitchellh/go-ps"
@@ -206,6 +207,15 @@ func AllocConsole() {
 	os.Stderr = os.NewFile(uintptr(herr), "/dev/stderr")
 	os.Stdin = os.NewFile(uintptr(hin), "/dev/stdin")
 
+	return
+}
+
+// SetConsoleTitle calls SetConsoleTitleW API in Windows kernel32
+func SetConsoleTitle(title string) {
+	kernel32, _ := syscall.LoadDLL("Kernel32.dll")
+	proc, _ := kernel32.FindProc("SetConsoleTitleW")
+	pTitle, _ := syscall.UTF16PtrFromString(title)
+	syscall.Syscall(proc.Addr(), 1, uintptr(unsafe.Pointer(pTitle)), 0, 0)
 	return
 }
 
