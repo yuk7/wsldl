@@ -38,7 +38,9 @@ func Execute(name string, args []string) {
 
 		err := Install(name, rootPath, showProgress)
 		if err == nil {
-			utils.StdoutGreenPrintln("Installation complete")
+			if showProgress {
+				utils.StdoutGreenPrintln("Installation complete")
+			}
 		} else {
 			utils.ErrorExit(err, showProgress, true, args == nil)
 		}

@@ -94,8 +94,8 @@ func ShowHelp(showTitle bool) {
 		println("Usage:")
 	}
 	println("    config [setting [value]]")
-	println("      - `--default-user <user>`: Set the default user for this distro to <user>")
-	println("      - `--default-uid <uid>`: Set the default user for this distro to <uid>")
+	println("      - `--default-user <user>`: Set the default user for this instance to <user>")
+	println("      - `--default-uid <uid>`: Set the default user for this instance to <uid>")
 	println("      - `--append-path <true|false>`: Switch of Append Windows PATH to $PATH")
 	println("      - `--mount-drive <true|false>`: Switch of Mount drives")
 	println("      - `--default-term <default|wt|flute>`: Set default terminal window")

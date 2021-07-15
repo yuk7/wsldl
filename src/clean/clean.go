@@ -50,3 +50,12 @@ func Clean(name string, showProgress bool) {
 	}
 	os.Exit(0)
 }
+
+// ShowHelp shows help message
+func ShowHelp(showTitle bool) {
+	if showTitle {
+		println("Usage:")
+	}
+	println("    clean")
+	println("      - Uninstall the distro.")
+}

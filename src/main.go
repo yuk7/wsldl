@@ -47,7 +47,7 @@ func main() {
 			clean.Execute(name, os.Args[2:])
 
 		case "help", "-h", "--help", "/?":
-			help.Execute()
+			help.Execute(os.Args[2:])
 
 		default:
 			utils.ErrorExit(os.ErrInvalid, true, true, false)

@@ -86,7 +86,7 @@ func ExecuteNoArgs(name string) {
 			os.Exit(res)
 		}
 
-		// Parent isn't console, launch distro with default conhost
+		// Parent isn't console, launch instance with default conhost
 		// Get the name from the registry to be case sensitive.
 		lxguid, err := utils.WslGetUUID(name)
 		if err == nil {
@@ -191,8 +191,8 @@ func ShowHelp(showTitle bool) {
 	println("      - Open a new shell with your default settings.")
 	println()
 	println("    run <command line>")
-	println("      - Run the given command line in that distro. Inherit current directory.")
+	println("      - Run the given command line in that instance. Inherit current directory.")
 	println()
 	println("    runp <command line (includes windows path)>")
-	println("      - Run the path translated command line in that distro.")
+	println("      - Run the path translated command line in that instance.")
 }
