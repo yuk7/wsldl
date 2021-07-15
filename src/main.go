@@ -50,7 +50,7 @@ func main() {
 			help.Execute()
 
 		default:
-			utils.ErrorExit(os.ErrInvalid, true, false)
+			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 	} else {
 		if !wslapi.WslIsDistributionRegistered(name) {

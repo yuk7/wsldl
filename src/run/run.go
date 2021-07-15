@@ -20,7 +20,7 @@ func Execute(name string, args []string) {
 
 	exitCode, err := wslapi.WslLaunchInteractive(name, command, true)
 	if err != nil {
-		utils.ErrorExit(err, true, false)
+		utils.ErrorExit(err, true, true, false)
 	} else {
 		os.Exit(int(exitCode))
 	}
@@ -38,7 +38,7 @@ func ExecuteP(name string, args []string) {
 				utils.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
 				if err != nil {
-					utils.ErrorExit(err, true, false)
+					utils.ErrorExit(err, true, true, false)
 				}
 				os.Exit(int(exitCode))
 			}
@@ -79,9 +79,9 @@ func ExecuteNoArgs(name string) {
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
-				utils.ErrorRedPrintln("ERR: Failed to launch Terminal Process")
+				fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
-				utils.ErrorExit(err, true, true)
+				utils.ErrorExit(err, true, false, true)
 			}
 			os.Exit(res)
 		}
@@ -161,9 +161,9 @@ func ExecWindowsTerminal(name string) {
 	res, err := utils.CreateProcessAndWait(cmd)
 	if err != nil {
 		utils.AllocConsole()
-		utils.ErrorRedPrintln("ERR: Failed to launch Terminal Process")
+		fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
 		fmt.Fprintln(os.Stderr, exe)
-		utils.ErrorExit(err, true, true)
+		utils.ErrorExit(err, true, false, true)
 	}
 	os.Exit(res)
 }

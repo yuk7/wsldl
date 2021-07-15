@@ -3,7 +3,7 @@ module github.com/yuk7/wsldl
 go 1.16
 
 require (
-	github.com/fatih/color v1.12.0 // indirect
+	github.com/fatih/color v1.12.0
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/satori/go.uuid v1.2.0
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c

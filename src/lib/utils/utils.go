@@ -210,7 +210,7 @@ func AllocConsole() {
 }
 
 // ErrorExit shows error message and exit
-func ErrorExit(err error, showmsg bool, pause bool) {
+func ErrorExit(err error, showmsg bool, showcolor bool, pause bool) {
 	var errno syscall.Errno
 	if err == nil {
 		if showmsg {
@@ -219,7 +219,12 @@ func ErrorExit(err error, showmsg bool, pause bool) {
 		}
 	}
 	if showmsg {
-		ErrorRedPrintln("ERR: " + err.Error())
+		if showcolor {
+			ErrorRedPrintln("ERR: " + err.Error())
+		} else {
+			fmt.Fprintln(os.Stderr, "ERR: "+err.Error())
+		}
+
 	}
 	if errors.As(err, &errno) {
 		if showmsg {

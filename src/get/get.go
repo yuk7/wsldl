@@ -34,18 +34,18 @@ func Execute(name string, args []string) {
 		case "--lxguid", "--lxuid":
 			guid, err := utils.WslGetUUID(name)
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 			print(guid)
 
 		case "--default-term", "--default-terminal":
 			uuid, err := utils.WslGetUUID(name)
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 			info, err := utils.WsldlGetTerminalInfo(uuid)
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 			switch info {
 			case utils.FlagWsldlTermWT:
@@ -59,16 +59,16 @@ func Execute(name string, args []string) {
 		case "--wt-profile-name", "--wt-profilename", "--wt-pn":
 			lxguid, err := utils.WslGetUUID(name)
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 			name, err := utils.WslGetDistroName(lxguid)
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 
 			conf, err := wtutils.ReadParseWTConfig()
 			if err != nil {
-				utils.ErrorExit(err, true, false)
+				utils.ErrorExit(err, true, true, false)
 			}
 			guid := "{" + wtutils.CreateProfileGUID(name) + "}"
 			profileName := ""
@@ -81,7 +81,7 @@ func Execute(name string, args []string) {
 			if profileName != "" {
 				print(profileName)
 			} else {
-				utils.ErrorExit(errors.New("profile not found"), true, false)
+				utils.ErrorExit(errors.New("profile not found"), true, true, false)
 			}
 
 		case "--flags-val":
@@ -91,10 +91,10 @@ func Execute(name string, args []string) {
 			fmt.Printf("%04b", flags)
 
 		default:
-			utils.ErrorExit(os.ErrInvalid, true, false)
+			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 	} else {
-		utils.ErrorExit(os.ErrInvalid, true, false)
+		utils.ErrorExit(os.ErrInvalid, true, true, false)
 	}
 }
 
@@ -104,7 +104,7 @@ func WslGetConfig(distributionName string) (uid uint64, flags uint32) {
 	_, uid, flags, err = wslapi.WslGetDistributionConfiguration(distributionName)
 	if err != nil {
 		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
-		utils.ErrorExit(err, true, false)
+		utils.ErrorExit(err, true, true, false)
 	}
 	return
 }

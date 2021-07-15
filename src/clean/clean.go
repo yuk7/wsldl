@@ -21,7 +21,7 @@ func Execute(name string, args []string) {
 
 		if in != "y" {
 			fmt.Fprintf(os.Stderr, "Accepting is required to proceed.")
-			utils.ErrorExit(os.ErrInvalid, false, false)
+			utils.ErrorExit(os.ErrInvalid, false, true, false)
 		}
 
 	case 1:
@@ -29,11 +29,11 @@ func Execute(name string, args []string) {
 		if args[0] == "-y" {
 			showProgress = false
 		} else {
-			utils.ErrorExit(os.ErrInvalid, true, false)
+			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 
 	default:
-		utils.ErrorExit(os.ErrInvalid, true, false)
+		utils.ErrorExit(os.ErrInvalid, true, true, false)
 	}
 
 	Clean(name, showProgress)
@@ -46,7 +46,7 @@ func Clean(name string, showProgress bool) {
 	}
 	err := wslapi.WslUnregisterDistribution(name)
 	if err != nil {
-		utils.ErrorExit(err, showProgress, false)
+		utils.ErrorExit(err, showProgress, true, false)
 	}
 	os.Exit(0)
 }

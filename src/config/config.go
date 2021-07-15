@@ -80,11 +80,11 @@ func Execute(name string, args []string) {
 			err = os.ErrInvalid
 		}
 		if err != nil {
-			utils.ErrorExit(err, true, false)
+			utils.ErrorExit(err, true, true, false)
 		}
 		wslapi.WslConfigureDistribution(name, uid, flags)
 	} else {
-		utils.ErrorExit(os.ErrInvalid, true, false)
+		utils.ErrorExit(os.ErrInvalid, true, true, false)
 	}
 }
 

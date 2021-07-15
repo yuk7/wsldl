@@ -32,14 +32,14 @@ func Execute(name string, args []string) {
 			}
 
 		default:
-			utils.ErrorExit(os.ErrInvalid, true, false)
+			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 
 		Install(name, rootPath, showProgress)
 
 	} else {
 		utils.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
-		utils.ErrorExit(os.ErrInvalid, false, false)
+		utils.ErrorExit(os.ErrInvalid, false, true, false)
 	}
 }
 
@@ -52,7 +52,7 @@ func Install(name string, rootPath string, showProgress bool) {
 	err := wslapi.WslRegisterDistribution(name, rootPath)
 	if showProgress {
 		if err != nil {
-			utils.ErrorExit(err, showProgress, showProgress)
+			utils.ErrorExit(err, showProgress, true, showProgress)
 		} else {
 			utils.StdoutGreenPrintln("Installation complete")
 		}
