@@ -57,5 +57,5 @@ func ShowHelp(showTitle bool) {
 		println("Usage:")
 	}
 	println("    clean")
-	println("      - Uninstall the distro.")
+	println("      - Uninstall that instance.")
 }

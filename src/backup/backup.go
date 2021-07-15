@@ -55,6 +55,6 @@ func ShowHelp(showTitle bool) {
 		println("Usage:")
 	}
 	println("    backup [contents]")
-	println("      - `--tar`: Output backup.tar to the current directory")
-	println("      - `--reg`: Output settings registry file to the current directory")
+	println("      - `--tar`: Output backup.tar to the current directory.")
+	println("      - `--reg`: Output settings registry file to the current directory.")
 }

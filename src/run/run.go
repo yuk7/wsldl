@@ -197,5 +197,5 @@ func ShowHelp(showTitle bool) {
 	println("      - Run the given command line in that instance. Inherit current directory.")
 	println()
 	println("    runp <command line (includes windows path)>")
-	println("      - Run the path translated command line in that instance.")
+	println("      - Run the given command line in that instance after converting its path.")
 }

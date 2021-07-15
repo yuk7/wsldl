@@ -51,29 +51,32 @@ Usage :
       - Open a new shell with your default settings.
 
     run <command line>
-      - Run the given command line in that distro. Inherit current directory.
+      - Run the given command line in that instance. Inherit current directory.
 
     runp <command line (includes windows path)>
-      - Run the path translated command line in that distro.
+      - Run the given command line in that instance after converting its path.
 
     config [setting [value]]
-      - `--default-user <user>`: Set the default user for this distro to <user>
-      - `--default-uid <uid>`: Set the default user for this distro to <uid>
+      - `--default-user <user>`: Set the default user of this instance to <user>.
+      - `--default-uid <uid>`: Set the default user uid of this instance to <uid>.
       - `--append-path <true|false>`: Switch of Append Windows PATH to $PATH
       - `--mount-drive <true|false>`: Switch of Mount drives
-      - `--default-term <default|wt|flute>`: Set default terminal window
+      - `--default-term <default|wt|flute>`: Set default type of terminal window.
 
-    get [setting [value]]
-      - `--default-uid`: Get the default user uid in this distro
-      - `--append-path`: Get true/false status of Append Windows PATH to $PATH
-      - `--mount-drive`: Get true/false status of Mount drives
-      - `--wsl-version`: Get WSL Version 1/2 for this distro
-      - `--default-term`: Get Default Terminal for this distro launcher
-      - `--wt-profile-name`: Get Profile Name from Windows Terminal
-      - `--lxguid`: Get WSL GUID key for this distro
+    get [setting]
+      - `--default-uid`: Get the default user uid in this instance.
+      - `--append-path`: Get true/false status of Append Windows PATH to $PATH.
+      - `--mount-drive`: Get true/false status of Mount drives.
+      - `--wsl-version`: Get the version os the WSL (1/2) of this instance.
+      - `--default-term`: Get Default Terminal type of this instance launcher.
+      - `--lxguid`: Get WSL GUID key for this instance.
+
+    backup [contents]
+      - `--tar`: Output backup.tar to the current directory.
+      - `--reg`: Output settings registry file to the current directory.
 
     clean
-      - Uninstall the distro.
+      - Uninstall that instance.
 
     help
       - Print this usage message.
