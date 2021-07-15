@@ -34,7 +34,7 @@ jobs:
       - name: Zip package and rename
         run: |
           Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out_amd64\icons.zip
-          move .\out_arm64\wsldl.exe .\out\arm64\wsldl_arm64.exe
+          move .\out_arm64\wsldl.exe .\out_arm64\wsldl_arm64.exe
           Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out_arm64\icons_arm64.zip
       - name: Release body
         run: |
