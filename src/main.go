@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yuk7/wsldl/backup"
 	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/config"
 	"github.com/yuk7/wsldl/get"
@@ -42,6 +43,9 @@ func main() {
 
 		case "get":
 			get.Execute(name, os.Args[2:])
+
+		case "backup":
+			backup.Execute(name, os.Args[2:])
 
 		case "clean":
 			clean.Execute(name, os.Args[2:])

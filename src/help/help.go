@@ -1,6 +1,7 @@
 package help
 
 import (
+	"github.com/yuk7/wsldl/backup"
 	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/config"
 	"github.com/yuk7/wsldl/get"
@@ -18,7 +19,9 @@ func Execute(args []string) {
 		case "config", "set":
 			config.ShowHelp(true)
 		case "get":
-			config.ShowHelp(true)
+			get.ShowHelp(true)
+		case "backup":
+			backup.ShowHelp(true)
 		case "clean":
 			clean.ShowHelp(true)
 		case "help":
@@ -38,6 +41,8 @@ func ShowHelpAll() {
 	config.ShowHelp(false)
 	println()
 	get.ShowHelp(false)
+	println()
+	backup.ShowHelp(false)
 	println()
 	clean.ShowHelp(false)
 	println()
