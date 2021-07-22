@@ -4,11 +4,13 @@ on:
   push:
     paths:
       - 'src/**'
+      - 'res/**'
       - 'build.bat'
       - '.github/workflows/**'
   pull_request:
     paths:
       - 'src/**'
+      - 'res/**'
       - 'build.bat'
       - '.github/workflows/**'
       
