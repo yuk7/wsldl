@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 
+	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
 )
@@ -37,6 +40,18 @@ func Execute(name string, args []string) {
 		}
 
 		err := Install(name, rootPath, showProgress)
+		if err != nil {
+			utils.ErrorExit(err, showProgress, true, args == nil)
+		}
+
+		json, err2 := preset.ReadParsePreset()
+		if err2 == nil {
+			if json.WslVersion == 1 || json.WslVersion == 2 {
+				wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+				_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(json.WslVersion)).Output()
+			}
+		}
+
 		if err == nil {
 			if showProgress {
 				utils.StdoutGreenPrintln("Installation complete")
