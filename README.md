@@ -28,7 +28,7 @@ If you rename it, you can register with a different name.
 #### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
 (wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
 #### 2. Rename it for distribution name to register.
-(Ex:Rename to Arch.exe if you want to use "Arch" for the Instance name)
+(Ex: Rename to Arch.exe if you want to use "Arch" for the Instance name)
 #### 3. Put your rootfs.tar(.gz) in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
