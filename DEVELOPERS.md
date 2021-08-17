@@ -43,7 +43,7 @@ Architecture names can be:\
 
 
 
-### Linux (cross compile)
+### MacOS, Linux (cross compile)
 
 Run this command in shell
 ```bash
