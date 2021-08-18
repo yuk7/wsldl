@@ -5,6 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/wslreg"
 )
 
 //Execute is default run entrypoint.
@@ -29,12 +30,12 @@ func Execute(name string, args []string) {
 	}
 
 	if optreg {
-		lxguid, err := utils.WslGetUUID(name)
+		profile, err := wslreg.GetProfileFromName(name)
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
 		regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
-		regpath := "HKEY_CURRENT_USER\\" + utils.LxssBaseKey + "\\" + lxguid
+		regpath := "HKEY_CURRENT_USER\\" + wslreg.LxssBaseKey + "\\" + profile.UUID
 		_, err = exec.Command(regexe, "export", regpath, "backup.reg", "/y").Output()
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)

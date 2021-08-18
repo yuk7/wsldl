@@ -8,6 +8,7 @@ import (
 	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/run"
 )
 
@@ -55,21 +56,22 @@ func Execute(name string, args []string) {
 		case "--default-term":
 			value := 0
 			switch args[1] {
-			case "default", strconv.Itoa(utils.FlagWsldlTermDefault):
-				value = utils.FlagWsldlTermDefault
-			case "wt", strconv.Itoa(utils.FlagWsldlTermWT):
-				value = utils.FlagWsldlTermWT
-			case "flute", strconv.Itoa(utils.FlagWsldlTermFlute):
-				value = utils.FlagWsldlTermFlute
+			case "default", strconv.Itoa(wslreg.FlagWsldlTermDefault):
+				value = wslreg.FlagWsldlTermDefault
+			case "wt", strconv.Itoa(wslreg.FlagWsldlTermWT):
+				value = wslreg.FlagWsldlTermWT
+			case "flute", strconv.Itoa(wslreg.FlagWsldlTermFlute):
+				value = wslreg.FlagWsldlTermFlute
 			default:
 				err = os.ErrInvalid
 				break
 			}
-			uuid, err := utils.WslGetUUID(name)
+			profile, err := wslreg.GetProfileFromName(name)
 			if err != nil {
 				break
 			}
-			err = utils.WsldlSetTerminalInfo(uuid, value)
+			profile.WsldlTerm = value
+			err = wslreg.WriteProfile(profile)
 
 		case "--flags-val":
 			var intFlags int

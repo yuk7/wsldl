@@ -7,12 +7,14 @@ import (
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/lib/wtutils"
 )
 
 //Execute is default install entrypoint
 func Execute(name string, args []string) {
 	uid, flags := WslGetConfig(name)
+	profile, proferr := wslreg.GetProfileFromName(name)
 	if len(args) == 1 {
 		switch args[0] {
 		case "--default-uid":
@@ -32,38 +34,27 @@ func Execute(name string, args []string) {
 			}
 
 		case "--lxguid", "--lxuid":
-			guid, err := utils.WslGetUUID(name)
-			if err != nil {
-				utils.ErrorExit(err, true, true, false)
+			if profile.UUID == "" {
+				if proferr != nil {
+					utils.ErrorExit(proferr, true, true, false)
+				}
+				utils.ErrorExit(errors.New("lxguid get failed"), true, true, false)
 			}
-			print(guid)
+			print(profile.UUID)
 
 		case "--default-term", "--default-terminal":
-			uuid, err := utils.WslGetUUID(name)
-			if err != nil {
-				utils.ErrorExit(err, true, true, false)
-			}
-			info, err := utils.WsldlGetTerminalInfo(uuid)
-			if err != nil {
-				utils.ErrorExit(err, true, true, false)
-			}
-			switch info {
-			case utils.FlagWsldlTermWT:
+			switch profile.WsldlTerm {
+			case wslreg.FlagWsldlTermWT:
 				print("wt")
-			case utils.FlagWsldlTermFlute:
+			case wslreg.FlagWsldlTermFlute:
 				print("flute")
 			default:
 				print("default")
 			}
 
 		case "--wt-profile-name", "--wt-profilename", "--wt-pn":
-			lxguid, err := utils.WslGetUUID(name)
-			if err != nil {
-				utils.ErrorExit(err, true, true, false)
-			}
-			name, err := utils.WslGetDistroName(lxguid)
-			if err != nil {
-				utils.ErrorExit(err, true, true, false)
+			if profile.DistributionName != "" {
+				name = profile.DistributionName
 			}
 
 			conf, err := wtutils.ReadParseWTConfig()

@@ -8,6 +8,7 @@ import (
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/lib/wtutils"
 )
 
@@ -62,18 +63,14 @@ func ExecuteNoArgs(name string) {
 		b = true
 	}
 	if !b {
-		uuid, err := utils.WslGetUUID(name)
-		if err != nil {
-			Execute(name, nil)
-		}
-		info, _ := utils.WsldlGetTerminalInfo(uuid)
-		switch info {
-		case utils.FlagWsldlTermWT:
+		profile, _ := wslreg.GetProfileFromName(name)
+		switch profile.WsldlTerm {
+		case wslreg.FlagWsldlTermWT:
 			utils.FreeConsole()
 			ExecWindowsTerminal(name)
 			os.Exit(0)
 
-		case utils.FlagWsldlTermFlute:
+		case wslreg.FlagWsldlTermFlute:
 			utils.FreeConsole()
 			exe := os.Getenv("LOCALAPPDATA")
 			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
@@ -91,12 +88,8 @@ func ExecuteNoArgs(name string) {
 
 		// Parent isn't console, launch instance with default conhost
 		// Get the name from the registry to be case sensitive.
-		lxguid, err := utils.WslGetUUID(name)
-		if err == nil {
-			tmpName, err := utils.WslGetDistroName(lxguid)
-			if err == nil {
-				name = tmpName
-			}
+		if profile.DistributionName != "" {
+			name = profile.DistributionName
 		}
 
 		utils.SetConsoleTitle(name)
@@ -136,12 +129,9 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 // ExecWindowsTerminal executes Windows Terminal
 func ExecWindowsTerminal(name string) {
 	// Get the name from the registry to be case sensitive.
-	lxguid, err := utils.WslGetUUID(name)
-	if err == nil {
-		tmpName, err := utils.WslGetDistroName(lxguid)
-		if err == nil {
-			name = tmpName
-		}
+	profile, _ := wslreg.GetProfileFromName(name)
+	if profile.DistributionName != "" {
+		name = profile.DistributionName
 	}
 
 	profileName := ""
