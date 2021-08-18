@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,24 +12,11 @@ import (
 
 	"github.com/fatih/color"
 	ps "github.com/mitchellh/go-ps"
-	"golang.org/x/sys/windows/registry"
 )
 
 const (
-	// LxssBaseRoot is LOCAL_MACHINE
-	LxssBaseRoot = registry.CURRENT_USER
-	// LxssBaseKey is path of lxss registry
-	LxssBaseKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
 	// ConsoleProcNames is console process list for detect parent console process
 	ConsoleProcNames = "cmd.exe,powershell.exe,wsl.exe,WindowsTerminal.exe,winpty-agent.exe"
-	// WsldlTermKey is registry key name used for wsldl terminal infomation
-	WsldlTermKey = "wsldl-term"
-	// FlagWsldlTermDefault is default terminal (conhost)
-	FlagWsldlTermDefault = 0
-	// FlagWsldlTermWT is Windows Terminal
-	FlagWsldlTermWT = 1
-	// FlagWsldlTermFlute is Fluent Terminal
-	FlagWsldlTermFlute = 2
 	// SpecialDirs is define path of special dirs
 	SpecialDirs = "SystemDrive:,SystemRoot:,SystemRoot:System32,USERPROFILE:"
 )
@@ -42,100 +28,6 @@ func DQEscapeString(str string) string {
 		str = "\"" + str + "\""
 	}
 	return str
-}
-
-//WslGetUUID gets distro guid key
-func WslGetUUID(distributionName string) (uuid string, err error) {
-	uuidList, tmpErr := WslGetUUIDList()
-	if tmpErr != nil {
-		err = tmpErr
-		return
-	}
-
-	errStr := ""
-	for _, loopUUID := range uuidList {
-		key, loopErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+loopUUID, registry.READ)
-		if loopErr == nil || loopErr == io.EOF {
-			str, _, itemErr := key.GetStringValue("DistributionName")
-			if itemErr == nil || itemErr == io.EOF {
-				if strings.EqualFold(str, distributionName) {
-					uuid = loopUUID
-					return
-				}
-			} else {
-				errStr += "\n" + "    " + loopUUID + ":" + itemErr.Error()
-			}
-		} else {
-			errStr += "\n" + "    " + loopUUID + ":" + loopErr.Error()
-		}
-	}
-	err = errors.New("Registry Key Not found\n" + errStr)
-
-	return
-}
-
-//WslGetUUIDList gets guid key lists
-func WslGetUUIDList() (uuidList []string, err error) {
-	baseKey, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey, registry.READ)
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	uuidList, tmpErr = baseKey.ReadSubKeyNames(1024)
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	return
-}
-
-// WsldlSetTerminalInfo sets terminal number from registry
-func WsldlSetTerminalInfo(uuid string, value int) error {
-	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.SET_VALUE)
-	if tmpErr != nil && tmpErr != io.EOF {
-		return tmpErr
-	}
-	tmpErr = key.SetDWordValue(WsldlTermKey, uint32(value))
-	if tmpErr != nil && tmpErr != io.EOF {
-		return tmpErr
-	}
-	return nil
-}
-
-// WsldlGetTerminalInfo gets terminal number from registry
-func WsldlGetTerminalInfo(uuid string) (res int, err error) {
-	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.READ)
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	num, _, tmpErr := key.GetIntegerValue(WsldlTermKey)
-	if tmpErr == syscall.ERROR_FILE_NOT_FOUND {
-		// not found is okay, it's just unconfigured.
-		res = FlagWsldlTermDefault
-		return
-	}
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	res = int(num)
-	return
-}
-
-// WslGetDistroName gets distro name from registry
-func WslGetDistroName(uuid string) (res string, err error) {
-	key, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey+"\\"+uuid, registry.READ)
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	res, _, tmpErr = key.GetStringValue("DistributionName")
-	if tmpErr != nil && tmpErr != io.EOF {
-		err = tmpErr
-		return
-	}
-	return
 }
 
 // IsParentConsole gets is parent process is console or not
