@@ -3,6 +3,7 @@ package wslreg
 import (
 	"errors"
 	"io"
+	"strings"
 
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/sys/windows/registry"
@@ -15,6 +16,12 @@ const (
 	LxssBaseKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
 	// WsldlTermKey is registry key name used for wsldl terminal infomation
 	WsldlTermKey = "wsldl-term"
+	// FlagWsldlTermDefault is default terminal (conhost)
+	FlagWsldlTermDefault = 0
+	// FlagWsldlTermWT is Windows Terminal
+	FlagWsldlTermWT = 1
+	// FlagWsldlTermFlute is Fluent Terminal
+	FlagWsldlTermFlute = 2
 	// InvalidNum is Num used for invalid
 	InvalidNum = -1
 )
@@ -153,5 +160,40 @@ func ReadProfile(lxUuid string) (profile Profile, err error) {
 	if tmperr == nil || tmperr == io.EOF {
 		profile.PackageFamilyName = pkgName
 	}
+	return
+}
+
+// GetLxUuidList gets guid key lists
+func GetLxUuidList() (uuidList []string, err error) {
+	baseKey, tmpErr := registry.OpenKey(LxssBaseRoot, LxssBaseKey, registry.READ)
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	uuidList, tmpErr = baseKey.ReadSubKeyNames(1024)
+	if tmpErr != nil && tmpErr != io.EOF {
+		err = tmpErr
+		return
+	}
+	return
+}
+
+// GetProfileFromName gets distro guid key
+func GetProfileFromName(distributionName string) (profile Profile, err error) {
+	uuidList, tmpErr := GetLxUuidList()
+	if tmpErr != nil {
+		err = tmpErr
+		return
+	}
+
+	errStr := ""
+	for _, loopUUID := range uuidList {
+		profile, _ = ReadProfile(loopUUID)
+		if strings.EqualFold(profile.DistributionName, distributionName) {
+			return
+		}
+	}
+	err = errors.New("Registry Key Not found\n" + errStr)
+	profile = NewProfile()
 	return
 }
