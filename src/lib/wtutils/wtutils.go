@@ -16,21 +16,6 @@ const (
 	WTProfileNameSpaceUUID = "2bde4a90-d05f-401c-9492-e40884ead1d8"
 )
 
-// Config is json root Config
-type Config struct {
-	Profiles struct {
-		ProfileList []Profile `json:"list"`
-	} `json:"profiles"`
-}
-
-// Profile is profile of terminal
-type Profile struct {
-	Name        string `json:"name"`
-	CommandLine string `json:"commandline"`
-	GUID        string `json:"guid"`
-	Source      string `json:"source"`
-}
-
 // ReadWTConfigJSON reads Windows Terminal configuration json file
 func ReadWTConfigJSON() (res string, err error) {
 	json := os.Getenv("LOCALAPPDATA")
