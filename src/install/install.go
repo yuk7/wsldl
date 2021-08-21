@@ -1,6 +1,7 @@
 package install
 
 import (
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	defaultRootFiles = []string{"install.tar", "install.tar.gz", "rootfs.tar", "rootfs.tar.gz", "install.ext4.vhdx"}
+	defaultRootFiles = []string{"install.tar", "install.tar.gz", "rootfs.tar", "rootfs.tar.gz", "install.ext4.vhdx", "install.ext4.vhdx.gz"}
 )
 
 //Install installs distribution with default rootfs file names
@@ -23,7 +24,7 @@ func Install(name string, rootPath string, showProgress bool) error {
 		fmt.Println("Installing...")
 	}
 	rootPathLower := strings.ToLower(rootPath)
-	if strings.HasSuffix(rootPathLower, "ext4.vhdx") {
+	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
 		return InstallExt4Vhdx(name, rootPath)
 	}
 	return InstallTar(name, rootPath)
@@ -73,9 +74,25 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 		return err
 	}
 	defer dest.Close()
-	_, err = io.Copy(dest, src)
-	if err != nil {
-		return err
+
+	// uncompress and copy
+	rootPathLower := strings.ToLower(rootPath)
+	if strings.HasSuffix(rootPathLower, ".gz") {
+		// compressed with gzip
+		gr, err := gzip.NewReader(src)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(dest, gr)
+		if err != nil {
+			return err
+		}
+	} else {
+		// not compressed
+		_, err = io.Copy(dest, src)
+		if err != nil {
+			return err
+		}
 	}
 
 	// write registry
