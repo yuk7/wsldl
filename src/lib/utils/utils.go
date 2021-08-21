@@ -167,12 +167,14 @@ func ErrorExit(err error, showmsg bool, showcolor bool, pause bool) {
 			fmt.Fprintln(os.Stderr, "Your command may be incorrect.")
 			fmt.Fprintf(os.Stderr, "You can get help with `%s help`.\n", exeName)
 		}
+	} else if !strings.HasPrefix(fmt.Sprintf("%#v", err), "&errors.errorString{") {
+		// errors.errorString only contains string, so skip it
 	} else {
 		if showmsg {
 			fmt.Fprintf(os.Stderr, "%#v\n", err)
 		}
-		Exit(pause, 1)
 	}
+	Exit(pause, 1)
 }
 
 // Exit exits program
