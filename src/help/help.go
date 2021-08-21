@@ -5,22 +5,29 @@ import (
 	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/config"
 	"github.com/yuk7/wsldl/get"
+	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/run"
 )
 
 // ShowHelpAll shows all help messages
-func ShowHelpAll() {
+func ShowHelpAll(registered bool) {
 	println("Usage :")
-	run.ShowHelp(false)
-	println()
-	config.ShowHelp(false)
-	println()
-	get.ShowHelp(false)
-	println()
-	backup.ShowHelp(false)
-	println()
-	clean.ShowHelp(false)
-	println()
+	if registered {
+		run.ShowHelp(false)
+		println()
+		config.ShowHelp(false)
+		println()
+		get.ShowHelp(false)
+		println()
+		backup.ShowHelp(false)
+		println()
+		clean.ShowHelp(false)
+		println()
+	} else {
+		install.ShowHelp(false)
+		println()
+	}
+
 	ShowHelp(false)
 }
 

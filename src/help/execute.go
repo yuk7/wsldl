@@ -5,13 +5,14 @@ import (
 	"github.com/yuk7/wsldl/clean"
 	"github.com/yuk7/wsldl/config"
 	"github.com/yuk7/wsldl/get"
+	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/run"
 )
 
 //Execute is default install entrypoint
-func Execute(args []string) {
+func Execute(name string, args []string) {
 	if len(args) == 0 {
-		ShowHelpAll()
+		ShowHelpAll(wslapi.WslIsDistributionRegistered(name))
 	} else {
 		switch args[0] {
 		case "run", "-c", "/c", "runp", "-p", "/p":
@@ -27,7 +28,7 @@ func Execute(args []string) {
 		case "help":
 			ShowHelp(true)
 		default:
-			ShowHelpAll()
+			ShowHelpAll(wslapi.WslIsDistributionRegistered(name))
 		}
 	}
 
