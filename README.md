@@ -24,12 +24,20 @@ Exe filename is using to the instance name to register.
 If you rename it, you can register with a different name.
 
 
-## 🔧Install with any rootfs
+## 🔧Install with any rootfs tarball
 #### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
 (wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
 #### 2. Rename it for distribution name to register.
 (Ex: Rename to Arch.exe if you want to use "Arch" for the Instance name)
-#### 3. Put your rootfs.tar(.gz) in same directory as exe (Installation directory)
+#### 3. Put your install.tar(.gz) in same directory as exe (Installation directory)
+#### 4. Run exe to install. This process may take a few minutes.
+
+## 🔧Install with any ext4 vhdx disk images (WSL2 only)
+#### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
+(wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
+#### 2. Rename it for distribution name to register.
+(Ex: Rename to Arch.exe if you want to use "Arch" for the Instance name)
+#### 3. Put your install.ext4.vhdx(.gz) in same directory as exe (Installation directory)
 #### 4. Run exe to install. This process may take a few minutes.
 
 ## 🔗Use as a Launcher for already installed distribution
