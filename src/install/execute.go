@@ -34,6 +34,25 @@ func Execute(name string, args []string) {
 			utils.ErrorExit(os.ErrInvalid, true, true, false)
 		}
 
+		if args == nil {
+			if isInstalledFilesExist() {
+				var in string
+				fmt.Printf("An old installation file was found.\n")
+				fmt.Printf("Do you want to rewrite and repair the installation infomation?\n")
+				fmt.Printf("Type y/n:")
+				fmt.Scan(&in)
+
+				if in == "y" {
+					err := repairRegistry(name)
+					if err != nil {
+						utils.ErrorExit(err, showProgress, true, showProgress)
+					}
+					utils.StdoutGreenPrintln("done.")
+					return
+				}
+			}
+		}
+
 		err := Install(name, rootPath, showProgress)
 		if err != nil {
 			utils.ErrorExit(err, showProgress, true, args == nil)
