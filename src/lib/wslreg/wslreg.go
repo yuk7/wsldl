@@ -3,6 +3,7 @@ package wslreg
 import (
 	"errors"
 	"io"
+	"path/filepath"
 	"strings"
 
 	uuid "github.com/satori/go.uuid"
@@ -165,7 +166,7 @@ func GetLxUuidList() (uuidList []string, err error) {
 	return
 }
 
-// GetProfileFromName gets distro guid key
+// GetProfileFromName gets distro profile from name
 func GetProfileFromName(distributionName string) (profile Profile, err error) {
 	uuidList, tmpErr := GetLxUuidList()
 	if tmpErr != nil {
@@ -177,6 +178,31 @@ func GetProfileFromName(distributionName string) (profile Profile, err error) {
 	for _, loopUUID := range uuidList {
 		profile, _ = ReadProfile(loopUUID)
 		if strings.EqualFold(profile.DistributionName, distributionName) {
+			return
+		}
+	}
+	err = errors.New("Registry Key Not found\n" + errStr)
+	profile = NewProfile()
+	return
+}
+
+// GetProfileFromBasePath gets distro profile from BasePath
+func GetProfileFromBasePath(basePath string) (profile Profile, err error) {
+	uuidList, tmpErr := GetLxUuidList()
+	if tmpErr != nil {
+		err = tmpErr
+		return
+	}
+
+	basePathAbs, tmpErr := filepath.Abs(basePath)
+	if err != nil {
+		basePathAbs = basePath
+	}
+
+	errStr := ""
+	for _, loopUUID := range uuidList {
+		profile, _ = ReadProfile(loopUUID)
+		if strings.EqualFold(profile.BasePath, basePathAbs) {
 			return
 		}
 	}
