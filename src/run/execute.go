@@ -56,12 +56,36 @@ func ExecuteP(name string, args []string) {
 // ExecuteNoArgs runs distro, but use terminal settings
 func ExecuteNoArgs(name string) {
 	efPath, _ := os.Executable()
+	profile, _ := wslreg.GetProfileFromName(name)
+
+	// repair when the installation is moved
+	if profile.BasePath != "" {
+		_, err := os.Stat(profile.BasePath)
+		if os.IsNotExist(err) {
+			if isInstalledFilesExist() {
+				var in string
+				fmt.Printf("This instance (%s) BasePath is not exist.\n", name)
+				fmt.Printf("Do you want to repair the installation infomation?\n")
+				fmt.Printf("Type y/n:")
+				fmt.Scan(&in)
+
+				if in == "y" {
+					err := repairRegistry(profile)
+					if err != nil {
+						utils.ErrorExit(err, true, true, true)
+					}
+					utils.StdoutGreenPrintln("done.")
+					utils.Exit(true, 0)
+				}
+			}
+		}
+	}
+
 	b, err := utils.IsParentConsole()
 	if err != nil {
 		b = true
 	}
 	if !b {
-		profile, _ := wslreg.GetProfileFromName(name)
 		switch profile.WsldlTerm {
 		case wslreg.FlagWsldlTermWT:
 			utils.FreeConsole()
