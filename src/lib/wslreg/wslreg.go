@@ -3,7 +3,10 @@ package wslreg
 import (
 	"errors"
 	"io"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	uuid "github.com/satori/go.uuid"
@@ -11,8 +14,10 @@ import (
 )
 
 const (
-	// LxssBaseRoot is LOCAL_MACHINE
+	// LxssBaseRoot is CURRENT_USER
 	LxssBaseRoot = registry.CURRENT_USER
+	// LxssBaseRootStr is CURRENT_USER string
+	LxssBaseRootStr = "HKEY_CURRENT_USER"
 	// LxssBaseKey is path of lxss registry
 	LxssBaseKey = "Software\\Microsoft\\Windows\\CurrentVersion\\Lxss"
 	// WsldlTermKey is registry key name used for wsldl terminal infomation
@@ -55,62 +60,139 @@ func WriteProfile(profile Profile) error {
 		return errors.New("Empty UUID")
 	}
 	key, _, err := registry.CreateKey(LxssBaseRoot, LxssBaseKey+"\\"+profile.UUID, registry.ALL_ACCESS)
-	if err != nil && err != io.EOF {
-		return err
+	if err != nil {
+		key = 0
 	}
+	regpathStr := LxssBaseRootStr + "\\" + LxssBaseKey + "\\" + profile.UUID
+
 	if profile.BasePath != "" {
-		err = key.SetStringValue("BasePath", profile.BasePath)
-		if err != nil && err != io.EOF {
+		err = regSetStringWithCmdAndFix(key, regpathStr, "BasePath", profile.BasePath)
+		if err != nil {
 			return err
 		}
 	}
 	if profile.DistributionName != "" {
-		err = key.SetStringValue("DistributionName", profile.DistributionName)
-		if err != nil && err != io.EOF {
+		err = regSetStringWithCmdAndFix(key, regpathStr, "DistributionName", profile.DistributionName)
+		if err != nil {
 			return err
 		}
 	}
 	if profile.DefaultUid != InvalidNum {
-		err = key.SetDWordValue("DefaultUid", uint32(profile.DefaultUid))
-		if err != nil && err != io.EOF {
+		err = regSetDWordWithCmdAndFix(key, regpathStr, "DefaultUid", uint32(profile.DefaultUid))
+		if err != nil {
 			return err
 		}
 	}
 
 	if profile.Flags != InvalidNum {
-		err = key.SetDWordValue("Flags", uint32(profile.Flags))
-		if err != nil && err != io.EOF {
+		err = regSetDWordWithCmdAndFix(key, regpathStr, "Flags", uint32(profile.Flags))
+		if err != nil {
 			return err
 		}
 	}
 
 	if profile.State != InvalidNum {
-		err = key.SetDWordValue("State", uint32(profile.State))
-		if err != nil && err != io.EOF {
+		err = regSetDWordWithCmdAndFix(key, regpathStr, "State", uint32(profile.State))
+		if err != nil {
 			return err
 		}
 	}
 
 	if profile.Version != InvalidNum {
-		err = key.SetDWordValue("Version", uint32(profile.Version))
-		if err != nil && err != io.EOF {
+		err = regSetDWordWithCmdAndFix(key, regpathStr, "Version", uint32(profile.Version))
+		if err != nil {
 			return err
 		}
 	}
 
 	if profile.PackageFamilyName != "" {
-		err = key.SetStringValue("PackageFamilyName", profile.PackageFamilyName)
-		if err != nil && err != io.EOF {
+		err = regSetStringWithCmdAndFix(key, regpathStr, "PackageFamilyName", profile.PackageFamilyName)
+		if err != nil {
 			return err
 		}
 	}
 	if profile.WsldlTerm != InvalidNum {
-		err = key.SetDWordValue(WsldlTermKey, uint32(profile.WsldlTerm))
-		if err != nil && err != io.EOF {
+		err = regSetDWordWithCmdAndFix(key, regpathStr, WsldlTermKey, uint32(profile.WsldlTerm))
+		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func regSetStringWithCmdAndFix(regkey registry.Key, regpathStr, keyname, value string) error {
+	// backup oldValue
+	oldValue := ""
+	if regkey != 0 {
+		oldValue, _, _ = regkey.GetStringValue(value)
+	}
+
+	// write with external command
+	err := regSetStringWithCmd(regpathStr, keyname, value)
+	if err != nil {
+		return err
+	}
+
+	// if regkey not 0, check if the value was written correctly
+	if regkey != 0 && oldValue != "" && oldValue != value {
+		newValue, _, _ := regkey.GetStringValue(value)
+		if oldValue == newValue {
+			// not changed, maybe appx virtual registry used
+			// delete it and rewrite registry value
+			regkey.DeleteValue(keyname)
+			err := regSetStringWithCmd(regpathStr, keyname, value)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// regSetStringWithCmd writes DWord key with command, forcibly use the real registry
+func regSetStringWithCmd(regpath, keyname, value string) error {
+	regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
+
+	_, err := exec.Command(regexe, "add", regpath, "/v", keyname, "/t", "REG_SZ", "/d", value, "/f").Output()
+	return err
+}
+
+func regSetDWordWithCmdAndFix(regkey registry.Key, regpathStr, keyname string, value uint32) error {
+	// backup oldValue
+	oldValue := InvalidNum
+	if regkey != 0 {
+		val, _, _ := regkey.GetIntegerValue(keyname)
+		oldValue = int(val)
+	}
+
+	// write with external command
+	err := regSetDWordWithCmd(regpathStr, keyname, value)
+	if err != nil {
+		return err
+	}
+
+	// if regkey not 0, check if the value was written correctly
+	if regkey != 0 && oldValue != InvalidNum && oldValue != int(value) {
+		newValue, _, _ := regkey.GetIntegerValue(keyname)
+		if oldValue == int(newValue) {
+			// not changed, maybe appx virtual registry used
+			// delete it and rewrite registry value
+			regkey.DeleteValue(keyname)
+			err := regSetDWordWithCmd(regpathStr, keyname, value)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// regSetDWordWithCmd writes DWord key with command, forcibly use the real registry
+func regSetDWordWithCmd(regpath, keyname string, value uint32) error {
+	regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
+
+	_, err := exec.Command(regexe, "add", regpath, "/v", keyname, "/t", "REG_DWORD", "/d", strconv.Itoa(int(value)), "/f").Output()
+	return err
 }
 
 func ReadProfile(lxUuid string) (profile Profile, err error) {
