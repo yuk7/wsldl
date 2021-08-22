@@ -2,25 +2,39 @@ package backup
 
 import (
 	"os"
-	"os/exec"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslreg"
+	"github.com/yuk7/wsldl/lib/wslapi"
 )
 
 //Execute is default run entrypoint.
 func Execute(name string, args []string) {
 	opttar := false
-	optreg := true
+	opttgz := false
+	optvhdx := false
+	optvhdxgz := false
+	optreg := false
 	switch len(args) {
 	case 0:
-		opttar = true
-		optreg = true
+		_, _, flags, _ := wslapi.WslGetDistributionConfiguration(name)
+		if flags&wslapi.FlagEnableWsl2 == wslapi.FlagEnableWsl2 {
+			optvhdxgz = true
+			optreg = true
+		} else {
+			opttgz = true
+			optreg = true
+		}
 
 	case 1:
 		switch args[0] {
 		case "--tar":
 			opttar = true
+		case "--tgz":
+			opttgz = true
+		case "--vhdx":
+			optvhdx = true
+		case "--vhdxgz":
+			optvhdxgz = true
 		case "--reg":
 			optreg = true
 		}
@@ -30,20 +44,32 @@ func Execute(name string, args []string) {
 	}
 
 	if optreg {
-		profile, err := wslreg.GetProfileFromName(name)
-		if err != nil {
-			utils.ErrorExit(err, true, true, false)
-		}
-		regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
-		regpath := "HKEY_CURRENT_USER\\" + wslreg.LxssBaseKey + "\\" + profile.UUID
-		_, err = exec.Command(regexe, "export", regpath, "backup.reg", "/y").Output()
+		err := backupReg(name, "backup.reg")
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
 	}
 	if opttar {
-		wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
-		_, err := exec.Command(wslexe, "--export", name, "backup.tar").Output()
+		err := backupTar(name, "backup.tar")
+		if err != nil {
+			utils.ErrorExit(err, true, true, false)
+		}
+
+	}
+	if opttgz {
+		err := backupTar(name, "backup.tar.gz")
+		if err != nil {
+			utils.ErrorExit(err, true, true, false)
+		}
+	}
+	if optvhdx {
+		err := backupExt4Vhdx(name, "backup.ext4.vhdx")
+		if err != nil {
+			utils.ErrorExit(err, true, true, false)
+		}
+	}
+	if optvhdxgz {
+		err := backupExt4Vhdx(name, "backup.ext4.vhdx.gz")
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
