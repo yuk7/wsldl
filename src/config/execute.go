@@ -53,6 +53,18 @@ func Execute(name string, args []string) {
 				flags ^= wslapi.FlagEnableDriveMounting
 			}
 
+		case "--wsl-version":
+			var intWslVer int
+			intWslVer, err = strconv.Atoi(args[1])
+			if err == nil {
+				if intWslVer == 1 || intWslVer == 2 {
+					err = wslreg.SetWslVersion(name, intWslVer)
+				} else {
+					err = os.ErrInvalid
+					break
+				}
+			}
+
 		case "--default-term":
 			value := 0
 			switch args[1] {

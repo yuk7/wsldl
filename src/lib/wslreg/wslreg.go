@@ -292,3 +292,10 @@ func GetProfileFromBasePath(basePath string) (profile Profile, err error) {
 	profile = NewProfile()
 	return
 }
+
+// SetWslVersion sets wsl version
+func SetWslVersion(distributionName string, version int) error {
+	wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+	_, err := exec.Command(wslexe, "--set-version", distributionName, strconv.Itoa(version)).Output()
+	return err
+}
