@@ -2,13 +2,6 @@
 
 ## 🛠How-to-Build
 
-## Sidenote: To compile ARM binaries, Please install `Go` 1.17 by running this:
-```bash
-go get golang.org/dl/go1.17rc1
-#Additional step if you want to cross-compile from Linux/MacOS
-export PATH=$PATH:~/go/bin
-```
-
 ### Windows
 
 #### Compile using `Go`
