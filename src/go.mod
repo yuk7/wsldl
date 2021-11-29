@@ -1,6 +1,6 @@
 module github.com/yuk7/wsldl
 
-go 1.17
+go 1.16
 
 require (
 	github.com/fatih/color v1.13.0
