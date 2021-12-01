@@ -25,6 +25,10 @@ If you rename it, you can register with a different name.
 
 
 ## 🔧Install with any rootfs tarball
+
+**Note:**
+The filesystem needs to be in the root of the tarball, some rootfs tarballs may need to be repacked.
+
 #### 1. [Download wsldl.exe](https://github.com/yuk7/wsldl/releases/latest)
 (wsldl.exe is x86_64, wsldl_arm64.exe is ARM64 build)
 #### 2. Rename it for distribution name to register.
