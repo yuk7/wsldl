@@ -22,12 +22,12 @@ jobs:
           .\build.bat all
           move out out_amd64
 
-          echo Download golang 1.17 RC1
-          go get golang.org/dl/go1.17rc1
-          go1.17rc1 download
+          echo Download golang 1.17
+          go get golang.org/dl/go1.17
+          go1.17 download
 
           echo ARM64 build
-          $Env:GOBIN="go1.17rc1"
+          $Env:GOBIN="go1.17"
           $Env:GOARCH="arm64"
           .\build.bat all
           move out out_arm64
