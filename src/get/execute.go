@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/lib/wtutils"
+	"github.com/yuk7/wsllib-go"
 )
 
 //Execute is default install entrypoint
@@ -21,13 +21,13 @@ func Execute(name string, args []string) {
 			print(uid)
 
 		case "--append-path":
-			print(flags&wslapi.FlagAppendNTPath == wslapi.FlagAppendNTPath)
+			print(flags&wsllib.FlagAppendNTPath == wsllib.FlagAppendNTPath)
 
 		case "--mount-drive":
-			print(flags&wslapi.FlagEnableDriveMounting == wslapi.FlagEnableDriveMounting)
+			print(flags&wsllib.FlagEnableDriveMounting == wsllib.FlagEnableDriveMounting)
 
 		case "--wsl-version":
-			if flags&wslapi.FlagEnableWsl2 == wslapi.FlagEnableWsl2 {
+			if flags&wsllib.FlagEnableWsl2 == wsllib.FlagEnableWsl2 {
 				print("2")
 			} else {
 				print("1")

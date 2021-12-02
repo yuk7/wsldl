@@ -7,9 +7,9 @@ import (
 	"syscall"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/lib/wtutils"
+	"github.com/yuk7/wsllib-go"
 )
 
 //ExecRead execs command and read output
@@ -23,7 +23,7 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 	syscall.CreatePipe(&stdin, &stdintmp, &sa, 0)
 	syscall.CreatePipe(&stdout, &stdouttmp, &sa, 0)
 
-	handle, err := wslapi.WslLaunch(name, command, true, stdintmp, stdouttmp, stdouttmp)
+	handle, err := wsllib.WslLaunch(name, command, true, stdintmp, stdouttmp, stdouttmp)
 	syscall.WaitForSingleObject(handle, syscall.INFINITE)
 	syscall.GetExitCodeProcess(handle, &exitCode)
 	buf := make([]byte, syscall.MAX_LONG_PATH)

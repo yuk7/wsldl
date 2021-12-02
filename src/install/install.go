@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
+	"github.com/yuk7/wsllib-go"
 )
 
 var (
@@ -31,7 +31,7 @@ func Install(name string, rootPath string, showProgress bool) error {
 }
 
 func InstallTar(name string, rootPath string) error {
-	err := wslapi.WslRegisterDistribution(name, rootPath)
+	err := wsllib.WslRegisterDistribution(name, rootPath)
 	return err
 }
 
@@ -48,7 +48,7 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 	}
 	tmptarfp.Close()
 	// initial empty instance entry
-	err = wslapi.WslRegisterDistribution(name, tmptar)
+	err = wsllib.WslRegisterDistribution(name, tmptar)
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 		return err
 	}
 	// remove instance temporary
-	err = wslapi.WslUnregisterDistribution(name)
+	err = wsllib.WslUnregisterDistribution(name)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 	}
 
 	// write registry
-	prof.Flags |= wslapi.FlagEnableWsl2
+	prof.Flags |= wsllib.FlagEnableWsl2
 	err = wslreg.WriteProfile(prof)
 	return err
 }

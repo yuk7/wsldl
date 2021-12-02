@@ -7,9 +7,9 @@ import (
 
 	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/run"
+	"github.com/yuk7/wsllib-go"
 )
 
 //Execute is default install entrypoint
@@ -39,18 +39,18 @@ func Execute(name string, args []string) {
 			var b bool
 			b, err = strconv.ParseBool(args[1])
 			if b {
-				flags |= wslapi.FlagAppendNTPath
+				flags |= wsllib.FlagAppendNTPath
 			} else {
-				flags ^= wslapi.FlagAppendNTPath
+				flags ^= wsllib.FlagAppendNTPath
 			}
 
 		case "--mount-drive":
 			var b bool
 			b, err = strconv.ParseBool(args[1])
 			if b {
-				flags |= wslapi.FlagEnableDriveMounting
+				flags |= wsllib.FlagEnableDriveMounting
 			} else {
-				flags ^= wslapi.FlagEnableDriveMounting
+				flags ^= wsllib.FlagEnableDriveMounting
 			}
 
 		case "--wsl-version":
@@ -96,7 +96,7 @@ func Execute(name string, args []string) {
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
-		wslapi.WslConfigureDistribution(name, uid, flags)
+		wsllib.WslConfigureDistribution(name, uid, flags)
 	} else {
 		utils.ErrorExit(os.ErrInvalid, true, true, false)
 	}

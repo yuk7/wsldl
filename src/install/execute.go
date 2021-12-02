@@ -9,12 +9,12 @@ import (
 
 	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsllib-go"
 )
 
 //Execute is default install entrypoint
 func Execute(name string, args []string) {
-	if !wslapi.WslIsDistributionRegistered(name) {
+	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
 		var showProgress bool
 		switch len(args) {

@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
+	"github.com/yuk7/wsllib-go"
 )
 
 func isInstalledFilesExist() bool {
@@ -44,7 +44,7 @@ func repairRegistry(name string) error {
 		prof.DistributionName = name
 		prof.BasePath = dir
 
-		prof.Flags |= wslapi.FlagEnableWsl2
+		prof.Flags |= wsllib.FlagEnableWsl2
 		return wslreg.WriteProfile(prof)
 	}
 	// for write new WSL1 configuration
@@ -53,7 +53,7 @@ func repairRegistry(name string) error {
 		prof := wslreg.GenerateProfile()
 		prof.DistributionName = name
 		prof.BasePath = dir
-		prof.Flags ^= wslapi.FlagEnableWsl2
+		prof.Flags ^= wsllib.FlagEnableWsl2
 		return wslreg.WriteProfile(prof)
 	}
 

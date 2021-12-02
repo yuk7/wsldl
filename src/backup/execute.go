@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsllib-go"
 )
 
 //Execute is default run entrypoint.
@@ -16,8 +16,8 @@ func Execute(name string, args []string) {
 	optreg := false
 	switch len(args) {
 	case 0:
-		_, _, flags, _ := wslapi.WslGetDistributionConfiguration(name)
-		if flags&wslapi.FlagEnableWsl2 == wslapi.FlagEnableWsl2 {
+		_, _, flags, _ := wsllib.WslGetDistributionConfiguration(name)
+		if flags&wsllib.FlagEnableWsl2 == wsllib.FlagEnableWsl2 {
 			optvhdxgz = true
 			optreg = true
 		} else {

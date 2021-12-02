@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wslreg"
+	"github.com/yuk7/wsllib-go"
 )
 
 //Execute is default run entrypoint.
@@ -20,7 +20,7 @@ func Execute(name string, args []string) {
 	if args == nil {
 		inheritpath = !utils.IsCurrentDirSpecial()
 	}
-	exitCode, err := wslapi.WslLaunchInteractive(name, command, inheritpath)
+	exitCode, err := wsllib.WslLaunchInteractive(name, command, inheritpath)
 	if err != nil {
 		utils.ErrorExit(err, true, true, false)
 	} else {
