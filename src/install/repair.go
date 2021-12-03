@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsllib-go"
+	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 func isInstalledFilesExist() bool {

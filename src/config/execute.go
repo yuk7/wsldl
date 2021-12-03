@@ -7,9 +7,9 @@ import (
 
 	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsllib-go"
+	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 //Execute is default install entrypoint

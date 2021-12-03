@@ -7,9 +7,9 @@ import (
 	"syscall"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsldl/lib/wtutils"
 	"github.com/yuk7/wsllib-go"
+	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 //ExecRead execs command and read output

@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsldl/lib/wslreg"
 	"github.com/yuk7/wsllib-go"
+	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 //Execute is default run entrypoint.
