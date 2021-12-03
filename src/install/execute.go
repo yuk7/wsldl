@@ -61,7 +61,7 @@ func Execute(name string, args []string) {
 		json, err2 := preset.ReadParsePreset()
 		if err2 == nil {
 			if json.WslVersion == 1 || json.WslVersion == 2 {
-				wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+				wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
 				_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(json.WslVersion)).Output()
 			}
 		}

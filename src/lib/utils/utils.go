@@ -61,6 +61,20 @@ func IsParentConsole() (res bool, err error) {
 	return
 }
 
+// GetWindowsDirectory gets windows direcotry path
+func GetWindowsDirectory() string {
+	dir := os.Getenv("SYSTEMROOT")
+	if dir != "" {
+		return dir
+	}
+	dir = os.Getenv("WINDIR")
+	if dir != "" {
+		return dir
+	}
+	return "C:\\WINDOWS"
+
+}
+
 // IsCurrentDirSpecial gets whether the current directory is special (Windows, USEPROFILE)
 func IsCurrentDirSpecial() bool {
 	cdir, err := filepath.Abs(".")

@@ -3,13 +3,13 @@ package wslreg
 import (
 	"errors"
 	"io"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	uuid "github.com/satori/go.uuid"
+	"github.com/yuk7/wsldl/lib/utils"
 	"golang.org/x/sys/windows/registry"
 )
 
@@ -151,7 +151,7 @@ func regSetStringWithCmdAndFix(regkey registry.Key, regpathStr, keyname, value s
 
 // regSetStringWithCmd writes DWord key with command, forcibly use the real registry
 func regSetStringWithCmd(regpath, keyname, value string) error {
-	regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
+	regexe := utils.GetWindowsDirectory() + "\\System32\\reg.exe"
 
 	_, err := exec.Command(regexe, "add", regpath, "/v", keyname, "/t", "REG_SZ", "/d", value, "/f").Output()
 	return err
@@ -189,7 +189,7 @@ func regSetDWordWithCmdAndFix(regkey registry.Key, regpathStr, keyname string, v
 
 // regSetDWordWithCmd writes DWord key with command, forcibly use the real registry
 func regSetDWordWithCmd(regpath, keyname string, value uint32) error {
-	regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
+	regexe := utils.GetWindowsDirectory() + "\\System32\\reg.exe"
 
 	_, err := exec.Command(regexe, "add", regpath, "/v", keyname, "/t", "REG_DWORD", "/d", strconv.Itoa(int(value)), "/f").Output()
 	return err
@@ -295,7 +295,7 @@ func GetProfileFromBasePath(basePath string) (profile Profile, err error) {
 
 // SetWslVersion sets wsl version
 func SetWslVersion(distributionName string, version int) error {
-	wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+	wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
 	_, err := exec.Command(wslexe, "--set-version", distributionName, strconv.Itoa(version)).Output()
 	return err
 }

@@ -20,7 +20,8 @@ func backupReg(name string, destFileName string) error {
 	if err != nil {
 		utils.ErrorExit(err, true, true, false)
 	}
-	regexe := os.Getenv("SystemRoot") + "\\System32\\reg.exe"
+
+	regexe := utils.GetWindowsDirectory() + "\\System32\\reg.exe"
 	regpath := "HKEY_CURRENT_USER\\" + wslreg.LxssBaseKey + "\\" + profile.UUID
 	_, err = exec.Command(regexe, "export", regpath, destFileName, "/y").Output()
 	return err
@@ -37,7 +38,7 @@ func backupTar(distributionName string, destFileName string) error {
 		}
 		rand.Seed(time.Now().UnixNano())
 		tmpTarFn = tmpTarFn + "\\" + strconv.Itoa(rand.Intn(10000)) + ".tar"
-		wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+		wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
 		_, err := exec.Command(wslexe, "--export", distributionName, tmpTarFn).Output()
 		defer os.Remove(tmpTarFn)
 		if err != nil {
@@ -47,7 +48,7 @@ func backupTar(distributionName string, destFileName string) error {
 		return copyFileAndCompress(tmpTarFn, destFileName)
 	} else {
 		// not compressed
-		wslexe := os.Getenv("SystemRoot") + "\\System32\\wsl.exe"
+		wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
 		_, err := exec.Command(wslexe, "--export", distributionName, destFileName).Output()
 		return err
 	}
