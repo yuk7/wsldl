@@ -5,10 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
@@ -19,11 +23,35 @@ var (
 
 //Install installs distribution with default rootfs file names
 func Install(name string, rootPath string, showProgress bool) error {
+	rootPathLower := strings.ToLower(rootPath)
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
+	}
+	if strings.HasPrefix(rootPathLower, "http://") || strings.HasPrefix(rootPathLower, "https://") {
+		progressBarWidth := 0
+		if showProgress {
+			fmt.Println("Downloading...")
+			progressBarWidth = 35
+		}
+		tmpRootFn := os.TempDir()
+		if tmpRootFn == "" {
+			return errors.New("Failed to create temp directory")
+		}
+		rand.Seed(time.Now().UnixNano())
+		tmpRootFn = tmpRootFn + "\\" + strconv.Itoa(rand.Intn(10000)) + filepath.Base(rootPath)
+		defer os.Remove(tmpRootFn)
+		err := utils.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
+		if err != nil {
+			return err
+		}
+		rootPath = tmpRootFn
+		rootPathLower = strings.ToLower(rootPath)
+		fmt.Println()
+	}
+	if showProgress {
 		fmt.Println("Installing...")
 	}
-	rootPathLower := strings.ToLower(rootPath)
+
 	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
 		return InstallExt4Vhdx(name, rootPath)
 	}
