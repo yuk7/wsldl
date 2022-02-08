@@ -17,15 +17,22 @@ func Execute(name string, args []string) {
 	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
 		var showProgress bool
+		jsonPreset, _ := preset.ReadParsePreset()
 		switch len(args) {
 		case 0:
 			rootPath = detectRootfsFiles()
+			if jsonPreset.InstallFile != "" {
+				rootPath = jsonPreset.InstallFile
+			}
 			showProgress = true
 
 		case 1:
 			showProgress = false
 			if args[0] == "--root" {
 				rootPath = detectRootfsFiles()
+				if jsonPreset.InstallFile != "" {
+					rootPath = jsonPreset.InstallFile
+				}
 			} else {
 				rootPath = args[0]
 			}
@@ -58,12 +65,9 @@ func Execute(name string, args []string) {
 			utils.ErrorExit(err, showProgress, true, args == nil)
 		}
 
-		json, err2 := preset.ReadParsePreset()
-		if err2 == nil {
-			if json.WslVersion == 1 || json.WslVersion == 2 {
-				wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
-				_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(json.WslVersion)).Output()
-			}
+		if jsonPreset.WslVersion == 1 || jsonPreset.WslVersion == 2 {
+			wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
+			_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(jsonPreset.WslVersion)).Output()
 		}
 
 		if err == nil {
