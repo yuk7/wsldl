@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"muzzammil.xyz/jsonc"
+	"github.com/muhammadmuzzammil1998/jsonc"
 )
 
 // ReadPresetJSON reads preset.json configuration json file

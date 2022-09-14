@@ -4,9 +4,9 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/muhammadmuzzammil1998/jsonc"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/text/encoding/unicode"
-	"muzzammil.xyz/jsonc"
 )
 
 const (
