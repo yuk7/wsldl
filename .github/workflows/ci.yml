@@ -41,11 +41,11 @@ jobs:
       - name: Build
         run: |
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
-          go get golang.org/dl/go1.18
-          go1.18 download
+          go get golang.org/dl/go1.20
+          go1.20 download
           $short_sha = $env:GITHUB_SHA.SubString(0, 7)
           $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=CI-${short_sha}`""
-          $Env:GOBIN="go1.18"
+          $Env:GOBIN="go1.20"
           $Env:GOARCH="arm64"
           .\build.bat all
           Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Build
         run: |
-          go get github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+          go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest
           export PATH=$PATH:~/go/bin
           cd src
           goversioninfo
