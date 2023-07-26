@@ -22,12 +22,7 @@ jobs:
           .\build.bat all
           move out out_amd64
 
-          echo Download golang 1.20
-          go get golang.org/dl/go1.20
-          go1.20 download
-
           echo ARM64 build
-          $Env:GOBIN="go1.20"
           $Env:GOARCH="arm64"
           .\build.bat all
           move out out_arm64
