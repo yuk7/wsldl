@@ -4,7 +4,7 @@ Advanced WSL Distribution Launcher / Installer
 
 ![screenshot](https://raw.githubusercontent.com/wiki/yuk7/wsldl/img/Arch_Alpine_Cent.png)
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/yuk7/wsldl/Continuous%20Integration?logo=GitHub&style=flat-square)](https://github.com/yuk7/wsldl/actions?query=workflow%3A%22Continuous-Integration%22)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/yuk7/wsldl/ci.yml?style=flat-square)](https://github.com/yuk7/wsldl/actions/workflows/ci.yml)
 [![Github All Releases](https://img.shields.io/github/downloads/yuk7/wsldl/total.svg?style=flat-square)](https://github.com/yuk7/wsldl/releases/latest)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 ![License](https://img.shields.io/github/license/yuk7/wsldl.svg?style=flat-square)
