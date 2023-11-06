@@ -10,5 +10,5 @@ require (
 	github.com/schollz/progressbar/v3 v3.13.1
 	github.com/yuk7/wsllib-go v1.0.0
 	github.com/yuk7/wslreglib-go v1.0.1
-	golang.org/x/text v0.13.0
+	golang.org/x/text v0.14.0
 )
