@@ -7,9 +7,10 @@ cd /d %~dp0
 
 set PATH="%GOPATH%\bin";%PATH%
 set PATH="%USERPROFILE%\go\bin";%PATH%
+set GOVERSIONINFO_PRG=goversioninfo.exe
 
-if not defined GOBIN (
-    set GOBIN=go
+if not defined GOPRG (
+    set GOPRG=go
 )
 
 if not defined GOARCH (
@@ -120,7 +121,7 @@ set DOING=resources
 cd /d %~dp0
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
-    tools\goversioninfo %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
+    %GOVERSIONINFO_PRG% %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 )
 exit /b
@@ -133,8 +134,8 @@ mkdir out\icons >NUL 2>&1
 FOR /D /r %%D in ("res/*") DO (
     copy /y res\%%~nxD\resource.syso src\resource.syso
     cd src
-    echo %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
-    %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
+    echo %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
+    %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
     cd ..
     del /f src\resource.syso
@@ -145,7 +146,7 @@ exit /b
 set DOING=single
 cd /d %~dp0
 echo Compiling resource object...
-tools\goversioninfo %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
+%GOVERSIONINFO_PRG% %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 :singlewor
 set DOING=singlewor
@@ -153,8 +154,8 @@ cd /d %~dp0
 mkdir out >NUL 2>&1
 cd src
 echo Building default wsldl.exe...
-echo %GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
-%GOBIN% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
+echo %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
+%GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 cd ..
 :end
@@ -171,24 +172,8 @@ exit /b
 
 :dlgoversioninfo
 set DOING=dlgoversioninfo
-cd /d %~dp0
-mkdir tools >NUL 2>&1
-if "%PROCESSOR_ARCHITECTURE%"=="x86" (
-    echo Downaloding goversioninfo 386...
-    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_386.exe -o tools\goversioninfo.exe
-) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
-    echo Downaloding goversioninfo amd64...
-    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_amd64.exe -o tools\goversioninfo.exe
-) else if "%PROCESSOR_ARCHITECTURE%"=="ARM" (
-    echo Downaloding goversioninfo ARM...
-    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm.exe -o tools\goversioninfo.exe
-) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
-    echo Downaloding goversioninfo ARM64...
-    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm64.exe -o tools\goversioninfo.exe
-) else (
-    echo ERROR: %PROCESSOR_ARCHITECTURE% is not supported for build environment
-)
-if not exist tools\goversioninfo.exe exit /b 1
+%GOVERSIONINFO_PRG% --help >NUL 2>&1
+if %ERRORLEVEL% NEQ 0 %GOPRG% install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
 exit /b
 
 :failed
