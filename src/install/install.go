@@ -34,7 +34,7 @@ var (
 	}
 )
 
-//Install installs distribution with default rootfs file names
+// Install installs distribution with default rootfs file names
 func Install(name string, rootPath string, showProgress bool) error {
 	rootPathLower := strings.ToLower(rootPath)
 	if showProgress {
