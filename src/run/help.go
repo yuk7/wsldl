@@ -6,7 +6,8 @@ func ShowHelp(showTitle bool) {
 		println("Usage:")
 	}
 	println("    <no args>")
-	println("      - Open a new shell with your default settings.")
+	println("      - Open a new shell with your default settings. ")
+	println("        Inherit current directory (with exception that %%USERPROFILE%% is changed to $HOME).")
 	println()
 	println("    run <command line>")
 	println("      - Run the given command line in that instance. Inherit current directory.")
