@@ -3,14 +3,14 @@ name: Continuous Deployment
 on:
   push:
     tags:
-      - '*'
-  
+      - "*"
+
 jobs:
   publish-github:
     name: Publish on Github
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Build
         run: |
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
@@ -38,7 +38,7 @@ jobs:
       - name: Upload the release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: body.txt 
+          body_path: body.txt
           files: |
             out_amd64/wsldl.exe
             out_amd64/icons.zip
