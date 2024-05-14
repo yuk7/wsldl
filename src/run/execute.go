@@ -65,7 +65,7 @@ func ExecuteNoArgs(name string) {
 			if isInstalledFilesExist() {
 				var in string
 				fmt.Printf("This instance (%s) BasePath is not exist.\n", name)
-				fmt.Printf("Do you want to repair the installation infomation?\n")
+				fmt.Printf("Do you want to repair the installation information?\n")
 				fmt.Printf("Type y/n:")
 				fmt.Scan(&in)
 
