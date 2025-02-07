@@ -1,6 +1,6 @@
 module github.com/yuk7/wsldl
 
-go 1.16
+go 1.23
 
 require (
 	github.com/fatih/color v1.18.0
@@ -11,4 +11,14 @@ require (
 	github.com/yuk7/wsllib-go v1.0.0
 	github.com/yuk7/wslreglib-go v1.0.1
 	golang.org/x/text v0.21.0
+)
+
+require (
+	github.com/kr/pretty v0.3.1 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
+	github.com/rivo/uniseg v0.4.7 // indirect
+	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/term v0.24.0 // indirect
 )
