@@ -54,7 +54,7 @@ func Install(name string, rootPath string, sha256Sum string, showProgress bool) 
 		if tmpRootFn == "" {
 			return errors.New("failed to create temp directory")
 		}
-		rand.Seed(time.Now().UnixNano())
+		rand.NewSource(time.Now().UnixNano())
 		tmpRootFn = tmpRootFn + "\\" + strconv.Itoa(rand.Intn(10000)) + filepath.Base(rootPath)
 		defer os.Remove(tmpRootFn)
 		var err error

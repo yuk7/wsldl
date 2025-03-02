@@ -1,7 +1,6 @@
 package wtutils
 
 import (
-	"io/ioutil"
 	"os"
 
 	"github.com/muhammadmuzzammil1998/jsonc"
@@ -21,7 +20,7 @@ func ReadWTConfigJSON() (res string, err error) {
 	json := os.Getenv("LOCALAPPDATA")
 	json = json + "\\Packages\\" + WTPackageName + "\\LocalState\\settings.json"
 
-	b, err := ioutil.ReadFile(json)
+	b, err := os.ReadFile(json)
 	if err != nil {
 		return
 	}

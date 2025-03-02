@@ -46,7 +46,7 @@ func IsParentConsole() (res bool, err error) {
 		}
 	}
 
-	info, err = ps.FindProcess(info.PPid())
+	_, err = ps.FindProcess(info.PPid())
 	if err != nil {
 		return
 	}
@@ -139,8 +139,6 @@ func AllocConsole() {
 	os.Stdout = os.NewFile(uintptr(hout), "/dev/stdout")
 	os.Stderr = os.NewFile(uintptr(herr), "/dev/stderr")
 	os.Stdin = os.NewFile(uintptr(hin), "/dev/stdin")
-
-	return
 }
 
 // SetConsoleTitle calls SetConsoleTitleW API in Windows kernel32
@@ -148,8 +146,7 @@ func SetConsoleTitle(title string) {
 	kernel32, _ := syscall.LoadDLL("Kernel32.dll")
 	proc, _ := kernel32.FindProc("SetConsoleTitleW")
 	pTitle, _ := syscall.UTF16PtrFromString(title)
-	syscall.Syscall(proc.Addr(), 1, uintptr(unsafe.Pointer(pTitle)), 0, 0)
-	return
+	syscall.SyscallN(proc.Addr(), 1, uintptr(unsafe.Pointer(pTitle)))
 }
 
 // ErrorExit shows error message and exit

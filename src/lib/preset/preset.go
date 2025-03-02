@@ -1,7 +1,6 @@
 package preset
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -13,7 +12,7 @@ func ReadPresetJSON() (res string, err error) {
 	efPath, _ := os.Executable()
 	dir := filepath.Dir(efPath)
 	json := filepath.Join(dir, "preset.json")
-	b, err := ioutil.ReadFile(json)
+	b, err := os.ReadFile(json)
 	if err != nil {
 		return
 	}

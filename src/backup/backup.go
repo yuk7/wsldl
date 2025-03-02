@@ -34,9 +34,9 @@ func backupTar(distributionName string, destFileName string) error {
 		// create temporary tar
 		tmpTarFn := os.TempDir()
 		if tmpTarFn == "" {
-			return errors.New("Failed to create temp directory")
+			return errors.New("failed to create temp directory")
 		}
-		rand.Seed(time.Now().UnixNano())
+		rand.NewSource(time.Now().UnixNano())
 		tmpTarFn = tmpTarFn + "\\" + strconv.Itoa(rand.Intn(10000)) + ".tar"
 		wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
 		_, err := exec.Command(wslexe, "--export", distributionName, tmpTarFn).Output()
