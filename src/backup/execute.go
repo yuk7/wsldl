@@ -2,74 +2,72 @@ package backup
 
 import (
 	"os"
+	"strings"
 
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
 
-//Execute is default run entrypoint.
+// Execute is default run entrypoint.
 func Execute(name string, args []string) {
-	opttar := false
-	opttgz := false
-	optvhdx := false
-	optvhdxgz := false
-	optreg := false
+	arg0Lower := strings.ToLower(args[0])
+	opttar := ""
+	optvhdx := ""
+	optreg := ""
 	switch len(args) {
 	case 0:
 		_, _, flags, _ := wsllib.WslGetDistributionConfiguration(name)
 		if flags&wsllib.FlagEnableWsl2 == wsllib.FlagEnableWsl2 {
-			optvhdxgz = true
-			optreg = true
+			optvhdx = "backup.ext4.vhdx.gz"
+			optreg = "backup.reg"
 		} else {
-			opttgz = true
-			optreg = true
+			opttar = "backup.tar.gz"
+			optreg = "backup.reg"
 		}
 
 	case 1:
-		switch args[0] {
+		switch arg0Lower {
 		case "--tar":
-			opttar = true
+			opttar = "backup.tar"
 		case "--tgz":
-			opttgz = true
+			opttar = "backup.tar.gz"
 		case "--vhdx":
-			optvhdx = true
+			optvhdx = "backup.ext4.vhdx"
 		case "--vhdxgz":
-			optvhdxgz = true
+			optvhdx = "backup.ext4.vhdx.gz"
 		case "--reg":
-			optreg = true
+			optreg = "backup.reg"
+		default:
+			if strings.HasSuffix(arg0Lower, ".tar") || strings.HasSuffix(arg0Lower, ".tar.gz") || strings.HasSuffix(arg0Lower, ".tgz") {
+				opttar = args[0]
+			} else if strings.HasSuffix(arg0Lower, ".ext4.vhdx") || strings.HasSuffix(arg0Lower, ".ext4.vhdx.gz") {
+				optvhdx = args[0]
+			} else if strings.HasSuffix(arg0Lower, ".reg") {
+				optreg = args[0]
+			} else {
+				utils.ErrorExit(os.ErrInvalid, true, true, false)
+			}
 		}
 
 	default:
 		utils.ErrorExit(os.ErrInvalid, true, true, false)
 	}
 
-	if optreg {
-		err := backupReg(name, "backup.reg")
+	if optreg != "" {
+		err := backupReg(name, optreg)
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
 	}
-	if opttar {
-		err := backupTar(name, "backup.tar")
+	if opttar != "" {
+		err := backupTar(name, opttar)
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}
 
 	}
-	if opttgz {
-		err := backupTar(name, "backup.tar.gz")
-		if err != nil {
-			utils.ErrorExit(err, true, true, false)
-		}
-	}
-	if optvhdx {
-		err := backupExt4Vhdx(name, "backup.ext4.vhdx")
-		if err != nil {
-			utils.ErrorExit(err, true, true, false)
-		}
-	}
-	if optvhdxgz {
-		err := backupExt4Vhdx(name, "backup.ext4.vhdx.gz")
+	if optvhdx != "" {
+		err := backupExt4Vhdx(name, optvhdx)
 		if err != nil {
 			utils.ErrorExit(err, true, true, false)
 		}

@@ -62,7 +62,7 @@ func backupExt4Vhdx(name string, destFileName string) error {
 		if err != nil {
 			return err
 		}
-		return errors.New("Get profile failed")
+		return errors.New("get profile failed")
 	}
 
 	vhdxPath := prof.BasePath + "\\ext4.vhdx"
