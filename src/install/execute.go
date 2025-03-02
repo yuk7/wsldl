@@ -6,13 +6,14 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
 
-//Execute is default install entrypoint
+// Execute is default install entrypoint
 func Execute(name string, args []string) {
 	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
@@ -60,7 +61,9 @@ func Execute(name string, args []string) {
 			}
 		}
 
-		err := Install(name, rootPath, showProgress)
+		rootFileSha256 := strings.ToLower(jsonPreset.InstallFileSha256)
+
+		err := Install(name, rootPath, rootFileSha256, showProgress)
 		if err != nil {
 			utils.ErrorExit(err, showProgress, true, args == nil)
 		}

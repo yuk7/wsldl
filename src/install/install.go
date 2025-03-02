@@ -2,6 +2,8 @@ package install
 
 import (
 	"compress/gzip"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -35,11 +37,13 @@ var (
 )
 
 // Install installs distribution with default rootfs file names
-func Install(name string, rootPath string, showProgress bool) error {
+func Install(name string, rootPath string, sha256Sum string, showProgress bool) error {
 	rootPathLower := strings.ToLower(rootPath)
+	sha256Actual := ""
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
 	}
+
 	if strings.HasPrefix(rootPathLower, "http://") || strings.HasPrefix(rootPathLower, "https://") {
 		progressBarWidth := 0
 		if showProgress {
@@ -48,19 +52,43 @@ func Install(name string, rootPath string, showProgress bool) error {
 		}
 		tmpRootFn := os.TempDir()
 		if tmpRootFn == "" {
-			return errors.New("Failed to create temp directory")
+			return errors.New("failed to create temp directory")
 		}
 		rand.Seed(time.Now().UnixNano())
 		tmpRootFn = tmpRootFn + "\\" + strconv.Itoa(rand.Intn(10000)) + filepath.Base(rootPath)
 		defer os.Remove(tmpRootFn)
-		err := utils.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
+		var err error
+		sha256Actual, err = utils.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
 		if err != nil {
 			return err
 		}
 		rootPath = tmpRootFn
 		rootPathLower = strings.ToLower(rootPath)
 		fmt.Println()
+	} else if sha256Sum != "" {
+		if showProgress {
+			fmt.Println("Calculating checksum...")
+		}
+		f, err := os.Open(rootPath)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		h := sha256.New()
+		if _, err := io.Copy(h, f); err != nil {
+			return err
+		}
+		sha256Actual = hex.EncodeToString(h.Sum(nil))
 	}
+
+	if showProgress && sha256Actual != "" {
+		fmt.Printf("Checksum(SHA256): %s\n", sha256Actual)
+	}
+
+	if sha256Sum != "" && sha256Actual != "" && sha256Sum != sha256Actual {
+		return errors.New("checksum mismatch")
+	}
+
 	if showProgress {
 		fmt.Println("Installing...")
 	}
@@ -80,7 +108,7 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 	// create empty tar
 	tmptar := os.TempDir()
 	if tmptar == "" {
-		return errors.New("Failed to create temp directory")
+		return errors.New("failed to create temp directory")
 	}
 	tmptar = tmptar + "\\em-vhdx-temp.tar"
 	tmptarfp, err := os.Create(tmptar)

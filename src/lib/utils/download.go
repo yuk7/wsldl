@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"io"
 	"net/http"
 	"os"
@@ -8,22 +10,24 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-func DownloadFile(url, dest string, progressBarWidth int) error {
+func DownloadFile(url, dest string, progressBarWidth int) (string, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	f, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer f.Close()
+
+	sum := sha256.New()
 
 	size := resp.ContentLength
 
@@ -52,10 +56,12 @@ func DownloadFile(url, dest string, progressBarWidth int) error {
 			progressbar.OptionShowCount(),
 		)
 	}
-	_, err = io.Copy(io.MultiWriter(f, bar), resp.Body)
+	_, err = io.Copy(io.MultiWriter(f, bar, sum), resp.Body)
 	if err != nil && err != io.EOF {
-		return err
+		return "", err
 	}
 
-	return nil
+	sha256String := hex.EncodeToString(sum.Sum(nil))
+
+	return sha256String, nil
 }
