@@ -25,13 +25,16 @@ jobs:
           $short_sha = $env:GITHUB_SHA.SubString(0, 7)
           $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=CI-${short_sha}`""
           .\build.bat all
+          Get-ChildItem .\out\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\icons\sha256sums.txt
           Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
+          Get-ChildItem .\out -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\sha256sums.txt
       - uses: actions/upload-artifact@v4
         with:
           name: Build results-Windows
           path: |
             out/wsldl.exe
             out/icons.zip
+            out/sha256sums.txt
           if-no-files-found: error
   compile-wsldl-windows-arm64:
     name: Compile wsldl ARM64
@@ -40,18 +43,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         run: |
+          go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
           $Env:PATH = "${Env:USERPROFILE}\go\bin;${Env:PATH}"
           $short_sha = $env:GITHUB_SHA.SubString(0, 7)
           $Env:GO_BUILD_OPTS = "-ldflags `"-X github.com/yuk7/wsldl/version.version=CI-${short_sha}`""
           $Env:GOARCH="arm64"
           .\build.bat all
-          Compress-Archive -Path .\out\icons\* -DestinationPath .\out\icons.zip
+          Get-ChildItem .\out\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\icons\sha256sums.txt
+          Compress-Archive -Path .\out\icons -DestinationPath .\out\icons.zip
+          Get-ChildItem .\out -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\sha256sums.txt
       - uses: actions/upload-artifact@v4
         with:
           name: Build results-Windows-ARM64
           path: |
             out/wsldl.exe
             out/icons.zip
+            out/sha256sums.txt
           if-no-files-found: error
   compile-wsldl-linux:
     name: Cross-compile wsldl from Linux

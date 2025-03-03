@@ -26,11 +26,16 @@ jobs:
           $Env:GOARCH="arm64"
           .\build.bat all
           move out out_arm64
-      - name: Zip package and rename
-        run: |
-          Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out_amd64\icons.zip
-          move .\out_arm64\wsldl.exe .\out_arm64\wsldl_arm64.exe
-          Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out_arm64\icons_arm64.zip
+      - name: Create sha256sums, zip icons and rename
+        run: |      
+          mkdir out
+          move .\out_amd64\wsldl.exe .\out\wsldl.exe
+          Get-ChildItem .\out_amd64\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out_amd64\icons\sha256sums.txt
+          Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out\icons.zip
+          move .\out_arm64\wsldl.exe .\out\wsldl_arm64.exe
+          Get-ChildItem .\out_arm64\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out_arm64\icons\sha256sums.txt
+          Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out\icons_arm64.zip
+          Get-ChildItem .\out -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\sha256sums.txt
       - name: Release body
         run: |
           $version = ${Env:GITHUB_REF}.Replace("refs/tags/","")
@@ -40,9 +45,10 @@ jobs:
         with:
           body_path: body.txt
           files: |
-            out_amd64/wsldl.exe
-            out_amd64/icons.zip
-            out_arm64/wsldl_arm64.exe
-            out_arm64/icons_arm64.zip
+            out/wsldl.exe
+            out/icons.zip
+            out/wsldl_arm64.exe
+            out/icons_arm64.zip
+            out/sha256sums.txt
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
