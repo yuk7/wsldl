@@ -29,12 +29,15 @@ jobs:
       - name: Create sha256sums, zip icons and rename
         run: |      
           mkdir out
+          echo "creating amd64 artifacts"
           move .\out_amd64\wsldl.exe .\out\wsldl.exe
           Get-ChildItem .\out_amd64\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out_amd64\icons\sha256sums.txt
           Compress-Archive -Path .\out_amd64\icons\* -DestinationPath .\out\icons.zip
+          echo "creating arm64 artifacts"
           move .\out_arm64\wsldl.exe .\out\wsldl_arm64.exe
           Get-ChildItem .\out_arm64\icons -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out_arm64\icons\sha256sums.txt
           Compress-Archive -Path .\out_arm64\icons\* -DestinationPath .\out\icons_arm64.zip
+          echo "creating all sha256sums"
           Get-ChildItem .\out -File | Get-FileHash -Algorithm SHA256 | ForEach-Object { $_.hash.toLower() + "  " + ($_.path | Split-Path -Leaf) } | Tee-Object -FilePath .\out\sha256sums.txt
       - name: Release body
         run: |
