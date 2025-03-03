@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"strings"
 
 	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
@@ -17,6 +16,7 @@ import (
 func Execute(name string, args []string) {
 	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
+		var rootFileSha256 string = ""
 		var showProgress bool
 		jsonPreset, _ := preset.ReadParsePreset()
 		switch len(args) {
@@ -25,6 +25,7 @@ func Execute(name string, args []string) {
 			if jsonPreset.InstallFile != "" {
 				rootPath = jsonPreset.InstallFile
 			}
+			rootFileSha256 = jsonPreset.InstallFileSha256
 			showProgress = true
 
 		case 1:
@@ -34,6 +35,7 @@ func Execute(name string, args []string) {
 				if jsonPreset.InstallFile != "" {
 					rootPath = jsonPreset.InstallFile
 				}
+				rootFileSha256 = jsonPreset.InstallFileSha256
 			} else {
 				rootPath = args[0]
 			}
@@ -60,8 +62,6 @@ func Execute(name string, args []string) {
 				}
 			}
 		}
-
-		rootFileSha256 := strings.ToLower(jsonPreset.InstallFileSha256)
 
 		err := Install(name, rootPath, rootFileSha256, showProgress)
 		if err != nil {
