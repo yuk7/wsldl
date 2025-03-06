@@ -166,4 +166,4 @@ Please see [DEVELOPERS.md](DEVELOPERS.md)
 ## 📄License
 [MIT](LICENSES.md)
 
-Copyright (c) 2017-2021 [yuk7](https://github.com/yuk7)
+Copyright (c) 2017-2025 [yuk7](https://github.com/yuk7)
