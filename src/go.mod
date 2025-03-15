@@ -1,6 +1,9 @@
 module github.com/yuk7/wsldl
 
-go 1.23
+go 1.24
+
+toolchain go1.24.0
+
 require (
 	github.com/fatih/color v1.18.0
 	github.com/mitchellh/go-ps v1.0.0
