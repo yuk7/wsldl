@@ -1,16 +1,14 @@
 package get
 
-// ShowHelp shows help message
-func ShowHelp(showTitle bool) {
-	if showTitle {
-		println("Usage:")
-	}
-	println("    get [setting [value]]")
-	println("      - `--default-uid`: Get the default user uid in this instance.")
-	println("      - `--append-path`: Get true/false status of Append Windows PATH to $PATH.")
-	println("      - `--mount-drive`: Get true/false status of Mount drives.")
-	println("      - `--wsl-version`: Get the version os the WSL (1/2) of this instance.")
-	println("      - `--default-term`: Get Default Terminal type of this instance launcher.")
-	println("      - `--wt-profile-name`: Get Profile Name from Windows Terminal")
-	println("      - `--lxguid`: Get WSL GUID key for this instance.")
+// getHelpMessage returns the help message
+func getHelpMessage() string {
+	return "" +
+		"get [setting [value]]\n" +
+		"  - `--default-uid`: Get the default user uid in this instance.\n" +
+		"  - `--append-path`: Get true/false status of Append Windows PATH to $PATH.\n" +
+		"  - `--mount-drive`: Get true/false status of Mount drives.\n" +
+		"  - `--wsl-version`: Get the version os the WSL (1/2) of this instance.\n" +
+		"  - `--default-term`: Get Default Terminal type of this instance launcher.\n" +
+		"  - `--wt-profile-name`: Get Profile Name from Windows Terminal\n" +
+		"  - `--lxguid`: Get WSL GUID key for this instance."
 }

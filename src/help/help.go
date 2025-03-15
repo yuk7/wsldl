@@ -1,41 +1,17 @@
 package help
 
 import (
-	"github.com/yuk7/wsldl/backup"
-	"github.com/yuk7/wsldl/clean"
-	"github.com/yuk7/wsldl/config"
-	"github.com/yuk7/wsldl/get"
-	"github.com/yuk7/wsldl/install"
-	"github.com/yuk7/wsldl/run"
+	"strings"
 )
 
-// ShowHelpAll shows all help messages
-func ShowHelpAll(registered bool) {
-	println("Usage :")
-	if registered {
-		run.ShowHelp(false)
-		println()
-		config.ShowHelp(false)
-		println()
-		get.ShowHelp(false)
-		println()
-		backup.ShowHelp(false)
-		println()
-		clean.ShowHelp(false)
-		println()
-	} else {
-		install.ShowHelp(false)
-		println()
-	}
-
-	ShowHelp(false)
+// getHelpMessage returns the help message
+func getHelpMessage() string {
+	return "" +
+		"help\n" +
+		"  - Print this usage message."
 }
 
-// ShowHelp shows help message
-func ShowHelp(showTitle bool) {
-	if showTitle {
-		println("Usage:")
-	}
-	println("    help")
-	println("      - Print this usage message.")
+// indentString indents the message
+func indentString(message string) string {
+	return "    " + strings.ReplaceAll(message, "\n", "\n    ")
 }

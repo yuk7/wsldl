@@ -13,10 +13,31 @@ import (
 	"github.com/yuk7/wsllib-go"
 )
 
+func GetCommandWithNoArgs() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{},
+		Help: func(distroName string, isListQuery bool) string {
+			if !wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessageNoArgs()
+			}
+			return ""
+		},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
+
 // GetCommand returns the install command structure
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"install"},
+		Help: func(distroName string, isListQuery bool) string {
+			if !wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessage()
+			}
+			return ""
+		},
 		Run: func(distroName string, args []string) {
 			Execute(distroName, args)
 		},

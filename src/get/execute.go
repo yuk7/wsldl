@@ -16,6 +16,12 @@ import (
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"get"},
+		Help: func(distroName string, isListQuery bool) string {
+			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessage()
+			}
+			return ""
+		},
 		Run: func(distroName string, args []string) {
 			Execute(distroName, args)
 		},

@@ -6,12 +6,19 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsllib-go"
 )
 
 // GetCommand returns the clean command structure
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"clean"},
+		Help: func(distroName string, isListQuery bool) string {
+			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessage()
+			}
+			return ""
+		},
 		Run: func(distroName string, args []string) {
 			Execute(distroName, args)
 		},

@@ -15,6 +15,13 @@ import (
 func GetCommandWithNoArgs() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{},
+		Help: func(distroName string, isListQuery bool) string {
+			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessageNoArgs()
+			} else {
+				return ""
+			}
+		},
 		Run: func(distroName string, args []string) {
 			ExecuteNoArgs(distroName)
 		},
@@ -25,6 +32,13 @@ func GetCommandWithNoArgs() cmdline.Command {
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"run", "-c", "/c"},
+		Help: func(distroName string, isListQuery bool) string {
+			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessage()
+			} else {
+				return ""
+			}
+		},
 		Run: func(distroName string, args []string) {
 			Execute(distroName, args)
 		},
@@ -35,6 +49,13 @@ func GetCommand() cmdline.Command {
 func GetCommandP() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"runp", "-p", "/p"},
+		Help: func(distroName string, isListQuery bool) string {
+			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+				return getHelpMessageP()
+			} else {
+				return ""
+			}
+		},
 		Run: func(distroName string, args []string) {
 			ExecuteP(distroName, args)
 		},

@@ -16,10 +16,7 @@ func isInstalledFilesExist() bool {
 		return true
 	}
 	_, err = os.Stat(dir + "\\rootfs")
-	if err == nil {
-		return true
-	}
-	return false
+	return err == nil
 }
 
 func repairRegistry(profile wslreg.Profile) error {

@@ -18,6 +18,7 @@ import (
 	"github.com/yuk7/wsllib-go"
 )
 
+// main is the entry point of the application
 func main() {
 	efPath, _ := os.Executable()
 	name := filepath.Base(efPath[:len(efPath)-len(filepath.Ext(efPath))])
@@ -25,6 +26,7 @@ func main() {
 	var commands = []cmdline.Command{
 		isregd.GetCommand(),
 		version.GetCommand(),
+		install.GetCommandWithNoArgs(),
 		install.GetCommand(),
 		run.GetCommandWithNoArgs(),
 		run.GetCommand(),
@@ -33,12 +35,22 @@ func main() {
 		get.GetCommand(),
 		backup.GetCommand(),
 		clean.GetCommand(),
-		help.GetCommand(),
 	}
+
+	var helpCommand = help.GetCommand()
+	var commandsWithHelp = append(commands, cmdline.Command{
+		Names: helpCommand.Names,
+		Help:  helpCommand.Help,
+		Run: func(distroName string, args []string) {
+			help.ShowHelpFromCommands(
+				append(commands, helpCommand), distroName, os.Args[2:],
+			)
+		},
+	})
 
 	if len(os.Args) > 1 {
 		cmdline.RunSubCommand(
-			commands,
+			commandsWithHelp,
 			func() {
 				utils.ErrorExit(os.ErrInvalid, true, true, false)
 			},
