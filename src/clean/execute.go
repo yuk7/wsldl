@@ -4,10 +4,21 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 )
 
-//Execute is default run entrypoint.
+// GetCommand returns the clean command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"clean"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
+
+// Execute is default run entrypoint.
 func Execute(name string, args []string) {
 	showProgress := true
 	switch len(args) {

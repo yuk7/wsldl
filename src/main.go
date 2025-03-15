@@ -11,6 +11,7 @@ import (
 	"github.com/yuk7/wsldl/help"
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsldl/version"
@@ -21,46 +22,35 @@ func main() {
 	efPath, _ := os.Executable()
 	name := filepath.Base(efPath[:len(efPath)-len(filepath.Ext(efPath))])
 
+	var commands = []cmdline.Command{
+		isregd.GetCommand(),
+		version.GetCommand(),
+		install.GetCommand(),
+		run.GetCommandWithNoArgs(),
+		run.GetCommand(),
+		run.GetCommandP(),
+		config.GetCommand(),
+		get.GetCommand(),
+		backup.GetCommand(),
+		clean.GetCommand(),
+		help.GetCommand(),
+	}
+
 	if len(os.Args) > 1 {
-		switch os.Args[1] {
-		case "version", "-v", "--version":
-			version.Execute()
+		cmdline.RunSubCommand(
+			commands,
+			func() {
+				utils.ErrorExit(os.ErrInvalid, true, true, false)
+			},
+			name,
+			os.Args[1:],
+		)
 
-		case "isregd":
-			isregd.Execute(name)
-
-		case "install":
-			install.Execute(name, os.Args[2:])
-
-		case "run", "-c", "/c":
-			run.Execute(name, os.Args[2:])
-
-		case "runp", "-p", "/p":
-			run.ExecuteP(name, os.Args[2:])
-
-		case "config", "set":
-			config.Execute(name, os.Args[2:])
-
-		case "get":
-			get.Execute(name, os.Args[2:])
-
-		case "backup":
-			backup.Execute(name, os.Args[2:])
-
-		case "clean":
-			clean.Execute(name, os.Args[2:])
-
-		case "help", "-h", "--help", "/?":
-			help.Execute(name, os.Args[2:])
-
-		default:
-			utils.ErrorExit(os.ErrInvalid, true, true, false)
-		}
 	} else {
 		if !wsllib.WslIsDistributionRegistered(name) {
-			install.Execute(name, nil)
+			install.GetCommand().Run(name, nil)
 		} else {
-			run.ExecuteNoArgs(name)
+			run.GetCommandWithNoArgs().Run(name, nil)
 		}
 	}
 }

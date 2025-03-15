@@ -6,13 +6,24 @@ import (
 	"strconv"
 
 	"github.com/yuk7/wsldl/get"
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
 
-//Execute is default install entrypoint
+// GetCommand returns the config set command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"config", "set"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
+
+// Execute is default install entrypoint
 func Execute(name string, args []string) {
 	var err error
 	uid, flags := get.WslGetConfig(name)

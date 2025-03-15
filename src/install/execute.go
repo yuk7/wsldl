@@ -7,10 +7,21 @@ import (
 	"os/exec"
 	"strconv"
 
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
+
+// GetCommand returns the install command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"install"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
 
 // Execute is default install entrypoint
 func Execute(name string, args []string) {

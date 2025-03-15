@@ -5,13 +5,24 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wtutils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
 
-//Execute is default install entrypoint
+// GetCommand returns the get command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"get"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
+
+// Execute is default install entrypoint
 func Execute(name string, args []string) {
 	uid, flags := WslGetConfig(name)
 	profile, proferr := wslreg.GetProfileFromName(name)

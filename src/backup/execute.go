@@ -4,9 +4,20 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
+
+// GetCommand returns the backup command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"backup"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
 
 // Execute is default run entrypoint.
 func Execute(name string, args []string) {

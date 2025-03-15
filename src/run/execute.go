@@ -5,12 +5,43 @@ import (
 	"os"
 	"strings"
 
+	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
 
-//Execute is default run entrypoint.
+// GetCommandWithNoArgs returns the run command structure with no arguments
+func GetCommandWithNoArgs() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{},
+		Run: func(distroName string, args []string) {
+			ExecuteNoArgs(distroName)
+		},
+	}
+}
+
+// GetCommand returns the run command structure
+func GetCommand() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"run", "-c", "/c"},
+		Run: func(distroName string, args []string) {
+			Execute(distroName, args)
+		},
+	}
+}
+
+// GetCommandP returns the runp command structure
+func GetCommandP() cmdline.Command {
+	return cmdline.Command{
+		Names: []string{"runp", "-p", "/p"},
+		Run: func(distroName string, args []string) {
+			ExecuteP(distroName, args)
+		},
+	}
+}
+
+// Execute is default run entrypoint.
 func Execute(name string, args []string) {
 	command := ""
 	for _, s := range args {
@@ -28,7 +59,7 @@ func Execute(name string, args []string) {
 	}
 }
 
-//ExecuteP runs Execute function with Path Translator
+// ExecuteP runs Execute function with Path Translator
 func ExecuteP(name string, args []string) {
 	var convArgs []string
 	for _, s := range args {
