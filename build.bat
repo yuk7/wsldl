@@ -121,7 +121,7 @@ set DOING=resources
 cd /d %~dp0
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
-    %GOVERSIONINFO_PRG% %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
+    tools\goversioninfo %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
     if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 )
 exit /b
@@ -146,7 +146,7 @@ exit /b
 set DOING=single
 cd /d %~dp0
 echo Compiling resource object...
-%GOVERSIONINFO_PRG% %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
+tools\goversioninfo %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
 if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 :singlewor
 set DOING=singlewor
@@ -172,8 +172,24 @@ exit /b
 
 :dlgoversioninfo
 set DOING=dlgoversioninfo
-%GOVERSIONINFO_PRG% --help >NUL 2>&1
-if %ERRORLEVEL% NEQ 0 %GOPRG% install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@v1.4.0
+cd /d %~dp0
+mkdir tools >NUL 2>&1
+if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    echo Downaloding goversioninfo 386...
+    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_386.exe -o tools\goversioninfo.exe
+) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+    echo Downaloding goversioninfo amd64...
+    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_amd64.exe -o tools\goversioninfo.exe
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM" (
+    echo Downaloding goversioninfo ARM...
+    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm.exe -o tools\goversioninfo.exe
+) else if "%PROCESSOR_ARCHITECTURE%"=="ARM64" (
+    echo Downaloding goversioninfo ARM64...
+    curl -sSfL https://github.com/yuk7/goversioninfo/releases/download/v1.2.0-arm/goversioninfo_arm64.exe -o tools\goversioninfo.exe
+) else (
+    echo ERROR: %PROCESSOR_ARCHITECTURE% is not supported for build environment
+)
+if not exist tools\goversioninfo.exe exit /b 1
 exit /b
 
 :failed
