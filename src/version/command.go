@@ -12,13 +12,13 @@ func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"version", "-v", "--version"},
 		Run: func(distroName string, args []string) {
-			Execute()
+			execute()
 		},
 	}
 }
 
-// Execute is default version entrypoint. prints version information
-func Execute() {
+// execute is default version entrypoint. prints version information
+func execute() {
 	fmt.Printf("%s, version %s  (%s)\n", project, version, runtime.GOARCH)
 	fmt.Printf("%s\n", url)
 }

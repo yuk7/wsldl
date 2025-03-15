@@ -20,13 +20,13 @@ func GetCommand() cmdline.Command {
 			return ""
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
 
-// Execute is default run entrypoint.
-func Execute(name string, args []string) {
+// execute is default run entrypoint.
+func execute(name string, args []string) {
 	showProgress := true
 	switch len(args) {
 	case 0:

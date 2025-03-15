@@ -23,13 +23,13 @@ func GetCommand() cmdline.Command {
 			return ""
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
 
-// Execute is default install entrypoint
-func Execute(name string, args []string) {
+// execute is default install entrypoint
+func execute(name string, args []string) {
 	uid, flags := WslGetConfig(name)
 	profile, proferr := wslreg.GetProfileFromName(name)
 	if len(args) == 1 {

@@ -23,7 +23,7 @@ func GetCommandWithNoArgs() cmdline.Command {
 			return ""
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
@@ -39,13 +39,13 @@ func GetCommand() cmdline.Command {
 			return ""
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
 
-// Execute is default install entrypoint
-func Execute(name string, args []string) {
+// execute is default install entrypoint
+func execute(name string, args []string) {
 	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
 		var rootFileSha256 string = ""

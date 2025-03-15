@@ -23,7 +23,7 @@ func GetCommandWithNoArgs() cmdline.Command {
 			}
 		},
 		Run: func(distroName string, args []string) {
-			ExecuteNoArgs(distroName)
+			executeNoArgs(distroName)
 		},
 	}
 }
@@ -40,7 +40,7 @@ func GetCommand() cmdline.Command {
 			}
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
@@ -57,13 +57,13 @@ func GetCommandP() cmdline.Command {
 			}
 		},
 		Run: func(distroName string, args []string) {
-			ExecuteP(distroName, args)
+			executeP(distroName, args)
 		},
 	}
 }
 
-// Execute is default run entrypoint.
-func Execute(name string, args []string) {
+// execute is default run entrypoint.
+func execute(name string, args []string) {
 	command := ""
 	for _, s := range args {
 		command = command + " " + utils.DQEscapeString(s)
@@ -80,8 +80,8 @@ func Execute(name string, args []string) {
 	}
 }
 
-// ExecuteP runs Execute function with Path Translator
-func ExecuteP(name string, args []string) {
+// executeP runs execute function with Path Translator
+func executeP(name string, args []string) {
 	var convArgs []string
 	for _, s := range args {
 		if strings.Contains(s, "\\") {
@@ -102,11 +102,11 @@ func ExecuteP(name string, args []string) {
 		}
 	}
 
-	Execute(name, convArgs)
+	execute(name, convArgs)
 }
 
-// ExecuteNoArgs runs distro, but use terminal settings
-func ExecuteNoArgs(name string) {
+// executeNoArgs runs distro, but use terminal settings
+func executeNoArgs(name string) {
 	efPath, _ := os.Executable()
 	profile, _ := wslreg.GetProfileFromName(name)
 
@@ -167,8 +167,8 @@ func ExecuteNoArgs(name string) {
 		}
 
 		utils.SetConsoleTitle(name)
-		Execute(name, nil)
+		execute(name, nil)
 	} else {
-		Execute(name, nil)
+		execute(name, nil)
 	}
 }

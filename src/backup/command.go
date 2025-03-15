@@ -20,13 +20,13 @@ func GetCommand() cmdline.Command {
 			return ""
 		},
 		Run: func(distroName string, args []string) {
-			Execute(distroName, args)
+			execute(distroName, args)
 		},
 	}
 }
 
-// Execute is default run entrypoint.
-func Execute(name string, args []string) {
+// execute is default backup entrypoint
+func execute(name string, args []string) {
 	arg0Lower := strings.ToLower(args[0])
 	opttar := ""
 	optvhdx := ""
