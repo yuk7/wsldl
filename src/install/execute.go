@@ -79,7 +79,7 @@ func Execute(name string, args []string) {
 		if args == nil {
 			if isInstalledFilesExist() {
 				var in string
-				fmt.Printf("An old installation file was found.\n")
+				fmt.Printf("An old installation files has been found.\n")
 				fmt.Printf("Do you want to rewrite and repair the installation information?\n")
 				fmt.Printf("Type y/n:")
 				fmt.Scan(&in)

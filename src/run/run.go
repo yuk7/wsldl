@@ -12,7 +12,7 @@ import (
 	wslreg "github.com/yuk7/wslreglib-go"
 )
 
-//ExecRead execs command and read output
+// ExecRead execs command and read output
 func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 	stdin := syscall.Handle(0)
 	stdout := syscall.Handle(0)
@@ -81,7 +81,7 @@ func ExecWindowsTerminal(name string) {
 	res, err := utils.CreateProcessAndWait(cmd)
 	if err != nil {
 		utils.AllocConsole()
-		fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+		fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 		fmt.Fprintln(os.Stderr, exe)
 		utils.ErrorExit(err, true, false, true)
 	}

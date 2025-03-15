@@ -153,7 +153,7 @@ func ExecuteNoArgs(name string) {
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
-				fmt.Fprintln(os.Stderr, "ERR: Failed to launch Terminal Process")
+				fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
 				utils.ErrorExit(err, true, false, true)
 			}
