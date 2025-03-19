@@ -22,9 +22,7 @@ func GetCommandWithNoArgs() cmdline.Command {
 				return ""
 			}
 		},
-		Run: func(distroName string, args []string) {
-			executeNoArgs(distroName)
-		},
+		Run: executeNoArgs,
 	}
 }
 
@@ -39,9 +37,7 @@ func GetCommand() cmdline.Command {
 				return ""
 			}
 		},
-		Run: func(distroName string, args []string) {
-			execute(distroName, args)
-		},
+		Run: execute,
 	}
 }
 
@@ -56,9 +52,7 @@ func GetCommandP() cmdline.Command {
 				return ""
 			}
 		},
-		Run: func(distroName string, args []string) {
-			executeP(distroName, args)
-		},
+		Run: executeP,
 	}
 }
 
@@ -106,7 +100,7 @@ func executeP(name string, args []string) {
 }
 
 // executeNoArgs runs distro, but use terminal settings
-func executeNoArgs(name string) {
+func executeNoArgs(name string, args []string) {
 	efPath, _ := os.Executable()
 	profile, _ := wslreg.GetProfileFromName(name)
 

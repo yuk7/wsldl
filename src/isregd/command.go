@@ -10,14 +10,12 @@ import (
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"isregd"},
-		Run: func(distroName string, args []string) {
-			Execute(distroName)
-		},
+		Run:   execute,
 	}
 }
 
-// Execute is default isregd entrypoint. Exits with registerd status
-func Execute(name string) {
+// execute is default isregd entrypoint. Exits with registerd status
+func execute(name string, args []string) {
 	if wsllib.WslIsDistributionRegistered(name) {
 		os.Exit(0)
 	}

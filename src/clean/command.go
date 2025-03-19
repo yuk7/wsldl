@@ -19,9 +19,7 @@ func GetCommand() cmdline.Command {
 			}
 			return ""
 		},
-		Run: func(distroName string, args []string) {
-			execute(distroName, args)
-		},
+		Run: execute,
 	}
 }
 
