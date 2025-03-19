@@ -16,7 +16,7 @@ import (
 
 const (
 	// ConsoleProcNames is console process list for detect parent console process
-	ConsoleProcNames = "cmd.exe,powershell.exe,wsl.exe,WindowsTerminal.exe,winpty-agent.exe"
+	ConsoleProcNames = "cmd.exe,powershell.exe,wsl.exe,WindowsTerminal.exe,flute.exe,FluentTerminal.SystemTray.exe,winpty-agent.exe"
 	// SpecialDirs is define path of special dirs
 	SpecialDirs = "SystemDrive:,SystemRoot:,SystemRoot:System32,USERPROFILE:"
 )

@@ -143,7 +143,7 @@ func executeNoArgs(name string, args []string) {
 			exe := os.Getenv("LOCALAPPDATA")
 			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
-			cmd := exe + " run " + utils.DQEscapeString(efPath)
+			cmd := exe + " run " + utils.DQEscapeString(efPath+" run")
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				utils.AllocConsole()
