@@ -27,7 +27,6 @@ func GetCommand() cmdline.Command {
 
 // execute is default backup entrypoint
 func execute(name string, args []string) {
-	arg0Lower := strings.ToLower(args[0])
 	opttar := ""
 	optvhdx := ""
 	optreg := ""
@@ -43,6 +42,7 @@ func execute(name string, args []string) {
 		}
 
 	case 1:
+		arg0Lower := strings.ToLower(args[0])
 		switch arg0Lower {
 		case "--tar":
 			opttar = "backup.tar"
