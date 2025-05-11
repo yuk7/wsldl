@@ -26,11 +26,13 @@ var (
 		"install.tgz",
 		"install.tar.zst",
 		"install.tar.xz",
+		"install.wsl",
 		"rootfs.tar",
 		"rootfs.tar.gz",
 		"rootfs.tgz",
 		"rootfs.tar.zst",
 		"rootfs.tar.xz",
+		"rootfs.wsl",
 		"install.ext4.vhdx",
 		"install.ext4.vhdx.gz",
 	}
