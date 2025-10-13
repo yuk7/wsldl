@@ -10,7 +10,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.18.0
 	github.com/yuk7/wsllib-go v1.0.0
 	github.com/yuk7/wslreglib-go v1.0.1
-	golang.org/x/text v0.29.0
+	golang.org/x/text v0.30.0
 )
 
 require (
