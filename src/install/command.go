@@ -41,7 +41,7 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) {
+func execute(name string, args []string) error {
 	if !wsllib.WslIsDistributionRegistered(name) {
 		var rootPath string
 		var rootFileSha256 string = ""
@@ -69,7 +69,7 @@ func execute(name string, args []string) {
 			}
 
 		default:
-			utils.ErrorExit(os.ErrInvalid, true, true, false)
+			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 
 		if args == nil {
@@ -83,17 +83,17 @@ func execute(name string, args []string) {
 				if in == "y" {
 					err := repairRegistry(name)
 					if err != nil {
-						utils.ErrorExit(err, showProgress, true, showProgress)
+						return utils.NewDisplayError(err, showProgress, true, showProgress)
 					}
 					utils.StdoutGreenPrintln("done.")
-					return
+					return nil
 				}
 			}
 		}
 
 		err := Install(name, rootPath, rootFileSha256, showProgress)
 		if err != nil {
-			utils.ErrorExit(err, showProgress, true, args == nil)
+			return utils.NewDisplayError(err, showProgress, true, args == nil)
 		}
 
 		if jsonPreset.WslVersion == 1 || jsonPreset.WslVersion == 2 {
@@ -106,7 +106,7 @@ func execute(name string, args []string) {
 				utils.StdoutGreenPrintln("Installation complete")
 			}
 		} else {
-			utils.ErrorExit(err, showProgress, true, args == nil)
+			return utils.NewDisplayError(err, showProgress, true, args == nil)
 		}
 
 		if args == nil {
@@ -116,6 +116,7 @@ func execute(name string, args []string) {
 
 	} else {
 		utils.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
-		utils.ErrorExit(os.ErrInvalid, false, true, false)
+		return utils.NewDisplayError(os.ErrInvalid, false, true, false)
 	}
+	return nil
 }

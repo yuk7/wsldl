@@ -24,7 +24,7 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default backup entrypoint
-func execute(name string, args []string) {
+func execute(name string, args []string) error {
 	opttar := ""
 	optvhdx := ""
 	optreg := ""
@@ -60,31 +60,32 @@ func execute(name string, args []string) {
 			} else if strings.HasSuffix(arg0Lower, ".reg") {
 				optreg = args[0]
 			} else {
-				utils.ErrorExit(os.ErrInvalid, true, true, false)
+				return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 			}
 		}
 
 	default:
-		utils.ErrorExit(os.ErrInvalid, true, true, false)
+		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
 	if optreg != "" {
 		err := backupReg(name, optreg)
 		if err != nil {
-			utils.ErrorExit(err, true, true, false)
+			return utils.NewDisplayError(err, true, true, false)
 		}
 	}
 	if opttar != "" {
 		err := backupTar(name, opttar)
 		if err != nil {
-			utils.ErrorExit(err, true, true, false)
+			return utils.NewDisplayError(err, true, true, false)
 		}
 
 	}
 	if optvhdx != "" {
 		err := backupExt4Vhdx(name, optvhdx)
 		if err != nil {
-			utils.ErrorExit(err, true, true, false)
+			return utils.NewDisplayError(err, true, true, false)
 		}
 	}
+	return nil
 }

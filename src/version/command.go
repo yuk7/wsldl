@@ -11,8 +11,9 @@ import (
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"version", "-v", "--version"},
-		Run: func(distroName string, args []string) {
+		Run: func(distroName string, args []string) error {
 			execute()
+			return nil
 		},
 	}
 }

@@ -24,7 +24,7 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default run entrypoint.
-func execute(name string, args []string) {
+func execute(name string, args []string) error {
 	showProgress := true
 	switch len(args) {
 	case 0:
@@ -36,7 +36,7 @@ func execute(name string, args []string) {
 
 		if in != "y" {
 			fmt.Fprintf(os.Stderr, "Accepting is required to proceed.")
-			utils.ErrorExit(os.ErrInvalid, false, true, false)
+			return utils.NewDisplayError(os.ErrInvalid, false, true, false)
 		}
 
 	case 1:
@@ -44,12 +44,16 @@ func execute(name string, args []string) {
 		if args[0] == "-y" {
 			showProgress = false
 		} else {
-			utils.ErrorExit(os.ErrInvalid, true, true, false)
+			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 
 	default:
-		utils.ErrorExit(os.ErrInvalid, true, true, false)
+		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
-	Clean(name, showProgress)
+	err := Clean(name, showProgress)
+	if err != nil {
+		return utils.NewDisplayError(err, showProgress, true, false)
+	}
+	return nil
 }

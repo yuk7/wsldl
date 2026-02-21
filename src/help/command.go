@@ -11,9 +11,10 @@ func GetCommand() cmdline.Command {
 		Help: func(distroName string, isListQuery bool) string {
 			return getHelpMessage()
 		},
-		Run: func(distroName string, args []string) {
+		Run: func(distroName string, args []string) error {
 			println("Usage:")
 			println(indentString(getHelpMessage()))
+			return nil
 		},
 	}
 }

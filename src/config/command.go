@@ -28,9 +28,12 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) {
-	var err error
-	uid, flags := get.WslGetConfig(name)
+func execute(name string, args []string) error {
+	uid, flags, err := get.WslGetConfig(name)
+	if err != nil {
+		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
+		return utils.NewDisplayError(err, true, true, false)
+	}
 	if len(args) == 2 {
 		switch args[0] {
 		case "--default-uid":
@@ -109,10 +112,11 @@ func execute(name string, args []string) {
 			err = os.ErrInvalid
 		}
 		if err != nil {
-			utils.ErrorExit(err, true, true, false)
+			return utils.NewDisplayError(err, true, true, false)
 		}
 		wsllib.WslConfigureDistribution(name, uid, flags)
 	} else {
-		utils.ErrorExit(os.ErrInvalid, true, true, false)
+		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
+	return nil
 }

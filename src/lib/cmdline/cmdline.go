@@ -5,15 +5,14 @@ import (
 )
 
 // RunSubCommand executes a subcommand
-func RunSubCommand(commands []Command, mismatch func(), distroName string, args []string) {
+func RunSubCommand(commands []Command, mismatch func() error, distroName string, args []string) error {
 	if len(args) > 0 {
 		command, err := FindCommandFromName(commands, args[0])
 		if err == nil {
-			command.Run(distroName, args[1:])
-			return
+			return command.Run(distroName, args[1:])
 		}
 	}
-	mismatch()
+	return mismatch()
 }
 
 // FindCommandFromName finds a command by name

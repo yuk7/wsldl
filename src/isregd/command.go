@@ -1,9 +1,8 @@
 package isregd
 
 import (
-	"os"
-
 	"github.com/yuk7/wsldl/lib/cmdline"
+	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
 
@@ -15,9 +14,9 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default isregd entrypoint. Exits with registerd status
-func execute(name string, args []string) {
+func execute(name string, args []string) error {
 	if wsllib.WslIsDistributionRegistered(name) {
-		os.Exit(0)
+		return nil
 	}
-	os.Exit(1)
+	return utils.NewExitCodeError(1, false)
 }

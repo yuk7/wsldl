@@ -57,7 +57,7 @@ func GetCommandP() cmdline.Command {
 }
 
 // execute is default run entrypoint.
-func execute(name string, args []string) {
+func execute(name string, args []string) error {
 	command := ""
 	for _, s := range args {
 		command = command + " " + utils.DQEscapeString(s)
@@ -68,14 +68,16 @@ func execute(name string, args []string) {
 	}
 	exitCode, err := wsllib.WslLaunchInteractive(name, command, inheritpath)
 	if err != nil {
-		utils.ErrorExit(err, true, true, false)
-	} else {
-		os.Exit(int(exitCode))
+		return utils.NewDisplayError(err, true, true, false)
 	}
+	if exitCode != 0 {
+		return utils.NewExitCodeError(int(exitCode), false)
+	}
+	return nil
 }
 
 // executeP runs execute function with Path Translator
-func executeP(name string, args []string) {
+func executeP(name string, args []string) error {
 	var convArgs []string
 	for _, s := range args {
 		if strings.Contains(s, "\\") {
@@ -86,9 +88,9 @@ func executeP(name string, args []string) {
 				utils.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
 				if err != nil {
-					utils.ErrorExit(err, true, true, false)
+					return utils.NewDisplayError(err, true, true, false)
 				}
-				os.Exit(int(exitCode))
+				return utils.NewExitCodeError(int(exitCode), false)
 			}
 			convArgs = append(convArgs, out)
 		} else {
@@ -96,11 +98,11 @@ func executeP(name string, args []string) {
 		}
 	}
 
-	execute(name, convArgs)
+	return execute(name, convArgs)
 }
 
 // executeNoArgs runs distro, but use terminal settings
-func executeNoArgs(name string, args []string) {
+func executeNoArgs(name string, args []string) error {
 	efPath, _ := os.Executable()
 	profile, _ := wslreg.GetProfileFromName(name)
 
@@ -118,10 +120,10 @@ func executeNoArgs(name string, args []string) {
 				if in == "y" {
 					err := repairRegistry(profile)
 					if err != nil {
-						utils.ErrorExit(err, true, true, true)
+						return utils.NewDisplayError(err, true, true, true)
 					}
 					utils.StdoutGreenPrintln("done.")
-					utils.Exit(true, 0)
+					return utils.NewExitCodeError(0, true)
 				}
 			}
 		}
@@ -135,8 +137,7 @@ func executeNoArgs(name string, args []string) {
 		switch profile.WsldlTerm {
 		case wslreg.FlagWsldlTermWT:
 			utils.FreeConsole()
-			ExecWindowsTerminal(name)
-			os.Exit(0)
+			return ExecWindowsTerminal(name)
 
 		case wslreg.FlagWsldlTermFlute:
 			utils.FreeConsole()
@@ -149,9 +150,12 @@ func executeNoArgs(name string, args []string) {
 				utils.AllocConsole()
 				fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
-				utils.ErrorExit(err, true, false, true)
+				return utils.NewDisplayError(err, true, false, true)
 			}
-			os.Exit(res)
+			if res != 0 {
+				return utils.NewExitCodeError(res, false)
+			}
+			return nil
 		}
 
 		// Parent isn't console, launch instance with default conhost
@@ -161,8 +165,8 @@ func executeNoArgs(name string, args []string) {
 		}
 
 		utils.SetConsoleTitle(name)
-		execute(name, nil)
+		return execute(name, nil)
 	} else {
-		execute(name, nil)
+		return execute(name, nil)
 	}
 }

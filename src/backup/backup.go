@@ -18,7 +18,7 @@ import (
 func backupReg(name string, destFileName string) error {
 	profile, err := wslreg.GetProfileFromName(name)
 	if err != nil {
-		utils.ErrorExit(err, true, true, false)
+		return err
 	}
 
 	regexe := utils.GetWindowsDirectory() + "\\System32\\reg.exe"

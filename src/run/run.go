@@ -40,7 +40,7 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 }
 
 // ExecWindowsTerminal executes Windows Terminal
-func ExecWindowsTerminal(name string) {
+func ExecWindowsTerminal(name string) error {
 	// Get the name from the registry to be case sensitive.
 	profile, _ := wslreg.GetProfileFromName(name)
 	if profile.DistributionName != "" {
@@ -83,7 +83,10 @@ func ExecWindowsTerminal(name string) {
 		utils.AllocConsole()
 		fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 		fmt.Fprintln(os.Stderr, exe)
-		utils.ErrorExit(err, true, false, true)
+		return utils.NewDisplayError(err, true, false, true)
 	}
-	os.Exit(res)
+	if res != 0 {
+		return utils.NewExitCodeError(res, false)
+	}
+	return nil
 }

@@ -27,8 +27,12 @@ func GetCommand() cmdline.Command {
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) {
-	uid, flags := WslGetConfig(name)
+func execute(name string, args []string) error {
+	uid, flags, err := WslGetConfig(name)
+	if err != nil {
+		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
+		return utils.NewDisplayError(err, true, true, false)
+	}
 	profile, proferr := wslreg.GetProfileFromName(name)
 	if len(args) == 1 {
 		switch args[0] {
@@ -51,9 +55,9 @@ func execute(name string, args []string) {
 		case "--lxguid", "--lxuid":
 			if profile.UUID == "" {
 				if proferr != nil {
-					utils.ErrorExit(proferr, true, true, false)
+					return utils.NewDisplayError(proferr, true, true, false)
 				}
-				utils.ErrorExit(errors.New("lxguid get failed"), true, true, false)
+				return utils.NewDisplayError(errors.New("lxguid get failed"), true, true, false)
 			}
 			print(profile.UUID)
 
@@ -74,7 +78,7 @@ func execute(name string, args []string) {
 
 			conf, err := wtutils.ReadParseWTConfig()
 			if err != nil {
-				utils.ErrorExit(err, true, true, false)
+				return utils.NewDisplayError(err, true, true, false)
 			}
 			guid := "{" + wtutils.CreateProfileGUID(name) + "}"
 			profileName := ""
@@ -87,7 +91,7 @@ func execute(name string, args []string) {
 			if profileName != "" {
 				print(profileName)
 			} else {
-				utils.ErrorExit(errors.New("profile not found"), true, true, false)
+				return utils.NewDisplayError(errors.New("profile not found"), true, true, false)
 			}
 
 		case "--flags-val":
@@ -97,9 +101,10 @@ func execute(name string, args []string) {
 			fmt.Printf("%04b", flags)
 
 		default:
-			utils.ErrorExit(os.ErrInvalid, true, true, false)
+			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 	} else {
-		utils.ErrorExit(os.ErrInvalid, true, true, false)
+		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
+	return nil
 }

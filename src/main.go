@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -41,28 +42,47 @@ func main() {
 	var commandsWithHelp = append(commands, cmdline.Command{
 		Names: helpCommand.Names,
 		Help:  helpCommand.Help,
-		Run: func(distroName string, args []string) {
+		Run: func(distroName string, args []string) error {
 			help.ShowHelpFromCommands(
 				append(commands, helpCommand), distroName, os.Args[2:],
 			)
+			return nil
 		},
 	})
 
+	handleCommandError := func(err error) {
+		if err == nil {
+			return
+		}
+		var displayErr *utils.DisplayError
+		if errors.As(err, &displayErr) {
+			utils.ErrorExit(displayErr.Err, displayErr.ShowMsg, displayErr.ShowColor, displayErr.Pause)
+			return
+		}
+		var exitCodeErr *utils.ExitCodeError
+		if errors.As(err, &exitCodeErr) {
+			utils.Exit(exitCodeErr.Pause, exitCodeErr.Code)
+			return
+		}
+		utils.ErrorExit(err, true, true, false)
+	}
+
 	if len(os.Args) > 1 {
-		cmdline.RunSubCommand(
+		err := cmdline.RunSubCommand(
 			commandsWithHelp,
-			func() {
-				utils.ErrorExit(os.ErrInvalid, true, true, false)
+			func() error {
+				return utils.NewDisplayError(os.ErrInvalid, true, true, false)
 			},
 			name,
 			os.Args[1:],
 		)
+		handleCommandError(err)
 
 	} else {
 		if !wsllib.WslIsDistributionRegistered(name) {
-			install.GetCommand().Run(name, nil)
+			handleCommandError(install.GetCommand().Run(name, nil))
 		} else {
-			run.GetCommandWithNoArgs().Run(name, nil)
+			handleCommandError(run.GetCommandWithNoArgs().Run(name, nil))
 		}
 	}
 }
