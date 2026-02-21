@@ -149,22 +149,30 @@ func SetConsoleTitle(title string) {
 	syscall.SyscallN(proc.Addr(), 1, uintptr(unsafe.Pointer(pTitle)))
 }
 
-// ErrorExit shows error message and exit
+// FormatError formats an error for CLI output.
+func FormatError(err error) string {
+	if err == nil {
+		return "ERR: unknown error"
+	}
+	return "ERR: " + err.Error()
+}
+
+// ErrorExit shows error message and exit.
+// Deprecated: use FormatError for formatting and handle process exit at call sites.
 func ErrorExit(err error, showmsg bool, showcolor bool, pause bool) {
 	var errno syscall.Errno
-	if err == nil {
-		if showmsg {
-			ErrorRedPrintln("ERR: unknown error")
-			Exit(pause, 1)
+
+	if showmsg {
+		formatted := FormatError(err)
+		if showcolor {
+			ErrorRedPrintln(formatted)
+		} else {
+			fmt.Fprintln(os.Stderr, formatted)
 		}
 	}
-	if showmsg {
-		if showcolor {
-			ErrorRedPrintln("ERR: " + err.Error())
-		} else {
-			fmt.Fprintln(os.Stderr, "ERR: "+err.Error())
-		}
 
+	if err == nil {
+		Exit(pause, 1)
 	}
 	if errors.As(err, &errno) {
 		if showmsg {
