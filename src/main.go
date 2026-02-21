@@ -2,8 +2,11 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"syscall"
 
 	"github.com/yuk7/wsldl/backup"
 	"github.com/yuk7/wsldl/clean"
@@ -56,7 +59,7 @@ func main() {
 		}
 		var displayErr *utils.DisplayError
 		if errors.As(err, &displayErr) {
-			utils.ErrorExit(displayErr.Err, displayErr.ShowMsg, displayErr.ShowColor, displayErr.Pause)
+			handleDisplayError(displayErr.Err, displayErr.ShowMsg, displayErr.ShowColor, displayErr.Pause)
 			return
 		}
 		var exitCodeErr *utils.ExitCodeError
@@ -64,7 +67,7 @@ func main() {
 			utils.Exit(exitCodeErr.Pause, exitCodeErr.Code)
 			return
 		}
-		utils.ErrorExit(err, true, true, false)
+		handleDisplayError(err, true, true, false)
 	}
 
 	if len(os.Args) > 1 {
@@ -85,4 +88,39 @@ func main() {
 			handleCommandError(run.GetCommandWithNoArgs().Run(name, nil))
 		}
 	}
+}
+
+func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {
+	var errno syscall.Errno
+
+	if showMsg {
+		formatted := utils.FormatError(err)
+		if showColor {
+			utils.ErrorRedPrintln(formatted)
+		} else {
+			fmt.Fprintln(os.Stderr, formatted)
+		}
+	}
+
+	if err == nil {
+		utils.Exit(pause, 1)
+	}
+	if errors.As(err, &errno) {
+		if showMsg {
+			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
+		}
+		utils.Exit(pause, int(errno))
+	} else if err == os.ErrInvalid {
+		if showMsg {
+			efPath, _ := os.Executable()
+			exeName := filepath.Base(efPath)
+			fmt.Fprintln(os.Stderr, "Your command may be incorrect.")
+			fmt.Fprintf(os.Stderr, "You can get help with `%s help`.\n", exeName)
+		}
+	} else if strings.HasPrefix(fmt.Sprintf("%#v", err), "&errors.errorString{") {
+		if showMsg {
+			fmt.Fprintf(os.Stderr, "%#v\n", err)
+		}
+	}
+	utils.Exit(pause, 1)
 }

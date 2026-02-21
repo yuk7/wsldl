@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -155,45 +154,6 @@ func FormatError(err error) string {
 		return "ERR: unknown error"
 	}
 	return "ERR: " + err.Error()
-}
-
-// ErrorExit shows error message and exit.
-// Deprecated: use FormatError for formatting and handle process exit at call sites.
-func ErrorExit(err error, showmsg bool, showcolor bool, pause bool) {
-	var errno syscall.Errno
-
-	if showmsg {
-		formatted := FormatError(err)
-		if showcolor {
-			ErrorRedPrintln(formatted)
-		} else {
-			fmt.Fprintln(os.Stderr, formatted)
-		}
-	}
-
-	if err == nil {
-		Exit(pause, 1)
-	}
-	if errors.As(err, &errno) {
-		if showmsg {
-			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
-		}
-		Exit(pause, int(errno))
-	} else if err == os.ErrInvalid {
-		if showmsg {
-			efPath, _ := os.Executable()
-			exeName := filepath.Base(efPath)
-			fmt.Fprintln(os.Stderr, "Your command may be incorrect.")
-			fmt.Fprintf(os.Stderr, "You can get help with `%s help`.\n", exeName)
-		}
-	} else if !strings.HasPrefix(fmt.Sprintf("%#v", err), "&errors.errorString{") {
-		// errors.errorString only contains string, so skip it
-	} else {
-		if showmsg {
-			fmt.Fprintf(os.Stderr, "%#v\n", err)
-		}
-	}
-	Exit(pause, 1)
 }
 
 // Exit exits program

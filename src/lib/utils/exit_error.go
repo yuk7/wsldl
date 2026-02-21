@@ -1,6 +1,6 @@
 package utils
 
-// DisplayError keeps ErrorExit display options alongside an underlying error.
+// DisplayError keeps CLI display options alongside an underlying error.
 type DisplayError struct {
 	Err       error
 	ShowMsg   bool
