@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/download"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
@@ -60,7 +60,7 @@ func Install(name string, rootPath string, sha256Sum string, showProgress bool) 
 		tmpRootFn = tmpRootFn + "\\" + strconv.Itoa(rand.Intn(10000)) + filepath.Base(rootPath)
 		defer os.Remove(tmpRootFn)
 		var err error
-		sha256Actual, err = utils.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
+		sha256Actual, err = download.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
 		if err != nil {
 			return err
 		}

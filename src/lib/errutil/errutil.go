@@ -1,4 +1,12 @@
-package utils
+package errutil
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+
+	"github.com/fatih/color"
+)
 
 // DisplayError keeps CLI display options alongside an underlying error.
 type DisplayError struct {
@@ -52,4 +60,31 @@ func NewExitCodeError(code int, pause bool) error {
 		Code:  code,
 		Pause: pause,
 	}
+}
+
+// FormatError formats an error for CLI output.
+func FormatError(err error) string {
+	if err == nil {
+		return "ERR: unknown error"
+	}
+	return "ERR: " + err.Error()
+}
+
+// Exit exits program
+func Exit(pause bool, exitCode int) {
+	if pause {
+		fmt.Fprintf(os.Stdout, "Press enter to exit...")
+		bufio.NewReader(os.Stdin).ReadString('\n')
+	}
+	os.Exit(exitCode)
+}
+
+// ErrorRedPrintln shows red string to stderr
+func ErrorRedPrintln(str string) {
+	color.New(color.FgRed).Fprintln(color.Error, str)
+}
+
+// StdoutGreenPrintln shows green string to stdout
+func StdoutGreenPrintln(str string) {
+	color.New(color.FgGreen).Fprintln(color.Output, str)
 }

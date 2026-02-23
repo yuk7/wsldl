@@ -1,4 +1,4 @@
-package utils
+package download
 
 import (
 	"crypto/sha256"
@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/schollz/progressbar/v3"
+	"github.com/yuk7/wsldl/lib/errutil"
 )
 
 func DownloadFile(url, dest string, progressBarWidth int) (string, error) {
@@ -33,7 +34,7 @@ func DownloadFile(url, dest string, progressBarWidth int) (string, error) {
 
 	if size == 0 {
 		if progressBarWidth > 0 {
-			ErrorRedPrintln("Failed to get total file size")
+			errutil.ErrorRedPrintln("Failed to get total file size")
 		}
 		size = -1
 	}

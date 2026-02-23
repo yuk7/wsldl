@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsllib-go"
 )
 
@@ -36,7 +36,7 @@ func execute(name string, args []string) error {
 
 		if in != "y" {
 			fmt.Fprintf(os.Stderr, "Accepting is required to proceed.")
-			return utils.NewDisplayError(os.ErrInvalid, false, true, false)
+			return errutil.NewDisplayError(os.ErrInvalid, false, true, false)
 		}
 
 	case 1:
@@ -44,16 +44,16 @@ func execute(name string, args []string) error {
 		if args[0] == "-y" {
 			showProgress = false
 		} else {
-			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+			return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 
 	default:
-		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
 	err := Clean(name, showProgress)
 	if err != nil {
-		return utils.NewDisplayError(err, showProgress, true, false)
+		return errutil.NewDisplayError(err, showProgress, true, false)
 	}
 	return nil
 }

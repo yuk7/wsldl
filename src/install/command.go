@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
@@ -69,7 +70,7 @@ func execute(name string, args []string) error {
 			}
 
 		default:
-			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+			return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 
 		if args == nil {
@@ -83,9 +84,9 @@ func execute(name string, args []string) error {
 				if in == "y" {
 					err := repairRegistry(name)
 					if err != nil {
-						return utils.NewDisplayError(err, showProgress, true, showProgress)
+						return errutil.NewDisplayError(err, showProgress, true, showProgress)
 					}
-					utils.StdoutGreenPrintln("done.")
+					errutil.StdoutGreenPrintln("done.")
 					return nil
 				}
 			}
@@ -93,7 +94,7 @@ func execute(name string, args []string) error {
 
 		err := Install(name, rootPath, rootFileSha256, showProgress)
 		if err != nil {
-			return utils.NewDisplayError(err, showProgress, true, args == nil)
+			return errutil.NewDisplayError(err, showProgress, true, args == nil)
 		}
 
 		if jsonPreset.WslVersion == 1 || jsonPreset.WslVersion == 2 {
@@ -103,10 +104,10 @@ func execute(name string, args []string) error {
 
 		if err == nil {
 			if showProgress {
-				utils.StdoutGreenPrintln("Installation complete")
+				errutil.StdoutGreenPrintln("Installation complete")
 			}
 		} else {
-			return utils.NewDisplayError(err, showProgress, true, args == nil)
+			return errutil.NewDisplayError(err, showProgress, true, args == nil)
 		}
 
 		if args == nil {
@@ -115,8 +116,8 @@ func execute(name string, args []string) error {
 		}
 
 	} else {
-		utils.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
-		return utils.NewDisplayError(os.ErrInvalid, false, true, false)
+		errutil.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
+		return errutil.NewDisplayError(os.ErrInvalid, false, true, false)
 	}
 	return nil
 }

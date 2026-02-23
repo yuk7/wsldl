@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsllib-go"
 )
 
@@ -60,31 +60,31 @@ func execute(name string, args []string) error {
 			} else if strings.HasSuffix(arg0Lower, ".reg") {
 				optreg = args[0]
 			} else {
-				return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+				return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 			}
 		}
 
 	default:
-		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
 	if optreg != "" {
 		err := backupReg(name, optreg)
 		if err != nil {
-			return utils.NewDisplayError(err, true, true, false)
+			return errutil.NewDisplayError(err, true, true, false)
 		}
 	}
 	if opttar != "" {
 		err := backupTar(name, opttar)
 		if err != nil {
-			return utils.NewDisplayError(err, true, true, false)
+			return errutil.NewDisplayError(err, true, true, false)
 		}
 
 	}
 	if optvhdx != "" {
 		err := backupExt4Vhdx(name, optvhdx)
 		if err != nil {
-			return utils.NewDisplayError(err, true, true, false)
+			return errutil.NewDisplayError(err, true, true, false)
 		}
 	}
 	return nil

@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
+	"github.com/yuk7/wsldl/lib/console"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
@@ -68,10 +70,10 @@ func execute(name string, args []string) error {
 	}
 	exitCode, err := wsllib.WslLaunchInteractive(name, command, inheritpath)
 	if err != nil {
-		return utils.NewDisplayError(err, true, true, false)
+		return errutil.NewDisplayError(err, true, true, false)
 	}
 	if exitCode != 0 {
-		return utils.NewExitCodeError(int(exitCode), false)
+		return errutil.NewExitCodeError(int(exitCode), false)
 	}
 	return nil
 }
@@ -85,12 +87,12 @@ func executeP(name string, args []string) error {
 			s = utils.DQEscapeString(s)
 			out, exitCode, err := ExecRead(name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
-				utils.ErrorRedPrintln("ERR: Failed to Path Translation")
+				errutil.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
 				if err != nil {
-					return utils.NewDisplayError(err, true, true, false)
+					return errutil.NewDisplayError(err, true, true, false)
 				}
-				return utils.NewExitCodeError(int(exitCode), false)
+				return errutil.NewExitCodeError(int(exitCode), false)
 			}
 			convArgs = append(convArgs, out)
 		} else {
@@ -120,40 +122,40 @@ func executeNoArgs(name string, args []string) error {
 				if in == "y" {
 					err := repairRegistry(profile)
 					if err != nil {
-						return utils.NewDisplayError(err, true, true, true)
+						return errutil.NewDisplayError(err, true, true, true)
 					}
-					utils.StdoutGreenPrintln("done.")
-					return utils.NewExitCodeError(0, true)
+					errutil.StdoutGreenPrintln("done.")
+					return errutil.NewExitCodeError(0, true)
 				}
 			}
 		}
 	}
 
-	b, err := utils.IsParentConsole()
+	b, err := console.IsParentConsole()
 	if err != nil {
 		b = true
 	}
 	if !b {
 		switch profile.WsldlTerm {
 		case wslreg.FlagWsldlTermWT:
-			utils.FreeConsole()
+			console.FreeConsole()
 			return ExecWindowsTerminal(name)
 
 		case wslreg.FlagWsldlTermFlute:
-			utils.FreeConsole()
+			console.FreeConsole()
 			exe := os.Getenv("LOCALAPPDATA")
 			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
 			cmd := exe + " run " + utils.DQEscapeString(efPath+" run")
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
-				utils.AllocConsole()
+				console.AllocConsole()
 				fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
-				return utils.NewDisplayError(err, true, false, true)
+				return errutil.NewDisplayError(err, true, false, true)
 			}
 			if res != 0 {
-				return utils.NewExitCodeError(res, false)
+				return errutil.NewExitCodeError(res, false)
 			}
 			return nil
 		}
@@ -164,7 +166,7 @@ func executeNoArgs(name string, args []string) error {
 			name = profile.DistributionName
 		}
 
-		utils.SetConsoleTitle(name)
+		console.SetConsoleTitle(name)
 		return execute(name, nil)
 	} else {
 		return execute(name, nil)

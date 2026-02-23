@@ -6,6 +6,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/yuk7/wsldl/lib/console"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wtutils"
 	"github.com/yuk7/wsllib-go"
@@ -80,13 +82,13 @@ func ExecWindowsTerminal(name string) error {
 
 	res, err := utils.CreateProcessAndWait(cmd)
 	if err != nil {
-		utils.AllocConsole()
+		console.AllocConsole()
 		fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 		fmt.Fprintln(os.Stderr, exe)
-		return utils.NewDisplayError(err, true, false, true)
+		return errutil.NewDisplayError(err, true, false, true)
 	}
 	if res != 0 {
-		return utils.NewExitCodeError(res, false)
+		return errutil.NewExitCodeError(res, false)
 	}
 	return nil
 }

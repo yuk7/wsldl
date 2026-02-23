@@ -16,7 +16,7 @@ import (
 	"github.com/yuk7/wsldl/install"
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/cmdline"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsldl/version"
 	"github.com/yuk7/wsllib-go"
@@ -57,14 +57,14 @@ func main() {
 		if err == nil {
 			return
 		}
-		var displayErr *utils.DisplayError
+		var displayErr *errutil.DisplayError
 		if errors.As(err, &displayErr) {
 			handleDisplayError(displayErr.Err, displayErr.ShowMsg, displayErr.ShowColor, displayErr.Pause)
 			return
 		}
-		var exitCodeErr *utils.ExitCodeError
+		var exitCodeErr *errutil.ExitCodeError
 		if errors.As(err, &exitCodeErr) {
-			utils.Exit(exitCodeErr.Pause, exitCodeErr.Code)
+			errutil.Exit(exitCodeErr.Pause, exitCodeErr.Code)
 			return
 		}
 		handleDisplayError(err, true, true, false)
@@ -74,7 +74,7 @@ func main() {
 		err := cmdline.RunSubCommand(
 			commandsWithHelp,
 			func() error {
-				return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+				return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 			},
 			name,
 			os.Args[1:],
@@ -94,22 +94,22 @@ func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {
 	var errno syscall.Errno
 
 	if showMsg {
-		formatted := utils.FormatError(err)
+		formatted := errutil.FormatError(err)
 		if showColor {
-			utils.ErrorRedPrintln(formatted)
+			errutil.ErrorRedPrintln(formatted)
 		} else {
 			fmt.Fprintln(os.Stderr, formatted)
 		}
 	}
 
 	if err == nil {
-		utils.Exit(pause, 1)
+		errutil.Exit(pause, 1)
 	}
 	if errors.As(err, &errno) {
 		if showMsg {
 			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
 		}
-		utils.Exit(pause, int(errno))
+		errutil.Exit(pause, int(errno))
 	} else if err == os.ErrInvalid {
 		if showMsg {
 			efPath, _ := os.Executable()
@@ -122,5 +122,5 @@ func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {
 			fmt.Fprintf(os.Stderr, "%#v\n", err)
 		}
 	}
-	utils.Exit(pause, 1)
+	errutil.Exit(pause, 1)
 }

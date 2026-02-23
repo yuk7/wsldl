@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/wtutils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
@@ -30,8 +30,8 @@ func GetCommand() cmdline.Command {
 func execute(name string, args []string) error {
 	uid, flags, err := WslGetConfig(name)
 	if err != nil {
-		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
-		return utils.NewDisplayError(err, true, true, false)
+		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
+		return errutil.NewDisplayError(err, true, true, false)
 	}
 	profile, proferr := wslreg.GetProfileFromName(name)
 	if len(args) == 1 {
@@ -55,9 +55,9 @@ func execute(name string, args []string) error {
 		case "--lxguid", "--lxuid":
 			if profile.UUID == "" {
 				if proferr != nil {
-					return utils.NewDisplayError(proferr, true, true, false)
+					return errutil.NewDisplayError(proferr, true, true, false)
 				}
-				return utils.NewDisplayError(errors.New("lxguid get failed"), true, true, false)
+				return errutil.NewDisplayError(errors.New("lxguid get failed"), true, true, false)
 			}
 			print(profile.UUID)
 
@@ -78,7 +78,7 @@ func execute(name string, args []string) error {
 
 			conf, err := wtutils.ReadParseWTConfig()
 			if err != nil {
-				return utils.NewDisplayError(err, true, true, false)
+				return errutil.NewDisplayError(err, true, true, false)
 			}
 			guid := "{" + wtutils.CreateProfileGUID(name) + "}"
 			profileName := ""
@@ -91,7 +91,7 @@ func execute(name string, args []string) error {
 			if profileName != "" {
 				print(profileName)
 			} else {
-				return utils.NewDisplayError(errors.New("profile not found"), true, true, false)
+				return errutil.NewDisplayError(errors.New("profile not found"), true, true, false)
 			}
 
 		case "--flags-val":
@@ -101,10 +101,10 @@ func execute(name string, args []string) error {
 			fmt.Printf("%04b", flags)
 
 		default:
-			return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+			return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 		}
 	} else {
-		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 	return nil
 }

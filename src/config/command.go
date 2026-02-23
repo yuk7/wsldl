@@ -7,6 +7,7 @@ import (
 
 	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/cmdline"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsllib-go"
@@ -31,8 +32,8 @@ func GetCommand() cmdline.Command {
 func execute(name string, args []string) error {
 	uid, flags, err := get.WslGetConfig(name)
 	if err != nil {
-		utils.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
-		return utils.NewDisplayError(err, true, true, false)
+		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
+		return errutil.NewDisplayError(err, true, true, false)
 	}
 	if len(args) == 2 {
 		switch args[0] {
@@ -112,11 +113,11 @@ func execute(name string, args []string) error {
 			err = os.ErrInvalid
 		}
 		if err != nil {
-			return utils.NewDisplayError(err, true, true, false)
+			return errutil.NewDisplayError(err, true, true, false)
 		}
 		wsllib.WslConfigureDistribution(name, uid, flags)
 	} else {
-		return utils.NewDisplayError(os.ErrInvalid, true, true, false)
+		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 	return nil
 }

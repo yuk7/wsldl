@@ -2,7 +2,7 @@ package isregd
 
 import (
 	"github.com/yuk7/wsldl/lib/cmdline"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsllib-go"
 )
 
@@ -18,5 +18,5 @@ func execute(name string, args []string) error {
 	if wsllib.WslIsDistributionRegistered(name) {
 		return nil
 	}
-	return utils.NewExitCodeError(1, false)
+	return errutil.NewExitCodeError(1, false)
 }
