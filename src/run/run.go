@@ -8,6 +8,7 @@ import (
 
 	"github.com/yuk7/wsldl/lib/console"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wtutils"
 	"github.com/yuk7/wsllib-go"
@@ -70,14 +71,14 @@ func ExecWindowsTerminal(name string) error {
 	}
 
 	exe := os.Getenv("LOCALAPPDATA")
-	exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\" + wtutils.WTPackageName + "\\wt.exe")
+	exe = fileutil.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\" + wtutils.WTPackageName + "\\wt.exe")
 	cmd := exe
 
 	if profileName != "" {
-		cmd = cmd + " -p " + utils.DQEscapeString(profileName)
+		cmd = cmd + " -p " + fileutil.DQEscapeString(profileName)
 	} else {
 		efPath, _ := os.Executable()
-		cmd = cmd + " " + utils.DQEscapeString(efPath) + " run"
+		cmd = cmd + " " + fileutil.DQEscapeString(efPath) + " run"
 	}
 
 	res, err := utils.CreateProcessAndWait(cmd)

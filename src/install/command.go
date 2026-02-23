@@ -9,8 +9,8 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/preset"
-	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 )
 
@@ -98,7 +98,7 @@ func execute(name string, args []string) error {
 		}
 
 		if jsonPreset.WslVersion == 1 || jsonPreset.WslVersion == 2 {
-			wslexe := utils.GetWindowsDirectory() + "\\System32\\wsl.exe"
+			wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
 			_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(jsonPreset.WslVersion)).Output()
 		}
 

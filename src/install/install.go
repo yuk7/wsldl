@@ -1,7 +1,6 @@
 package install
 
 import (
-	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -15,6 +14,7 @@ import (
 	"time"
 
 	"github.com/yuk7/wsldl/lib/download"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
 )
@@ -135,35 +135,9 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 		return err
 	}
 	// copy vhdx to destination directory
-	src, err := os.Open(rootPath)
+	err = fileutil.CopyFileAndCompress(rootPath, prof.BasePath+"\\ext4.vhdx")
 	if err != nil {
 		return err
-	}
-	defer src.Close()
-	dest, err := os.Create(prof.BasePath + "\\ext4.vhdx")
-	if err != nil {
-		return err
-	}
-	defer dest.Close()
-
-	// uncompress and copy
-	rootPathLower := strings.ToLower(rootPath)
-	if strings.HasSuffix(rootPathLower, ".gz") {
-		// compressed with gzip
-		gr, err := gzip.NewReader(src)
-		if err != nil {
-			return err
-		}
-		_, err = io.Copy(dest, gr)
-		if err != nil {
-			return err
-		}
-	} else {
-		// not compressed
-		_, err = io.Copy(dest, src)
-		if err != nil {
-			return err
-		}
 	}
 
 	// write registry

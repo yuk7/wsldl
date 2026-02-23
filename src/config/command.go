@@ -8,7 +8,7 @@ import (
 	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
-	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
@@ -43,7 +43,7 @@ func execute(name string, args []string) error {
 			uid = uint64(intUID)
 
 		case "--default-user":
-			str, _, errtmp := run.ExecRead(name, "id -u "+utils.DQEscapeString(args[1]))
+			str, _, errtmp := run.ExecRead(name, "id -u "+fileutil.DQEscapeString(args[1]))
 			err = errtmp
 			if err == nil {
 				var intUID int

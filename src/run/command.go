@@ -8,6 +8,7 @@ import (
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/console"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsllib-go"
 	wslreg "github.com/yuk7/wslreglib-go"
@@ -62,11 +63,11 @@ func GetCommandP() cmdline.Command {
 func execute(name string, args []string) error {
 	command := ""
 	for _, s := range args {
-		command = command + " " + utils.DQEscapeString(s)
+		command = command + " " + fileutil.DQEscapeString(s)
 	}
 	var inheritpath = true
 	if args == nil {
-		inheritpath = !utils.IsCurrentDirSpecial()
+		inheritpath = !fileutil.IsCurrentDirSpecial()
 	}
 	exitCode, err := wsllib.WslLaunchInteractive(name, command, inheritpath)
 	if err != nil {
@@ -84,7 +85,7 @@ func executeP(name string, args []string) error {
 	for _, s := range args {
 		if strings.Contains(s, "\\") {
 			s = strings.Replace(s, "\\", "/", -1)
-			s = utils.DQEscapeString(s)
+			s = fileutil.DQEscapeString(s)
 			out, exitCode, err := ExecRead(name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
 				errutil.ErrorRedPrintln("ERR: Failed to Path Translation")
@@ -144,9 +145,9 @@ func executeNoArgs(name string, args []string) error {
 		case wslreg.FlagWsldlTermFlute:
 			console.FreeConsole()
 			exe := os.Getenv("LOCALAPPDATA")
-			exe = utils.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
+			exe = fileutil.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
-			cmd := exe + " run " + utils.DQEscapeString(efPath+" run")
+			cmd := exe + " run " + fileutil.DQEscapeString(efPath+" run")
 			res, err := utils.CreateProcessAndWait(cmd)
 			if err != nil {
 				console.AllocConsole()
