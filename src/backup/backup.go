@@ -10,17 +10,17 @@ import (
 	"time"
 
 	"github.com/yuk7/wsldl/lib/fileutil"
-	wslreg "github.com/yuk7/wslreglib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
-func backupReg(name string, destFileName string) error {
-	profile, err := wslreg.GetProfileFromName(name)
+func backupReg(reg wsllib.WslReg, name string, destFileName string) error {
+	profile, err := reg.GetProfileFromName(name)
 	if err != nil {
 		return err
 	}
 
 	regexe := fileutil.GetWindowsDirectory() + "\\System32\\reg.exe"
-	regpath := "HKEY_CURRENT_USER\\" + wslreg.LxssBaseKey + "\\" + profile.UUID
+	regpath := "HKEY_CURRENT_USER\\" + wsllib.LxssBaseKey + "\\" + profile.UUID
 	_, err = exec.Command(regexe, "export", regpath, destFileName, "/y").Output()
 	return err
 }
@@ -52,8 +52,8 @@ func backupTar(distributionName string, destFileName string) error {
 	}
 }
 
-func backupExt4Vhdx(name string, destFileName string) error {
-	prof, err := wslreg.GetProfileFromName(name)
+func backupExt4Vhdx(reg wsllib.WslReg, name string, destFileName string) error {
+	prof, err := reg.GetProfileFromName(name)
 	if prof.BasePath != "" {
 
 	} else {

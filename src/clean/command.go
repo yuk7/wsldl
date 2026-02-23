@@ -6,25 +6,33 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
-	"github.com/yuk7/wsllib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 // GetCommand returns the clean command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl)
+}
+
+// GetCommandWithDeps returns the clean command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"clean"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, name, args)
+		},
 	}
 }
 
 // execute is default run entrypoint.
-func execute(name string, args []string) error {
+func execute(wsl wsllib.WslLib, name string, args []string) error {
 	showProgress := true
 	switch len(args) {
 	case 0:
@@ -51,7 +59,7 @@ func execute(name string, args []string) error {
 		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
-	err := Clean(name, showProgress)
+	err := Clean(wsl, name, showProgress)
 	if err != nil {
 		return errutil.NewDisplayError(err, showProgress, true, false)
 	}

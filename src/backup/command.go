@@ -6,31 +6,39 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
-	"github.com/yuk7/wsllib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 // GetCommand returns the backup command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl, deps.Reg)
+}
+
+// GetCommandWithDeps returns the backup command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"backup"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, reg, name, args)
+		},
 	}
 }
 
 // execute is default backup entrypoint
-func execute(name string, args []string) error {
+func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
 	opttar := ""
 	optvhdx := ""
 	optreg := ""
 	switch len(args) {
 	case 0:
-		_, _, flags, _ := wsllib.WslGetDistributionConfiguration(name)
+		_, _, flags, _ := wsl.GetDistributionConfiguration(name)
 		if flags&wsllib.FlagEnableWsl2 == wsllib.FlagEnableWsl2 {
 			optvhdx = "backup.ext4.vhdx.gz"
 			optreg = "backup.reg"
@@ -69,7 +77,7 @@ func execute(name string, args []string) error {
 	}
 
 	if optreg != "" {
-		err := backupReg(name, optreg)
+		err := backupReg(reg, name, optreg)
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}
@@ -82,7 +90,7 @@ func execute(name string, args []string) error {
 
 	}
 	if optvhdx != "" {
-		err := backupExt4Vhdx(name, optvhdx)
+		err := backupExt4Vhdx(reg, name, optvhdx)
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}

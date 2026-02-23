@@ -17,28 +17,29 @@ import (
 	"github.com/yuk7/wsldl/isregd"
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/wsllib"
 	"github.com/yuk7/wsldl/run"
 	"github.com/yuk7/wsldl/version"
-	"github.com/yuk7/wsllib-go"
 )
 
 // main is the entry point of the application
 func main() {
 	efPath, _ := os.Executable()
 	name := filepath.Base(efPath[:len(efPath)-len(filepath.Ext(efPath))])
+	deps := wsllib.NewDependencies()
 
 	var commands = []cmdline.Command{
-		isregd.GetCommand(),
+		isregd.GetCommandWithDeps(deps.Wsl),
 		version.GetCommand(),
-		install.GetCommandWithNoArgs(),
-		install.GetCommand(),
-		run.GetCommandWithNoArgs(),
-		run.GetCommand(),
-		run.GetCommandP(),
-		config.GetCommand(),
-		get.GetCommand(),
-		backup.GetCommand(),
-		clean.GetCommand(),
+		install.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg),
+		install.GetCommandWithDeps(deps.Wsl, deps.Reg),
+		run.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg),
+		run.GetCommandWithDeps(deps.Wsl),
+		run.GetCommandPWithDeps(deps.Wsl),
+		config.GetCommandWithDeps(deps.Wsl, deps.Reg),
+		get.GetCommandWithDeps(deps.Wsl, deps.Reg),
+		backup.GetCommandWithDeps(deps.Wsl, deps.Reg),
+		clean.GetCommandWithDeps(deps.Wsl),
 	}
 
 	var helpCommand = help.GetCommand()
@@ -82,10 +83,10 @@ func main() {
 		handleCommandError(err)
 
 	} else {
-		if !wsllib.WslIsDistributionRegistered(name) {
-			handleCommandError(install.GetCommand().Run(name, nil))
+		if !deps.Wsl.IsDistributionRegistered(name) {
+			handleCommandError(install.GetCommandWithDeps(deps.Wsl, deps.Reg).Run(name, nil))
 		} else {
-			handleCommandError(run.GetCommandWithNoArgs().Run(name, nil))
+			handleCommandError(run.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg).Run(name, nil))
 		}
 	}
 }

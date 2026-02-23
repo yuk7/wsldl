@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	wslreg "github.com/yuk7/wslreglib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 func isInstalledFilesExist() bool {
@@ -19,10 +19,10 @@ func isInstalledFilesExist() bool {
 	return err == nil
 }
 
-func repairRegistry(profile wslreg.Profile) error {
+func repairRegistry(reg wsllib.WslReg, profile wsllib.Profile) error {
 	efPath, _ := os.Executable()
 	dir := filepath.Dir(efPath)
 
 	profile.BasePath = dir
-	return wslreg.WriteProfile(profile)
+	return reg.WriteProfile(profile)
 }

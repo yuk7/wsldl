@@ -15,8 +15,7 @@ import (
 
 	"github.com/yuk7/wsldl/lib/download"
 	"github.com/yuk7/wsldl/lib/fileutil"
-	"github.com/yuk7/wsllib-go"
-	wslreg "github.com/yuk7/wslreglib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 var (
@@ -39,7 +38,7 @@ var (
 )
 
 // Install installs distribution with default rootfs file names
-func Install(name string, rootPath string, sha256Sum string, showProgress bool) error {
+func Install(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool) error {
 	rootPathLower := strings.ToLower(rootPath)
 	sha256Actual := ""
 	if showProgress {
@@ -96,17 +95,17 @@ func Install(name string, rootPath string, sha256Sum string, showProgress bool) 
 	}
 
 	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
-		return InstallExt4Vhdx(name, rootPath)
+		return InstallExt4Vhdx(wsl, reg, name, rootPath)
 	}
-	return InstallTar(name, rootPath)
+	return InstallTar(wsl, name, rootPath)
 }
 
-func InstallTar(name string, rootPath string) error {
-	err := wsllib.WslRegisterDistribution(name, rootPath)
+func InstallTar(wsl wsllib.WslLib, name string, rootPath string) error {
+	err := wsl.RegisterDistribution(name, rootPath)
 	return err
 }
 
-func InstallExt4Vhdx(name string, rootPath string) error {
+func InstallExt4Vhdx(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string) error {
 	// create empty tar
 	tmptar := os.TempDir()
 	if tmptar == "" {
@@ -119,18 +118,18 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 	}
 	tmptarfp.Close()
 	// initial empty instance entry
-	err = wsllib.WslRegisterDistribution(name, tmptar)
+	err = wsl.RegisterDistribution(name, tmptar)
 	if err != nil {
 		return err
 	}
 	os.Remove(tmptar)
 	// get profile of instance
-	prof, err := wslreg.GetProfileFromName(name)
+	prof, err := reg.GetProfileFromName(name)
 	if prof.BasePath == "" {
 		return err
 	}
 	// remove instance temporary
-	err = wsllib.WslUnregisterDistribution(name)
+	err = wsl.UnregisterDistribution(name)
 	if err != nil {
 		return err
 	}
@@ -142,7 +141,7 @@ func InstallExt4Vhdx(name string, rootPath string) error {
 
 	// write registry
 	prof.Flags |= wsllib.FlagEnableWsl2
-	err = wslreg.WriteProfile(prof)
+	err = reg.WriteProfile(prof)
 	return err
 }
 

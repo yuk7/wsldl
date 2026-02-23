@@ -11,39 +11,54 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/preset"
-	"github.com/yuk7/wsllib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 func GetCommandWithNoArgs() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg)
+}
+
+func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{},
 		Help: func(distroName string, isListQuery bool) string {
-			if !wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if !wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessageNoArgs()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, reg, name, args)
+		},
 	}
 }
 
 // GetCommand returns the install command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl, deps.Reg)
+}
+
+// GetCommandWithDeps returns the install command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"install"},
 		Help: func(distroName string, isListQuery bool) string {
-			if !wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if !wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, reg, name, args)
+		},
 	}
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) error {
-	if !wsllib.WslIsDistributionRegistered(name) {
+func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	if !wsl.IsDistributionRegistered(name) {
 		var rootPath string
 		var rootFileSha256 string = ""
 		var showProgress bool
@@ -82,7 +97,7 @@ func execute(name string, args []string) error {
 				fmt.Scan(&in)
 
 				if in == "y" {
-					err := repairRegistry(name)
+					err := repairRegistry(reg, name)
 					if err != nil {
 						return errutil.NewDisplayError(err, showProgress, true, showProgress)
 					}
@@ -92,7 +107,7 @@ func execute(name string, args []string) error {
 			}
 		}
 
-		err := Install(name, rootPath, rootFileSha256, showProgress)
+		err := Install(wsl, reg, name, rootPath, rootFileSha256, showProgress)
 		if err != nil {
 			return errutil.NewDisplayError(err, showProgress, true, args == nil)
 		}

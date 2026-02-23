@@ -10,13 +10,12 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/wsllib"
 	"github.com/yuk7/wsldl/lib/wtutils"
-	"github.com/yuk7/wsllib-go"
-	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 // ExecRead execs command and read output
-func ExecRead(name, command string) (out string, exitCode uint32, err error) {
+func ExecRead(wsl wsllib.WslLib, name, command string) (out string, exitCode uint32, err error) {
 	stdin := syscall.Handle(0)
 	stdout := syscall.Handle(0)
 	stdintmp := syscall.Handle(0)
@@ -26,7 +25,7 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 	syscall.CreatePipe(&stdin, &stdintmp, &sa, 0)
 	syscall.CreatePipe(&stdout, &stdouttmp, &sa, 0)
 
-	handle, err := wsllib.WslLaunch(name, command, true, stdintmp, stdouttmp, stdouttmp)
+	handle, err := wsl.Launch(name, command, true, stdintmp, stdouttmp, stdouttmp)
 	syscall.WaitForSingleObject(handle, syscall.INFINITE)
 	syscall.GetExitCodeProcess(handle, &exitCode)
 	buf := make([]byte, syscall.MAX_LONG_PATH)
@@ -43,9 +42,9 @@ func ExecRead(name, command string) (out string, exitCode uint32, err error) {
 }
 
 // ExecWindowsTerminal executes Windows Terminal
-func ExecWindowsTerminal(name string) error {
+func ExecWindowsTerminal(reg wsllib.WslReg, name string) error {
 	// Get the name from the registry to be case sensitive.
-	profile, _ := wslreg.GetProfileFromName(name)
+	profile, _ := reg.GetProfileFromName(name)
 	if profile.DistributionName != "" {
 		name = profile.DistributionName
 	}

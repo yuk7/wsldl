@@ -10,57 +10,80 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/utils"
-	"github.com/yuk7/wsllib-go"
-	wslreg "github.com/yuk7/wslreglib-go"
+	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 // GetCommandWithNoArgs returns the run command structure with no arguments
 func GetCommandWithNoArgs() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg)
+}
+
+// GetCommandWithNoArgsWithDeps returns the run command structure with no arguments and injectable dependencies.
+func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessageNoArgs()
 			} else {
 				return ""
 			}
 		},
-		Run: executeNoArgs,
+		Run: func(name string, args []string) error {
+			return executeNoArgs(wsl, reg, name, args)
+		},
 	}
 }
 
 // GetCommand returns the run command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl)
+}
+
+// GetCommandWithDeps returns the run command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"run", "-c", "/c"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			} else {
 				return ""
 			}
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, name, args)
+		},
 	}
 }
 
 // GetCommandP returns the runp command structure
 func GetCommandP() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandPWithDeps(deps.Wsl)
+}
+
+// GetCommandPWithDeps returns the runp command structure with injectable dependencies.
+func GetCommandPWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"runp", "-p", "/p"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessageP()
 			} else {
 				return ""
 			}
 		},
-		Run: executeP,
+		Run: func(name string, args []string) error {
+			return executeP(wsl, name, args)
+		},
 	}
 }
 
 // execute is default run entrypoint.
-func execute(name string, args []string) error {
+func execute(wsl wsllib.WslLib, name string, args []string) error {
 	command := ""
 	for _, s := range args {
 		command = command + " " + fileutil.DQEscapeString(s)
@@ -69,7 +92,7 @@ func execute(name string, args []string) error {
 	if args == nil {
 		inheritpath = !fileutil.IsCurrentDirSpecial()
 	}
-	exitCode, err := wsllib.WslLaunchInteractive(name, command, inheritpath)
+	exitCode, err := wsl.LaunchInteractive(name, command, inheritpath)
 	if err != nil {
 		return errutil.NewDisplayError(err, true, true, false)
 	}
@@ -80,13 +103,13 @@ func execute(name string, args []string) error {
 }
 
 // executeP runs execute function with Path Translator
-func executeP(name string, args []string) error {
+func executeP(wsl wsllib.WslLib, name string, args []string) error {
 	var convArgs []string
 	for _, s := range args {
 		if strings.Contains(s, "\\") {
 			s = strings.Replace(s, "\\", "/", -1)
 			s = fileutil.DQEscapeString(s)
-			out, exitCode, err := ExecRead(name, "wslpath -u "+s)
+			out, exitCode, err := ExecRead(wsl, name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
 				errutil.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
@@ -101,13 +124,13 @@ func executeP(name string, args []string) error {
 		}
 	}
 
-	return execute(name, convArgs)
+	return execute(wsl, name, convArgs)
 }
 
 // executeNoArgs runs distro, but use terminal settings
-func executeNoArgs(name string, args []string) error {
+func executeNoArgs(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
 	efPath, _ := os.Executable()
-	profile, _ := wslreg.GetProfileFromName(name)
+	profile, _ := reg.GetProfileFromName(name)
 
 	// repair when the installation is moved
 	if profile.BasePath != "" {
@@ -121,7 +144,7 @@ func executeNoArgs(name string, args []string) error {
 				fmt.Scan(&in)
 
 				if in == "y" {
-					err := repairRegistry(profile)
+					err := repairRegistry(reg, profile)
 					if err != nil {
 						return errutil.NewDisplayError(err, true, true, true)
 					}
@@ -138,11 +161,11 @@ func executeNoArgs(name string, args []string) error {
 	}
 	if !b {
 		switch profile.WsldlTerm {
-		case wslreg.FlagWsldlTermWT:
+		case wsllib.FlagWsldlTermWT:
 			console.FreeConsole()
-			return ExecWindowsTerminal(name)
+			return ExecWindowsTerminal(reg, name)
 
-		case wslreg.FlagWsldlTermFlute:
+		case wsllib.FlagWsldlTermFlute:
 			console.FreeConsole()
 			exe := os.Getenv("LOCALAPPDATA")
 			exe = fileutil.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
@@ -168,8 +191,8 @@ func executeNoArgs(name string, args []string) error {
 		}
 
 		console.SetConsoleTitle(name)
-		return execute(name, nil)
+		return execute(wsl, name, nil)
 	} else {
-		return execute(name, nil)
+		return execute(wsl, name, nil)
 	}
 }

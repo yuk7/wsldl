@@ -7,33 +7,40 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/wsllib"
 	"github.com/yuk7/wsldl/lib/wtutils"
-	"github.com/yuk7/wsllib-go"
-	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 // GetCommand returns the get command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl, deps.Reg)
+}
+
+// GetCommandWithDeps returns the get command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"get"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, reg, name, args)
+		},
 	}
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) error {
-	uid, flags, err := WslGetConfig(name)
+func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	uid, flags, err := WslGetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		return errutil.NewDisplayError(err, true, true, false)
 	}
-	profile, proferr := wslreg.GetProfileFromName(name)
+	profile, proferr := reg.GetProfileFromName(name)
 	if len(args) == 1 {
 		switch args[0] {
 		case "--default-uid":
@@ -63,9 +70,9 @@ func execute(name string, args []string) error {
 
 		case "--default-term", "--default-terminal":
 			switch profile.WsldlTerm {
-			case wslreg.FlagWsldlTermWT:
+			case wsllib.FlagWsldlTermWT:
 				print("wt")
-			case wslreg.FlagWsldlTermFlute:
+			case wsllib.FlagWsldlTermFlute:
 				print("flute")
 			default:
 				print("default")

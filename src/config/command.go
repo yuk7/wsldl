@@ -9,28 +9,35 @@ import (
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
+	"github.com/yuk7/wsldl/lib/wsllib"
 	"github.com/yuk7/wsldl/run"
-	"github.com/yuk7/wsllib-go"
-	wslreg "github.com/yuk7/wslreglib-go"
 )
 
 // GetCommand returns the config set command structure
 func GetCommand() cmdline.Command {
+	deps := wsllib.NewDependencies()
+	return GetCommandWithDeps(deps.Wsl, deps.Reg)
+}
+
+// GetCommandWithDeps returns the config set command structure with injectable dependencies.
+func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"config", "set"},
 		Help: func(distroName string, isListQuery bool) string {
-			if wsllib.WslIsDistributionRegistered(distroName) || !isListQuery {
+			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessage()
 			}
 			return ""
 		},
-		Run: execute,
+		Run: func(name string, args []string) error {
+			return execute(wsl, reg, name, args)
+		},
 	}
 }
 
 // execute is default install entrypoint
-func execute(name string, args []string) error {
-	uid, flags, err := get.WslGetConfig(name)
+func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	uid, flags, err := get.WslGetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		return errutil.NewDisplayError(err, true, true, false)
@@ -43,7 +50,7 @@ func execute(name string, args []string) error {
 			uid = uint64(intUID)
 
 		case "--default-user":
-			str, _, errtmp := run.ExecRead(name, "id -u "+fileutil.DQEscapeString(args[1]))
+			str, _, errtmp := run.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(args[1]))
 			err = errtmp
 			if err == nil {
 				var intUID int
@@ -77,7 +84,7 @@ func execute(name string, args []string) error {
 			intWslVer, err = strconv.Atoi(args[1])
 			if err == nil {
 				if intWslVer == 1 || intWslVer == 2 {
-					err = wslreg.SetWslVersion(name, intWslVer)
+					err = reg.SetWslVersion(name, intWslVer)
 				} else {
 					err = os.ErrInvalid
 					break
@@ -87,22 +94,22 @@ func execute(name string, args []string) error {
 		case "--default-term":
 			value := 0
 			switch args[1] {
-			case "default", strconv.Itoa(wslreg.FlagWsldlTermDefault):
-				value = wslreg.FlagWsldlTermDefault
-			case "wt", strconv.Itoa(wslreg.FlagWsldlTermWT):
-				value = wslreg.FlagWsldlTermWT
-			case "flute", strconv.Itoa(wslreg.FlagWsldlTermFlute):
-				value = wslreg.FlagWsldlTermFlute
+			case "default", strconv.Itoa(wsllib.FlagWsldlTermDefault):
+				value = wsllib.FlagWsldlTermDefault
+			case "wt", strconv.Itoa(wsllib.FlagWsldlTermWT):
+				value = wsllib.FlagWsldlTermWT
+			case "flute", strconv.Itoa(wsllib.FlagWsldlTermFlute):
+				value = wsllib.FlagWsldlTermFlute
 			default:
 				err = os.ErrInvalid
 				break
 			}
-			profile, err := wslreg.GetProfileFromName(name)
+			profile, err := reg.GetProfileFromName(name)
 			if err != nil {
 				break
 			}
 			profile.WsldlTerm = value
-			err = wslreg.WriteProfile(profile)
+			err = reg.WriteProfile(profile)
 
 		case "--flags-val":
 			var intFlags int
@@ -115,7 +122,10 @@ func execute(name string, args []string) error {
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}
-		wsllib.WslConfigureDistribution(name, uid, flags)
+		err = wsl.ConfigureDistribution(name, uid, flags)
+		if err != nil {
+			return errutil.NewDisplayError(err, true, true, false)
+		}
 	} else {
 		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
