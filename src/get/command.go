@@ -7,6 +7,7 @@ import (
 
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/wslapi"
 	"github.com/yuk7/wsldl/lib/wsllib"
 	"github.com/yuk7/wsldl/lib/wtutils"
 )
@@ -35,7 +36,7 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default install entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
-	uid, flags, err := WslGetConfig(wsl, name)
+	uid, flags, err := wslapi.GetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		return errutil.NewDisplayError(err, true, true, false)

@@ -5,12 +5,12 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/yuk7/wsldl/get"
 	"github.com/yuk7/wsldl/lib/cmdline"
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
+	"github.com/yuk7/wsldl/lib/wslapi"
+	"github.com/yuk7/wsldl/lib/wslexec"
 	"github.com/yuk7/wsldl/lib/wsllib"
-	"github.com/yuk7/wsldl/run"
 )
 
 // GetCommand returns the config set command structure
@@ -37,7 +37,7 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default install entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
-	uid, flags, err := get.WslGetConfig(wsl, name)
+	uid, flags, err := wslapi.GetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		return errutil.NewDisplayError(err, true, true, false)
@@ -50,7 +50,7 @@ func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) e
 			uid = uint64(intUID)
 
 		case "--default-user":
-			str, _, errtmp := run.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(args[1]))
+			str, _, errtmp := wslexec.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(args[1]))
 			err = errtmp
 			if err == nil {
 				var intUID int

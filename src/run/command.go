@@ -10,6 +10,7 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/utils"
+	"github.com/yuk7/wsldl/lib/wslexec"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
@@ -109,7 +110,7 @@ func executeP(wsl wsllib.WslLib, name string, args []string) error {
 		if strings.Contains(s, "\\") {
 			s = strings.Replace(s, "\\", "/", -1)
 			s = fileutil.DQEscapeString(s)
-			out, exitCode, err := ExecRead(wsl, name, "wslpath -u "+s)
+			out, exitCode, err := wslexec.ExecRead(wsl, name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
 				errutil.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
