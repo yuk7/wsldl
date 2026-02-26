@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -53,6 +54,10 @@ func backupTar(distributionName string, destFileName string) error {
 }
 
 func backupExt4Vhdx(reg wsllib.WslReg, name string, destFileName string) error {
+	return backupExt4VhdxWithCopy(reg, name, destFileName, fileutil.CopyFile)
+}
+
+func backupExt4VhdxWithCopy(reg wsllib.WslReg, name string, destFileName string, copyFile func(srcPath, destPath string, compress bool) error) error {
 	prof, err := reg.GetProfileFromName(name)
 	if prof.BasePath != "" {
 
@@ -63,9 +68,9 @@ func backupExt4Vhdx(reg wsllib.WslReg, name string, destFileName string) error {
 		return errors.New("get profile failed")
 	}
 
-	vhdxPath := prof.BasePath + "\\ext4.vhdx"
+	vhdxPath := filepath.Join(prof.BasePath, "ext4.vhdx")
 
 	rootPathLower := strings.ToLower(destFileName)
 	compress := strings.HasSuffix(rootPathLower, ".gz") || strings.HasSuffix(rootPathLower, ".tgz")
-	return fileutil.CopyFile(vhdxPath, destFileName, compress)
+	return copyFile(vhdxPath, destFileName, compress)
 }

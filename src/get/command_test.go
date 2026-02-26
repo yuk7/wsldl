@@ -2,7 +2,6 @@ package get
 
 import (
 	"errors"
-	"os"
 	"strings"
 	"testing"
 
@@ -143,14 +142,10 @@ func TestExecute_WslVersionAndDefaultTerm_Success(t *testing.T) {
 func TestExecute_WtProfileName_FindsProfileByGeneratedGUID(t *testing.T) {
 	distName := "Arch"
 	guid := "{" + wtutils.CreateProfileGUID(distName) + "}"
-	json := `{"profiles":{"list":[{"name":"Arch","guid":"` + guid + `"}]}}`
-
-	tmp := t.TempDir()
-	settingsPath := tmp + "\\Packages\\" + wtutils.WTPackageName + "\\LocalState\\settings.json"
-	if err := os.WriteFile(settingsPath, []byte(json), 0o600); err != nil {
-		t.Fatalf("write settings.json failed: %v", err)
+	conf := wtutils.Config{}
+	conf.Profiles.ProfileList = []wtutils.Profile{
+		{Name: "Arch", GUID: guid},
 	}
-	t.Setenv("LOCALAPPDATA", tmp)
 
 	wsl := wsllib.MockWslLib{
 		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
@@ -163,8 +158,10 @@ func TestExecute_WtProfileName_FindsProfileByGeneratedGUID(t *testing.T) {
 		},
 	}
 
-	if err := execute(wsl, reg, "ignored", []string{"--wt-profile-name"}); err != nil {
-		t.Fatalf("execute returned error: %v", err)
+	if err := executeWithWTConfigReader(wsl, reg, "ignored", []string{"--wt-profile-name"}, func() (wtutils.Config, error) {
+		return conf, nil
+	}); err != nil {
+		t.Fatalf("executeWithWTConfigReader returned error: %v", err)
 	}
 }
 

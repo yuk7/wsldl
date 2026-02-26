@@ -36,6 +36,16 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default install entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	return executeWithWTConfigReader(wsl, reg, name, args, wtutils.ReadParseWTConfig)
+}
+
+func executeWithWTConfigReader(
+	wsl wsllib.WslLib,
+	reg wsllib.WslReg,
+	name string,
+	args []string,
+	readWTConfig func() (wtutils.Config, error),
+) error {
 	uid, flags, err := wslapi.GetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
@@ -84,7 +94,7 @@ func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) e
 				name = profile.DistributionName
 			}
 
-			conf, err := wtutils.ReadParseWTConfig()
+			conf, err := readWTConfig()
 			if err != nil {
 				return errutil.NewDisplayError(err, true, true, false)
 			}

@@ -1,10 +1,7 @@
 package backup
 
 import (
-	"compress/gzip"
 	"errors"
-	"io"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -66,29 +63,39 @@ func TestBackupExt4Vhdx_CopiesPlainFile(t *testing.T) {
 
 	tmp := t.TempDir()
 	basePath := filepath.Join(tmp, "base")
-	srcPath := basePath + "\\ext4.vhdx"
-	payload := []byte("plain-vhdx")
-	if err := os.WriteFile(srcPath, payload, 0o600); err != nil {
-		t.Fatalf("write source vhdx: %v", err)
-	}
-
 	destPath := filepath.Join(tmp, "backup.ext4.vhdx")
+	var gotSrcPath string
+	var gotDestPath string
+	var gotCompress bool
+	called := false
 	reg := wsllib.MockWslReg{
 		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
 			return wsllib.Profile{BasePath: basePath}, nil
 		},
 	}
 
-	if err := backupExt4Vhdx(reg, "Arch", destPath); err != nil {
+	if err := backupExt4VhdxWithCopy(reg, "Arch", destPath, func(srcPath, destPath string, compress bool) error {
+		called = true
+		gotSrcPath = srcPath
+		gotDestPath = destPath
+		gotCompress = compress
+		return nil
+	}); err != nil {
 		t.Fatalf("backupExt4Vhdx returned error: %v", err)
 	}
 
-	got, err := os.ReadFile(destPath)
-	if err != nil {
-		t.Fatalf("read destination: %v", err)
+	if !called {
+		t.Fatal("copyFile was not called")
 	}
-	if string(got) != string(payload) {
-		t.Fatalf("destination = %q, want %q", got, payload)
+	wantSrcPath := filepath.Join(basePath, "ext4.vhdx")
+	if gotSrcPath != wantSrcPath {
+		t.Fatalf("srcPath = %q, want %q", gotSrcPath, wantSrcPath)
+	}
+	if gotDestPath != destPath {
+		t.Fatalf("destPath = %q, want %q", gotDestPath, destPath)
+	}
+	if gotCompress {
+		t.Fatal("compress = true, want false")
 	}
 }
 
@@ -97,44 +104,26 @@ func TestBackupExt4Vhdx_CompressesWhenGzSuffix(t *testing.T) {
 
 	tmp := t.TempDir()
 	basePath := filepath.Join(tmp, "base")
-	srcPath := basePath + "\\ext4.vhdx"
-	payload := []byte("compress-vhdx")
-	if err := os.WriteFile(srcPath, payload, 0o600); err != nil {
-		t.Fatalf("write source vhdx: %v", err)
-	}
-
 	destPath := filepath.Join(tmp, "backup.ext4.vhdx.gz")
+	var gotCompress bool
+	called := false
 	reg := wsllib.MockWslReg{
 		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
 			return wsllib.Profile{BasePath: basePath}, nil
 		},
 	}
 
-	if err := backupExt4Vhdx(reg, "Arch", destPath); err != nil {
+	if err := backupExt4VhdxWithCopy(reg, "Arch", destPath, func(_, _ string, compress bool) error {
+		called = true
+		gotCompress = compress
+		return nil
+	}); err != nil {
 		t.Fatalf("backupExt4Vhdx returned error: %v", err)
 	}
-
-	got, err := readGzipFile(destPath)
-	if err != nil {
-		t.Fatalf("read gzip destination: %v", err)
+	if !called {
+		t.Fatal("copyFile was not called")
 	}
-	if string(got) != string(payload) {
-		t.Fatalf("gzip payload = %q, want %q", got, payload)
+	if !gotCompress {
+		t.Fatal("compress = false, want true")
 	}
-}
-
-func readGzipFile(path string) ([]byte, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	gr, err := gzip.NewReader(f)
-	if err != nil {
-		return nil, err
-	}
-	defer gr.Close()
-
-	return io.ReadAll(gr)
 }

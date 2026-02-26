@@ -33,6 +33,18 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default backup entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	return executeWithBackups(wsl, reg, name, args, backupReg, backupTar, backupExt4Vhdx)
+}
+
+func executeWithBackups(
+	wsl wsllib.WslLib,
+	reg wsllib.WslReg,
+	name string,
+	args []string,
+	backupRegFn func(wsllib.WslReg, string, string) error,
+	backupTarFn func(string, string) error,
+	backupExt4VhdxFn func(wsllib.WslReg, string, string) error,
+) error {
 	opttar := ""
 	optvhdx := ""
 	optreg := ""
@@ -77,20 +89,20 @@ func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) e
 	}
 
 	if optreg != "" {
-		err := backupReg(reg, name, optreg)
+		err := backupRegFn(reg, name, optreg)
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}
 	}
 	if opttar != "" {
-		err := backupTar(name, opttar)
+		err := backupTarFn(name, opttar)
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}
 
 	}
 	if optvhdx != "" {
-		err := backupExt4Vhdx(reg, name, optvhdx)
+		err := backupExt4VhdxFn(reg, name, optvhdx)
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}

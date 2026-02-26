@@ -2,7 +2,6 @@ package backup
 
 import (
 	"errors"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -61,31 +60,42 @@ func TestExecute_RegOption_ProfileError_ReturnsDisplayError(t *testing.T) {
 func TestExecute_VhdxCustomPath_Success(t *testing.T) {
 	t.Parallel()
 
-	tmp := t.TempDir()
-	basePath := filepath.Join(tmp, "base")
-	srcPath := basePath + "\\ext4.vhdx"
-	payload := []byte("fake-vhdx")
-	if err := os.WriteFile(srcPath, payload, 0o600); err != nil {
-		t.Fatalf("write source vhdx: %v", err)
-	}
+	destPath := filepath.Join(t.TempDir(), "backup.ext4.vhdx")
+	gotName := ""
+	gotDestPath := ""
+	called := false
 
-	destPath := filepath.Join(tmp, "backup.ext4.vhdx")
-	reg := wsllib.MockWslReg{
-		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
-			return wsllib.Profile{BasePath: basePath}, nil
+	err := executeWithBackups(
+		wsllib.MockWslLib{},
+		wsllib.MockWslReg{},
+		"Arch",
+		[]string{destPath},
+		func(wsllib.WslReg, string, string) error {
+			t.Fatal("backupReg should not be called")
+			return nil
 		},
-	}
-
-	if err := execute(wsllib.MockWslLib{}, reg, "Arch", []string{destPath}); err != nil {
-		t.Fatalf("execute returned error: %v", err)
-	}
-
-	got, err := os.ReadFile(destPath)
+		func(string, string) error {
+			t.Fatal("backupTar should not be called")
+			return nil
+		},
+		func(_ wsllib.WslReg, name, dest string) error {
+			called = true
+			gotName = name
+			gotDestPath = dest
+			return nil
+		},
+	)
 	if err != nil {
-		t.Fatalf("read destination: %v", err)
+		t.Fatalf("executeWithBackups returned error: %v", err)
 	}
-	if string(got) != string(payload) {
-		t.Fatalf("destination = %q, want %q", got, payload)
+	if !called {
+		t.Fatal("backupExt4Vhdx should be called")
+	}
+	if gotName != "Arch" {
+		t.Fatalf("name = %q, want %q", gotName, "Arch")
+	}
+	if gotDestPath != destPath {
+		t.Fatalf("dest path = %q, want %q", gotDestPath, destPath)
 	}
 }
 
