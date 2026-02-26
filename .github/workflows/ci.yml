@@ -15,6 +15,24 @@ on:
       - ".github/workflows/**"
 
 jobs:
+  test-wsldl-windows:
+    name: Test wsldl on Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: .\build.bat test
+
+  test-wsldl-linux:
+    name: Test wsldl on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test (go test)
+        run: |
+          cd src
+          go test ./...
+
   compile-wsldl-windows:
     name: Compile wsldl
     runs-on: windows-latest
