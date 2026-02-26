@@ -1,9 +1,9 @@
 package install
 
 import (
+	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/yuk7/wsldl/lib/wsllib"
@@ -74,23 +74,17 @@ func TestInstall_RoutesToExt4VhdxFlow(t *testing.T) {
 
 	tmp := t.TempDir()
 	sourcePath := filepath.Join(tmp, "install.ext4.vhdx")
-	payload := []byte("fake-vhdx-content")
-	if err := os.WriteFile(sourcePath, payload, 0o600); err != nil {
-		t.Fatalf("write source vhdx: %v", err)
-	}
-
 	basePath := filepath.Join(tmp, "distro")
-	if err := os.MkdirAll(basePath, 0o700); err != nil {
-		t.Fatalf("mkdir basePath: %v", err)
-	}
 
-	calls := make([]string, 0, 4)
+	calls := make([]string, 0, 7)
+	tempTarPath := ""
 	mockWsl := wsllib.MockWslLib{
 		RegisterDistributionFunc: func(name, rootPath string) error {
 			calls = append(calls, "register")
-			if !strings.HasSuffix(strings.ToLower(rootPath), "\\em-vhdx-temp.tar") {
-				t.Fatalf("temp tar path = %q, want suffix %q", rootPath, "\\em-vhdx-temp.tar")
+			if filepath.Base(rootPath) != "em-vhdx-temp.tar" {
+				t.Fatalf("temp tar path = %q, want basename %q", rootPath, "em-vhdx-temp.tar")
 			}
+			tempTarPath = rootPath
 			return nil
 		},
 		UnregisterDistributionFunc: func(name string) error {
@@ -115,27 +109,73 @@ func TestInstall_RoutesToExt4VhdxFlow(t *testing.T) {
 		},
 	}
 
-	if err := Install(mockWsl, mockReg, "TestDistro", sourcePath, "", false); err != nil {
+	var createdPath, removedPath, copiedSrc, copiedDest string
+	gotCompress := true
+	deps := installDeps{
+		tempDir: func() string {
+			return tmp
+		},
+		createFile: func(path string) (io.Closer, error) {
+			calls = append(calls, "create-temp-tar")
+			createdPath = path
+			return nopCloser{}, nil
+		},
+		removeFile: func(path string) error {
+			calls = append(calls, "remove-temp-tar")
+			removedPath = path
+			return nil
+		},
+		copyFile: func(srcPath, destPath string, compress bool) error {
+			calls = append(calls, "copy-vhdx")
+			copiedSrc = srcPath
+			copiedDest = destPath
+			gotCompress = compress
+			return nil
+		},
+	}
+
+	if err := installWithDeps(mockWsl, mockReg, "TestDistro", sourcePath, "", false, deps); err != nil {
 		t.Fatalf("Install failed: %v", err)
 	}
 
-	if len(calls) != 4 {
-		t.Fatalf("call sequence length = %d, want 4 (%v)", len(calls), calls)
+	if len(calls) != 7 {
+		t.Fatalf("call sequence length = %d, want 7 (%v)", len(calls), calls)
 	}
-	if calls[0] != "register" || calls[1] != "get-profile" || calls[2] != "unregister" || calls[3] != "write-profile" {
-		t.Fatalf("call sequence = %v, want [register get-profile unregister write-profile]", calls)
+	wantCalls := []string{
+		"create-temp-tar",
+		"register",
+		"remove-temp-tar",
+		"get-profile",
+		"unregister",
+		"copy-vhdx",
+		"write-profile",
+	}
+	for i, got := range calls {
+		if got != wantCalls[i] {
+			t.Fatalf("calls[%d] = %q, want %q (full=%v)", i, got, wantCalls[i], calls)
+		}
+	}
+	if createdPath != tempTarPath {
+		t.Fatalf("create temp path = %q, want %q", createdPath, tempTarPath)
+	}
+	if removedPath != tempTarPath {
+		t.Fatalf("remove temp path = %q, want %q", removedPath, tempTarPath)
+	}
+	if copiedSrc != sourcePath {
+		t.Fatalf("copied source path = %q, want %q", copiedSrc, sourcePath)
+	}
+	if copiedDest != filepath.Join(basePath, "ext4.vhdx") {
+		t.Fatalf("copied dest path = %q, want %q", copiedDest, filepath.Join(basePath, "ext4.vhdx"))
+	}
+	if gotCompress {
+		t.Fatalf("copy compress = %v, want false", gotCompress)
 	}
 
 	if written.Flags&wsllib.FlagEnableWsl2 != wsllib.FlagEnableWsl2 {
 		t.Fatalf("written.Flags = %d, want WSL2 flag set", written.Flags)
 	}
-
-	destPath := basePath + "\\ext4.vhdx"
-	got, err := os.ReadFile(destPath)
-	if err != nil {
-		t.Fatalf("read copied vhdx: %v", err)
-	}
-	if string(got) != string(payload) {
-		t.Fatalf("copied vhdx payload = %q, want %q", got, payload)
-	}
 }
+
+type nopCloser struct{}
+
+func (nopCloser) Close() error { return nil }

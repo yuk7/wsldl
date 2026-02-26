@@ -37,8 +37,30 @@ var (
 	}
 )
 
+type installDeps struct {
+	tempDir    func() string
+	createFile func(path string) (io.Closer, error)
+	removeFile func(path string) error
+	copyFile   func(srcPath, destPath string, compress bool) error
+}
+
+func defaultInstallDeps() installDeps {
+	return installDeps{
+		tempDir: os.TempDir,
+		createFile: func(path string) (io.Closer, error) {
+			return os.Create(path)
+		},
+		removeFile: os.Remove,
+		copyFile:   fileutil.CopyFile,
+	}
+}
+
 // Install installs distribution with default rootfs file names
 func Install(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool) error {
+	return installWithDeps(wsl, reg, name, rootPath, sha256Sum, showProgress, defaultInstallDeps())
+}
+
+func installWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool, deps installDeps) error {
 	rootPathLower := strings.ToLower(rootPath)
 	sha256Actual := ""
 	if showProgress {
@@ -51,13 +73,13 @@ func Install(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string,
 			fmt.Println("Downloading...")
 			progressBarWidth = 35
 		}
-		tmpRootFn := os.TempDir()
+		tmpRootFn := deps.tempDir()
 		if tmpRootFn == "" {
 			return errors.New("failed to create temp directory")
 		}
 		rand.NewSource(time.Now().UnixNano())
-		tmpRootFn = tmpRootFn + "\\" + strconv.Itoa(rand.Intn(10000)) + filepath.Base(rootPath)
-		defer os.Remove(tmpRootFn)
+		tmpRootFn = filepath.Join(tmpRootFn, strconv.Itoa(rand.Intn(10000))+filepath.Base(rootPath))
+		defer deps.removeFile(tmpRootFn)
 		var err error
 		sha256Actual, err = download.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
 		if err != nil {
@@ -95,7 +117,7 @@ func Install(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string,
 	}
 
 	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
-		return InstallExt4Vhdx(wsl, reg, name, rootPath)
+		return installExt4VhdxWithDeps(wsl, reg, name, rootPath, deps)
 	}
 	return InstallTar(wsl, name, rootPath)
 }
@@ -106,13 +128,17 @@ func InstallTar(wsl wsllib.WslLib, name string, rootPath string) error {
 }
 
 func InstallExt4Vhdx(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string) error {
+	return installExt4VhdxWithDeps(wsl, reg, name, rootPath, defaultInstallDeps())
+}
+
+func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, deps installDeps) error {
 	// create empty tar
-	tmptar := os.TempDir()
+	tmptar := deps.tempDir()
 	if tmptar == "" {
 		return errors.New("failed to create temp directory")
 	}
-	tmptar = tmptar + "\\em-vhdx-temp.tar"
-	tmptarfp, err := os.Create(tmptar)
+	tmptar = filepath.Join(tmptar, "em-vhdx-temp.tar")
+	tmptarfp, err := deps.createFile(tmptar)
 	if err != nil {
 		return err
 	}
@@ -122,7 +148,7 @@ func InstallExt4Vhdx(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 	if err != nil {
 		return err
 	}
-	os.Remove(tmptar)
+	deps.removeFile(tmptar)
 	// get profile of instance
 	prof, err := reg.GetProfileFromName(name)
 	if prof.BasePath == "" {
@@ -134,7 +160,7 @@ func InstallExt4Vhdx(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 		return err
 	}
 	// copy vhdx to destination directory
-	err = fileutil.CopyFile(rootPath, prof.BasePath+"\\ext4.vhdx", false)
+	err = deps.copyFile(rootPath, filepath.Join(prof.BasePath, "ext4.vhdx"), false)
 	if err != nil {
 		return err
 	}
