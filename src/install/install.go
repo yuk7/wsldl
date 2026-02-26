@@ -134,7 +134,7 @@ func InstallExt4Vhdx(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 		return err
 	}
 	// copy vhdx to destination directory
-	err = fileutil.CopyFileAndCompress(rootPath, prof.BasePath+"\\ext4.vhdx")
+	err = fileutil.CopyFile(rootPath, prof.BasePath+"\\ext4.vhdx", false)
 	if err != nil {
 		return err
 	}

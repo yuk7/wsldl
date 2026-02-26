@@ -43,7 +43,7 @@ func backupTar(distributionName string, destFileName string) error {
 			return err
 		}
 
-		return fileutil.CopyFileAndCompress(tmpTarFn, destFileName)
+		return fileutil.CopyFile(tmpTarFn, destFileName, true)
 	} else {
 		// not compressed
 		wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
@@ -65,5 +65,7 @@ func backupExt4Vhdx(reg wsllib.WslReg, name string, destFileName string) error {
 
 	vhdxPath := prof.BasePath + "\\ext4.vhdx"
 
-	return fileutil.CopyFileAndCompress(vhdxPath, destFileName)
+	rootPathLower := strings.ToLower(destFileName)
+	compress := strings.HasSuffix(rootPathLower, ".gz") || strings.HasSuffix(rootPathLower, ".tgz")
+	return fileutil.CopyFile(vhdxPath, destFileName, compress)
 }

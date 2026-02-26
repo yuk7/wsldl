@@ -9,6 +9,7 @@ import (
 	"github.com/yuk7/wsldl/lib/console"
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
+	"github.com/yuk7/wsldl/lib/repair"
 	"github.com/yuk7/wsldl/lib/utils"
 	"github.com/yuk7/wsldl/lib/wslexec"
 	"github.com/yuk7/wsldl/lib/wsllib"
@@ -137,7 +138,7 @@ func executeNoArgs(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []str
 	if profile.BasePath != "" {
 		_, err := os.Stat(profile.BasePath)
 		if os.IsNotExist(err) {
-			if isInstalledFilesExist() {
+			if repair.IsInstalledFilesExist() {
 				var in string
 				fmt.Printf("This instance (%s) BasePath is not exist.\n", name)
 				fmt.Printf("Do you want to repair the installation information?\n")

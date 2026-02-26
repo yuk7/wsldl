@@ -11,6 +11,7 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/preset"
+	"github.com/yuk7/wsldl/lib/repair"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
@@ -89,7 +90,7 @@ func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) e
 		}
 
 		if args == nil {
-			if isInstalledFilesExist() {
+			if repair.IsInstalledFilesExist() {
 				var in string
 				fmt.Printf("An old installation files has been found.\n")
 				fmt.Printf("Do you want to rewrite and repair the installation information?\n")

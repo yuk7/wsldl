@@ -59,8 +59,10 @@ func IsCurrentDirSpecial() bool {
 	return false
 }
 
-// CopyFileAndCompress copies a file to the destination and gzip-compresses when destination has .gz/.tgz suffix.
-func CopyFileAndCompress(srcPath, destPath string) error {
+// CopyFile copies a file to destination.
+// If src has .gz/.tgz suffix, it is transparently decompressed.
+// If compress is true, destination data is gzip-compressed.
+func CopyFile(srcPath, destPath string, compress bool) error {
 	src, err := os.Open(srcPath)
 	if err != nil {
 		return err
@@ -84,8 +86,7 @@ func CopyFileAndCompress(srcPath, destPath string) error {
 	}
 
 	destWriter := io.Writer(dest)
-	destPathLower := strings.ToLower(destPath)
-	if strings.HasSuffix(destPathLower, ".gz") || strings.HasSuffix(destPathLower, ".tgz") {
+	if compress {
 		gw := gzip.NewWriter(dest)
 		defer gw.Close()
 		destWriter = gw
@@ -93,4 +94,11 @@ func CopyFileAndCompress(srcPath, destPath string) error {
 
 	_, err = io.Copy(destWriter, srcReader)
 	return err
+}
+
+// CopyFileAndCompress copies a file to the destination and gzip-compresses when destination has .gz/.tgz suffix.
+func CopyFileAndCompress(srcPath, destPath string) error {
+	destPathLower := strings.ToLower(destPath)
+	compress := strings.HasSuffix(destPathLower, ".gz") || strings.HasSuffix(destPathLower, ".tgz")
+	return CopyFile(srcPath, destPath, compress)
 }
