@@ -1,3 +1,5 @@
+//go:build windows
+
 package wsllib
 
 import (
@@ -29,8 +31,8 @@ func (nativeWslLib) LaunchInteractive(name, command string, inheritPath bool) (u
 	return wsllibgo.WslLaunchInteractive(name, command, inheritPath)
 }
 
-func (nativeWslLib) Launch(name, command string, inheritPath bool, stdin, stdout, stderr syscall.Handle) (syscall.Handle, error) {
-	return wsllibgo.WslLaunch(name, command, inheritPath, stdin, stdout, stderr)
+func (nativeWslLib) Launch(name, command string, inheritPath bool, stdin, stdout, stderr Handle) (Handle, error) {
+	return wsllibgo.WslLaunch(name, command, inheritPath, syscall.Handle(stdin), syscall.Handle(stdout), syscall.Handle(stderr))
 }
 
 func (nativeWslLib) GetDistributionConfiguration(name string) (uint32, uint64, uint32, error) {
@@ -47,16 +49,46 @@ func NewNativeWslReg() WslReg {
 	return nativeWslReg{}
 }
 
+func toProfile(p wslreg.Profile) Profile {
+	return Profile{
+		UUID:              p.UUID,
+		BasePath:          p.BasePath,
+		DistributionName:  p.DistributionName,
+		DefaultUid:        p.DefaultUid,
+		Flags:             p.Flags,
+		State:             p.State,
+		Version:           p.Version,
+		PackageFamilyName: p.PackageFamilyName,
+		WsldlTerm:         p.WsldlTerm,
+	}
+}
+
+func fromProfile(p Profile) wslreg.Profile {
+	return wslreg.Profile{
+		UUID:              p.UUID,
+		BasePath:          p.BasePath,
+		DistributionName:  p.DistributionName,
+		DefaultUid:        p.DefaultUid,
+		Flags:             p.Flags,
+		State:             p.State,
+		Version:           p.Version,
+		PackageFamilyName: p.PackageFamilyName,
+		WsldlTerm:         p.WsldlTerm,
+	}
+}
+
 func (nativeWslReg) GetProfileFromName(name string) (Profile, error) {
-	return wslreg.GetProfileFromName(name)
+	p, err := wslreg.GetProfileFromName(name)
+	return toProfile(p), err
 }
 
 func (nativeWslReg) GetProfileFromBasePath(path string) (Profile, error) {
-	return wslreg.GetProfileFromBasePath(path)
+	p, err := wslreg.GetProfileFromBasePath(path)
+	return toProfile(p), err
 }
 
 func (nativeWslReg) WriteProfile(profile Profile) error {
-	return wslreg.WriteProfile(profile)
+	return wslreg.WriteProfile(fromProfile(profile))
 }
 
 func (nativeWslReg) SetWslVersion(name string, version int) error {
@@ -64,5 +96,5 @@ func (nativeWslReg) SetWslVersion(name string, version int) error {
 }
 
 func (nativeWslReg) GenerateProfile() Profile {
-	return wslreg.GenerateProfile()
+	return toProfile(wslreg.GenerateProfile())
 }

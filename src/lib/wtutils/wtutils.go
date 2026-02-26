@@ -17,10 +17,16 @@ const (
 
 // ReadWTConfigJSON reads Windows Terminal configuration json file
 func ReadWTConfigJSON() (res string, err error) {
-	json := os.Getenv("LOCALAPPDATA")
-	json = json + "\\Packages\\" + WTPackageName + "\\LocalState\\settings.json"
+	json := wtConfigPath(os.Getenv("LOCALAPPDATA"))
+	return readWTConfigJSONFromPath(json)
+}
 
-	b, err := os.ReadFile(json)
+func wtConfigPath(localAppData string) string {
+	return localAppData + "\\Packages\\" + WTPackageName + "\\LocalState\\settings.json"
+}
+
+func readWTConfigJSONFromPath(path string) (res string, err error) {
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return
 	}

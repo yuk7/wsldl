@@ -1,13 +1,11 @@
 package wsllib
 
-import "syscall"
-
 type MockWslLib struct {
 	IsDistributionRegisteredFunc     func(name string) bool
 	RegisterDistributionFunc         func(name, rootPath string) error
 	UnregisterDistributionFunc       func(name string) error
 	LaunchInteractiveFunc            func(name, command string, inheritPath bool) (uint32, error)
-	LaunchFunc                       func(name, command string, inheritPath bool, stdin, stdout, stderr syscall.Handle) (syscall.Handle, error)
+	LaunchFunc                       func(name, command string, inheritPath bool, stdin, stdout, stderr Handle) (Handle, error)
 	GetDistributionConfigurationFunc func(name string) (uint32, uint64, uint32, error)
 	ConfigureDistributionFunc        func(name string, uid uint64, flags uint32) error
 }
@@ -40,11 +38,11 @@ func (m MockWslLib) LaunchInteractive(name, command string, inheritPath bool) (u
 	return 0, nil
 }
 
-func (m MockWslLib) Launch(name, command string, inheritPath bool, stdin, stdout, stderr syscall.Handle) (syscall.Handle, error) {
+func (m MockWslLib) Launch(name, command string, inheritPath bool, stdin, stdout, stderr Handle) (Handle, error) {
 	if m.LaunchFunc != nil {
 		return m.LaunchFunc(name, command, inheritPath, stdin, stdout, stderr)
 	}
-	return syscall.Handle(0), nil
+	return Handle(0), nil
 }
 
 func (m MockWslLib) GetDistributionConfiguration(name string) (uint32, uint64, uint32, error) {

@@ -11,8 +11,12 @@ import (
 func ReadPresetJSON() (res string, err error) {
 	efPath, _ := os.Executable()
 	dir := filepath.Dir(efPath)
-	json := filepath.Join(dir, "preset.json")
-	b, err := os.ReadFile(json)
+	return readPresetJSONFromDir(dir)
+}
+
+func readPresetJSONFromDir(dir string) (res string, err error) {
+	jsonPath := filepath.Join(dir, "preset.json")
+	b, err := os.ReadFile(jsonPath)
 	if err != nil {
 		return
 	}

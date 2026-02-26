@@ -1,4 +1,4 @@
-:: Copyright (c) 2021-2025 yuk7 <yukx00@gmail.com>
+:: Copyright (c) 2021-2026 yuk7 <yukx00@gmail.com>
 :: Released under the MIT license
 :: http://opensource.org/licenses/mit-license.php
 
@@ -108,6 +108,11 @@ if "%~1"=="clean" (
     call :clean
     exit /b
 )
+if "%~1"=="test" (
+    echo Running tests...
+    call :test
+    exit /b %ERRORLEVEL%
+)
 call :dlgoversioninfo
 if %ERRORLEVEL% NEQ 0 goto :failed
 call :single
@@ -160,6 +165,13 @@ if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
 cd ..
 :end
 exit /b
+
+:test
+set DOING=test
+cd /d %~dp0\src
+echo %GOPRG% test ./...
+%GOPRG% test ./...
+exit /b %ERRORLEVEL%
 
 :clean
 FOR /D /r %%D in ("res/*") DO (

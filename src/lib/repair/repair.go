@@ -9,11 +9,14 @@ import (
 func IsInstalledFilesExist() bool {
 	efPath, _ := os.Executable()
 	dir := filepath.Dir(efPath)
+	return isInstalledFilesExistInDir(dir, os.Stat)
+}
 
-	_, err := os.Stat(dir + "\\ext4.vhdx")
+func isInstalledFilesExistInDir(dir string, stat func(name string) (os.FileInfo, error)) bool {
+	_, err := stat(dir + "\\ext4.vhdx")
 	if err == nil {
 		return true
 	}
-	_, err = os.Stat(dir + "\\rootfs")
+	_, err = stat(dir + "\\rootfs")
 	return err == nil
 }
