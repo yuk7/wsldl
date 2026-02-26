@@ -22,11 +22,20 @@ import (
 	"github.com/yuk7/wsldl/version"
 )
 
+var (
+	executableFunc = os.Executable
+	exitFunc       = errutil.Exit
+)
+
 // main is the entry point of the application
 func main() {
-	efPath, _ := os.Executable()
-	name := filepath.Base(efPath[:len(efPath)-len(filepath.Ext(efPath))])
 	deps := wsllib.NewDependencies()
+	efPath, _ := executableFunc()
+	runMain(deps, os.Args, efPath)
+}
+
+func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
+	name := filepath.Base(executablePath[:len(executablePath)-len(filepath.Ext(executablePath))])
 
 	var commands = []cmdline.Command{
 		isregd.GetCommandWithDeps(deps.Wsl),
@@ -46,9 +55,9 @@ func main() {
 	var commandsWithHelp = append(commands, cmdline.Command{
 		Names: helpCommand.Names,
 		Help:  helpCommand.Help,
-		Run: func(distroName string, args []string) error {
+		Run: func(distroName string, _ []string) error {
 			help.ShowHelpFromCommands(
-				append(commands, helpCommand), distroName, os.Args[2:],
+				append(commands, helpCommand), distroName, argv[2:],
 			)
 			return nil
 		},
@@ -65,20 +74,20 @@ func main() {
 		}
 		var exitCodeErr *errutil.ExitCodeError
 		if errors.As(err, &exitCodeErr) {
-			errutil.Exit(exitCodeErr.Pause, exitCodeErr.Code)
+			exitFunc(exitCodeErr.Pause, exitCodeErr.Code)
 			return
 		}
 		handleDisplayError(err, true, true, false)
 	}
 
-	if len(os.Args) > 1 {
+	if len(argv) > 1 {
 		err := cmdline.RunSubCommand(
 			commandsWithHelp,
 			func() error {
 				return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 			},
 			name,
-			os.Args[1:],
+			argv[1:],
 		)
 		handleCommandError(err)
 
@@ -104,16 +113,16 @@ func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {
 	}
 
 	if err == nil {
-		errutil.Exit(pause, 1)
+		exitFunc(pause, 1)
 	}
 	if errors.As(err, &errno) {
 		if showMsg {
 			fmt.Fprintf(os.Stderr, "HRESULT: 0x%x\n", int(errno))
 		}
-		errutil.Exit(pause, int(errno))
+		exitFunc(pause, int(errno))
 	} else if err == os.ErrInvalid {
 		if showMsg {
-			efPath, _ := os.Executable()
+			efPath, _ := executableFunc()
 			exeName := filepath.Base(efPath)
 			fmt.Fprintln(os.Stderr, "Your command may be incorrect.")
 			fmt.Fprintf(os.Stderr, "You can get help with `%s help`.\n", exeName)
@@ -123,5 +132,5 @@ func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {
 			fmt.Fprintf(os.Stderr, "%#v\n", err)
 		}
 	}
-	errutil.Exit(pause, 1)
+	exitFunc(pause, 1)
 }

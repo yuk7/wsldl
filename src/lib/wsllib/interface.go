@@ -1,9 +1,7 @@
 package wsllib
 
 import (
-	"os"
-	"path/filepath"
-	"strings"
+	"testing"
 )
 
 // Profile is registry profile information used by wsldl.
@@ -67,13 +65,5 @@ func NewDependencies() Dependencies {
 }
 
 func isUnitTestProcess() bool {
-	if strings.HasSuffix(filepath.Base(os.Args[0]), ".test") {
-		return true
-	}
-	for _, arg := range os.Args[1:] {
-		if strings.HasPrefix(arg, "-test.") {
-			return true
-		}
-	}
-	return false
+	return testing.Testing()
 }
