@@ -3,6 +3,7 @@
 :: http://opensource.org/licenses/mit-license.php
 
 @echo off
+setlocal EnableExtensions EnableDelayedExpansion
 cd /d %~dp0
 
 set PATH="%GOPATH%\bin";%PATH%
@@ -66,41 +67,41 @@ if "%GOARCH%"=="386" (
 if "%~1"=="all" (
     echo Building everything
     call :dlgoversioninfo
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     call :resources
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     call :icons
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     call :single
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="resources" (
     echo Building resources
     call :dlgoversioninfo
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     call :resources
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="icons" (
     echo Building icon binaries
     call :icons
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="single" (
     echo Building binary...
     call :dlgoversioninfo
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     call :single
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="singlewor" (
     echo Building binary without resource...
     call :singlewor
-    if %ERRORLEVEL% NEQ 0 goto :failed
+    if !ERRORLEVEL! NEQ 0 goto :failed
     exit /b
 )
 if "%~1"=="clean" (
@@ -111,12 +112,12 @@ if "%~1"=="clean" (
 if "%~1"=="test" (
     echo Running tests...
     call :test
-    exit /b %ERRORLEVEL%
+    exit /b !ERRORLEVEL!
 )
 call :dlgoversioninfo
-if %ERRORLEVEL% NEQ 0 goto :failed
+if !ERRORLEVEL! NEQ 0 goto :failed
 call :single
-if %ERRORLEVEL% NEQ 0 goto :failed
+if !ERRORLEVEL! NEQ 0 goto :failed
 exit /b
 
 
@@ -127,7 +128,7 @@ cd /d %~dp0
 echo Compiling all resources...
 FOR /D /r %%D in ("res/*") DO (
     tools\goversioninfo %GOVERSIONINFO_OPTS% -icon res\%%~nxD\icon.ico -o res\%%~nxD\resource.syso src\versioninfo.json
-    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 )
 exit /b
 
@@ -141,7 +142,7 @@ FOR /D /r %%D in ("res/*") DO (
     cd src
     echo %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
     %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\icons\%%~nxD.exe"
-    if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+    if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
     cd ..
     del /f src\resource.syso
 )
@@ -152,7 +153,7 @@ set DOING=single
 cd /d %~dp0
 echo Compiling resource object...
 tools\goversioninfo %GOVERSIONINFO_OPTS% -o src\resource.syso src\versioninfo.json
-if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 :singlewor
 set DOING=singlewor
 cd /d %~dp0
@@ -161,7 +162,7 @@ cd src
 echo Building default wsldl.exe...
 echo %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
 %GOPRG% build %GO_BUILD_OPTS% -o "%~dp0\out\wsldl.exe"
-if %ERRORLEVEL% NEQ 0 exit /b %ERRORLEVEL%
+if !ERRORLEVEL! NEQ 0 exit /b !ERRORLEVEL!
 cd ..
 :end
 exit /b
@@ -171,7 +172,7 @@ set DOING=test
 cd /d %~dp0\src
 echo %GOPRG% test ./...
 %GOPRG% test ./...
-exit /b %ERRORLEVEL%
+exit /b !ERRORLEVEL!
 
 :clean
 FOR /D /r %%D in ("res/*") DO (
