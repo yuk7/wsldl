@@ -44,11 +44,17 @@ func TestGetCommandWithNoArgsWithDeps_HelpVisibility(t *testing.T) {
 		},
 	}
 	cmd := GetCommandWithNoArgsWithDeps(wsl, wsllib.MockWslReg{})
-	if got := cmd.Help("Arch", true); got != "" {
-		t.Fatalf("Help(list query) = %q, want empty", got)
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
 	}
-	if got := cmd.Help("Arch", false); got == "" {
-		t.Fatal("Help(non-list query) should not be empty")
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
 	}
 }
 
@@ -61,11 +67,17 @@ func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 		},
 	}
 	cmd := GetCommandWithDeps(wsl)
-	if got := cmd.Help("Arch", true); got != "" {
-		t.Fatalf("Help(list query) = %q, want empty", got)
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
 	}
-	if got := cmd.Help("Arch", false); got == "" {
-		t.Fatal("Help(non-list query) should not be empty")
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
 	}
 }
 
@@ -78,11 +90,17 @@ func TestGetCommandPWithDeps_HelpVisibility(t *testing.T) {
 		},
 	}
 	cmd := GetCommandPWithDeps(wsl)
-	if got := cmd.Help("Arch", true); got != "" {
-		t.Fatalf("Help(list query) = %q, want empty", got)
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
 	}
-	if got := cmd.Help("Arch", false); got == "" {
-		t.Fatal("Help(non-list query) should not be empty")
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
 	}
 }
 

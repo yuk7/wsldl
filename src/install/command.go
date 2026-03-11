@@ -44,12 +44,10 @@ func GetCommandWithNoArgs() cmdline.Command {
 
 func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
-		Help: func(distroName string, isListQuery bool) string {
-			if !wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessageNoArgs()
-			}
-			return ""
+		Visible: func(distroName string) bool {
+			return !wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessageNoArgs,
 		Run: func(name string, args []string) error {
 			return execute(wsl, reg, name, args)
 		},
@@ -66,12 +64,10 @@ func GetCommand() cmdline.Command {
 func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"install"},
-		Help: func(distroName string, isListQuery bool) string {
-			if !wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessage()
-			}
-			return ""
+		Visible: func(distroName string) bool {
+			return !wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessage,
 		Run: func(name string, args []string) error {
 			return execute(wsl, reg, name, args)
 		},

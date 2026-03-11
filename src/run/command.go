@@ -35,13 +35,10 @@ func GetCommandWithNoArgs() cmdline.Command {
 // GetCommandWithNoArgsWithDeps returns the run command structure with no arguments and injectable dependencies.
 func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
-		Help: func(distroName string, isListQuery bool) string {
-			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessageNoArgs()
-			} else {
-				return ""
-			}
+		Visible: func(distroName string) bool {
+			return wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessageNoArgs,
 		Run: func(name string, args []string) error {
 			return executeNoArgs(wsl, reg, name, args)
 		},
@@ -58,13 +55,10 @@ func GetCommand() cmdline.Command {
 func GetCommandWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"run", "-c", "/c"},
-		Help: func(distroName string, isListQuery bool) string {
-			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessage()
-			} else {
-				return ""
-			}
+		Visible: func(distroName string) bool {
+			return wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessage,
 		Run: func(name string, args []string) error {
 			return execute(wsl, name, args)
 		},
@@ -81,13 +75,10 @@ func GetCommandP() cmdline.Command {
 func GetCommandPWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"runp", "-p", "/p"},
-		Help: func(distroName string, isListQuery bool) string {
-			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessageP()
-			} else {
-				return ""
-			}
+		Visible: func(distroName string) bool {
+			return wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessageP,
 		Run: func(name string, args []string) error {
 			return executeP(wsl, name, args)
 		},

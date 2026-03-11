@@ -26,12 +26,10 @@ func GetCommand() cmdline.Command {
 func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
 		Names: []string{"backup"},
-		Help: func(distroName string, isListQuery bool) string {
-			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
-				return getHelpMessage()
-			}
-			return ""
+		Visible: func(distroName string) bool {
+			return wsl.IsDistributionRegistered(distroName)
 		},
+		HelpText: getHelpMessage,
 		Run: func(name string, args []string) error {
 			return execute(wsl, reg, name, args)
 		},

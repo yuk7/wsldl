@@ -13,10 +13,10 @@ func TestGetCommand(t *testing.T) {
 	if len(cmd.Names) == 0 {
 		t.Fatal("Names is empty")
 	}
-	if cmd.Help == nil || cmd.Run == nil {
-		t.Fatal("Help or Run is nil")
+	if cmd.HelpText == nil || cmd.Run == nil {
+		t.Fatal("HelpText or Run is nil")
 	}
-	if got := cmd.Help("Arch", true); got == "" {
+	if got := cmd.HelpText(); got == "" {
 		t.Fatal("help message is empty")
 	}
 	if err := cmd.Run("Arch", nil); err != nil {
@@ -40,11 +40,29 @@ func TestShowHelpFromCommands_DoesNotPanic(t *testing.T) {
 	commands := []cmdline.Command{
 		{
 			Names: []string{"get"},
-			Help: func(distroName string, isListQuery bool) string {
+			HelpText: func() string {
 				return "get"
 			},
 		},
 	}
 	ShowHelpFromCommands(commands, "Arch", []string{"get"})
 	ShowHelpFromCommands(commands, "Arch", nil)
+}
+
+func TestCommandVisible_NilIsTrue(t *testing.T) {
+	t.Parallel()
+
+	got := commandVisible(cmdline.Command{}, "Arch")
+	if !got {
+		t.Fatal("commandVisible(nil) = false, want true")
+	}
+}
+
+func TestCommandHelpText_NilIsEmpty(t *testing.T) {
+	t.Parallel()
+
+	got := commandHelpText(cmdline.Command{})
+	if got != "" {
+		t.Fatalf("commandHelpText(nil) = %q, want empty", got)
+	}
 }

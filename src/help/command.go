@@ -7,10 +7,8 @@ import (
 // GetCommand returns the help command structure
 func GetCommand() cmdline.Command {
 	return cmdline.Command{
-		Names: []string{"help", "--help", "-h", "/?"},
-		Help: func(distroName string, isListQuery bool) string {
-			return getHelpMessage()
-		},
+		Names:    []string{"help", "--help", "-h", "/?"},
+		HelpText: getHelpMessage,
 		Run: func(distroName string, args []string) error {
 			println("Usage:")
 			println(indentString(getHelpMessage()))
@@ -25,25 +23,38 @@ func ShowHelpFromCommands(commands []cmdline.Command, distroName string, args []
 	if len(args) > 0 {
 		command, err := cmdline.FindCommandFromName(commands, args[0])
 		if err == nil {
-			if command.Help != nil {
-				help := command.Help(distroName, false)
-				if help != "" {
-					helpStrs += "\n" + indentString(help) + "\n"
-				}
+			help := commandHelpText(command)
+			if help != "" {
+				helpStrs += "\n" + indentString(help) + "\n"
 			}
 		}
 	}
 
 	if len(args) == 0 || helpStrs == "" {
 		for _, c := range commands {
-			if c.Help != nil {
-				help := c.Help(distroName, true)
-				if help != "" {
-					helpStrs += "\n" + indentString(help) + "\n"
-				}
+			if !commandVisible(c, distroName) {
+				continue
+			}
+			help := commandHelpText(c)
+			if help != "" {
+				helpStrs += "\n" + indentString(help) + "\n"
 			}
 		}
 	}
 	helpStrs = "Usage:" + helpStrs
 	print(helpStrs)
+}
+
+func commandVisible(command cmdline.Command, distroName string) bool {
+	if command.Visible == nil {
+		return true
+	}
+	return command.Visible(distroName)
+}
+
+func commandHelpText(command cmdline.Command) string {
+	if command.HelpText == nil {
+		return ""
+	}
+	return command.HelpText()
 }

@@ -62,11 +62,12 @@ func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
 
 	var helpCommand = help.GetCommand()
 	var commandsWithHelp = append(commands, cmdline.Command{
-		Names: helpCommand.Names,
-		Help:  helpCommand.Help,
-		Run: func(distroName string, _ []string) error {
+		Names:    helpCommand.Names,
+		Visible:  helpCommand.Visible,
+		HelpText: helpCommand.HelpText,
+		Run: func(distroName string, args []string) error {
 			help.ShowHelpFromCommands(
-				append(commands, helpCommand), distroName, argv[2:],
+				append(commands, helpCommand), distroName, args,
 			)
 			return nil
 		},
