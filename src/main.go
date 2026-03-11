@@ -38,6 +38,15 @@ func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
 	name := filepath.Base(executablePath[:len(executablePath)-len(filepath.Ext(executablePath))])
 
 	var commands = []cmdline.Command{
+		{
+			IsDefault: true,
+			Run: func(distroName string, _ []string) error {
+				if !deps.Wsl.IsDistributionRegistered(distroName) {
+					return install.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg).Run(distroName, nil)
+				}
+				return run.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg).Run(distroName, nil)
+			},
+		},
 		isregd.GetCommandWithDeps(deps.Wsl),
 		version.GetCommand(),
 		install.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg),
@@ -80,24 +89,11 @@ func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
 		handleDisplayError(err, true, true, false)
 	}
 
-	if len(argv) > 1 {
-		err := cmdline.RunSubCommand(
-			commandsWithHelp,
-			func() error {
-				return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
-			},
-			name,
-			argv[1:],
-		)
-		handleCommandError(err)
-
-	} else {
-		if !deps.Wsl.IsDistributionRegistered(name) {
-			handleCommandError(install.GetCommandWithDeps(deps.Wsl, deps.Reg).Run(name, nil))
-		} else {
-			handleCommandError(run.GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg).Run(name, nil))
-		}
+	err := cmdline.RunSubCommand(commandsWithHelp, name, argv[1:])
+	if errors.Is(err, cmdline.ErrCommandNotFound) || errors.Is(err, cmdline.ErrNoDefault) {
+		err = errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
+	handleCommandError(err)
 }
 
 func handleDisplayError(err error, showMsg bool, showColor bool, pause bool) {

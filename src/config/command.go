@@ -13,6 +13,28 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+type configOption int
+
+const (
+	configOptionDefaultUID configOption = iota
+	configOptionDefaultUser
+	configOptionAppendPath
+	configOptionMountDrive
+	configOptionWslVersion
+	configOptionDefaultTerm
+	configOptionFlagsVal
+)
+
+type configOptions struct {
+	option      configOption
+	uid         uint64
+	user        string
+	enabled     bool
+	wslVersion  int
+	defaultTerm int
+	flags       uint32
+}
+
 // GetCommand returns the config set command structure
 func GetCommand() cmdline.Command {
 	deps := wsllib.NewDependencies()
@@ -37,97 +59,152 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default install entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	opts, err := parseArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executeWithOptions(wsl, reg, name, opts)
+}
+
+func parseArgs(args []string) (configOptions, error) {
+	if len(args) != 2 {
+		return configOptions{}, os.ErrInvalid
+	}
+
+	opts := configOptions{}
+	switch args[0] {
+	case "--default-uid":
+		intUID, err := strconv.Atoi(args[1])
+		if err != nil {
+			return configOptions{}, err
+		}
+		opts.option = configOptionDefaultUID
+		opts.uid = uint64(intUID)
+
+	case "--default-user":
+		opts.option = configOptionDefaultUser
+		opts.user = args[1]
+
+	case "--append-path":
+		b, err := strconv.ParseBool(args[1])
+		if err != nil {
+			return configOptions{}, err
+		}
+		opts.option = configOptionAppendPath
+		opts.enabled = b
+
+	case "--mount-drive":
+		b, err := strconv.ParseBool(args[1])
+		if err != nil {
+			return configOptions{}, err
+		}
+		opts.option = configOptionMountDrive
+		opts.enabled = b
+
+	case "--wsl-version":
+		intWslVer, err := strconv.Atoi(args[1])
+		if err != nil {
+			return configOptions{}, err
+		}
+		if intWslVer != 1 && intWslVer != 2 {
+			return configOptions{}, os.ErrInvalid
+		}
+		opts.option = configOptionWslVersion
+		opts.wslVersion = intWslVer
+
+	case "--default-term":
+		value := 0
+		switch args[1] {
+		case "default", strconv.Itoa(wsllib.FlagWsldlTermDefault):
+			value = wsllib.FlagWsldlTermDefault
+		case "wt", strconv.Itoa(wsllib.FlagWsldlTermWT):
+			value = wsllib.FlagWsldlTermWT
+		case "flute", strconv.Itoa(wsllib.FlagWsldlTermFlute):
+			value = wsllib.FlagWsldlTermFlute
+		default:
+			return configOptions{}, os.ErrInvalid
+		}
+		opts.option = configOptionDefaultTerm
+		opts.defaultTerm = value
+
+	case "--flags-val":
+		intFlags, err := strconv.Atoi(args[1])
+		if err != nil {
+			return configOptions{}, err
+		}
+		opts.option = configOptionFlagsVal
+		opts.flags = uint32(intFlags)
+
+	default:
+		return configOptions{}, os.ErrInvalid
+	}
+
+	return opts, nil
+}
+
+func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts configOptions) error {
 	uid, flags, err := wslapi.GetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
 		return errutil.NewDisplayError(err, true, true, false)
 	}
-	if len(args) == 2 {
-		switch args[0] {
-		case "--default-uid":
-			var intUID int
-			intUID, err = strconv.Atoi(args[1])
+
+	switch opts.option {
+	case configOptionDefaultUID:
+		uid = opts.uid
+
+	case configOptionDefaultUser:
+		str, _, errtmp := wslexec.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(opts.user))
+		err = errtmp
+		if err == nil {
+			intUID, convErr := strconv.Atoi(str)
+			err = convErr
 			uid = uint64(intUID)
-
-		case "--default-user":
-			str, _, errtmp := wslexec.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(args[1]))
-			err = errtmp
-			if err == nil {
-				var intUID int
-				intUID, err = strconv.Atoi(str)
-				uid = uint64(intUID)
-				if err != nil {
-					err = errors.New(str)
-				}
-			}
-
-		case "--append-path":
-			var b bool
-			b, err = strconv.ParseBool(args[1])
-			if b {
-				flags |= wsllib.FlagAppendNTPath
-			} else {
-				flags ^= wsllib.FlagAppendNTPath
-			}
-
-		case "--mount-drive":
-			var b bool
-			b, err = strconv.ParseBool(args[1])
-			if b {
-				flags |= wsllib.FlagEnableDriveMounting
-			} else {
-				flags ^= wsllib.FlagEnableDriveMounting
-			}
-
-		case "--wsl-version":
-			var intWslVer int
-			intWslVer, err = strconv.Atoi(args[1])
-			if err == nil {
-				if intWslVer == 1 || intWslVer == 2 {
-					err = reg.SetWslVersion(name, intWslVer)
-				} else {
-					err = os.ErrInvalid
-					break
-				}
-			}
-
-		case "--default-term":
-			value := 0
-			switch args[1] {
-			case "default", strconv.Itoa(wsllib.FlagWsldlTermDefault):
-				value = wsllib.FlagWsldlTermDefault
-			case "wt", strconv.Itoa(wsllib.FlagWsldlTermWT):
-				value = wsllib.FlagWsldlTermWT
-			case "flute", strconv.Itoa(wsllib.FlagWsldlTermFlute):
-				value = wsllib.FlagWsldlTermFlute
-			default:
-				err = os.ErrInvalid
-				break
-			}
-			profile, err := reg.GetProfileFromName(name)
 			if err != nil {
-				break
+				err = errors.New(str)
 			}
-			profile.WsldlTerm = value
-			err = reg.WriteProfile(profile)
+		}
 
-		case "--flags-val":
-			var intFlags int
-			intFlags, err = strconv.Atoi(args[1])
-			flags = uint32(intFlags)
+	case configOptionAppendPath:
+		flags = updateFlag(flags, wsllib.FlagAppendNTPath, opts.enabled)
 
-		default:
-			err = os.ErrInvalid
-		}
+	case configOptionMountDrive:
+		flags = updateFlag(flags, wsllib.FlagEnableDriveMounting, opts.enabled)
+
+	case configOptionWslVersion:
+		err = reg.SetWslVersion(name, opts.wslVersion)
+
+	case configOptionDefaultTerm:
+		profile, profileErr := reg.GetProfileFromName(name)
+		err = profileErr
 		if err != nil {
-			return errutil.NewDisplayError(err, true, true, false)
+			break
 		}
-		err = wsl.ConfigureDistribution(name, uid, flags)
-		if err != nil {
-			return errutil.NewDisplayError(err, true, true, false)
-		}
-	} else {
-		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
+		profile.WsldlTerm = opts.defaultTerm
+		err = reg.WriteProfile(profile)
+
+	case configOptionFlagsVal:
+		flags = opts.flags
+
+	default:
+		err = os.ErrInvalid
 	}
+
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+
+	err = wsl.ConfigureDistribution(name, uid, flags)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+
 	return nil
+}
+
+func updateFlag(flags uint32, mask uint32, enabled bool) uint32 {
+	if enabled {
+		return flags | mask
+	}
+	return flags &^ mask
 }

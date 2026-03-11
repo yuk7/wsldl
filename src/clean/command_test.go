@@ -8,6 +8,36 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+func TestParseArgs_NoArgs_RequiresConfirmation(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs(nil)
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if !opts.showProgress {
+		t.Fatal("showProgress = false, want true")
+	}
+	if !opts.requireConfirmation {
+		t.Fatal("requireConfirmation = false, want true")
+	}
+}
+
+func TestParseArgs_WithY_DisablesProgress(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs([]string{"-y"})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if opts.showProgress {
+		t.Fatal("showProgress = true, want false")
+	}
+	if opts.requireConfirmation {
+		t.Fatal("requireConfirmation = true, want false")
+	}
+}
+
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 

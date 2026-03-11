@@ -15,6 +15,28 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+type installMode int
+
+const (
+	installModeAuto installMode = iota
+	installModeRoot
+	installModePath
+)
+
+type installArgs struct {
+	mode          installMode
+	inputPath     string
+	fromNoArgCall bool
+}
+
+type installOptions struct {
+	rootPath       string
+	rootFileSHA256 string
+	showProgress   bool
+	pauseAfterRun  bool
+	presetVersion  int
+}
+
 func GetCommandWithNoArgs() cmdline.Command {
 	deps := wsllib.NewDependencies()
 	return GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg)
@@ -22,7 +44,6 @@ func GetCommandWithNoArgs() cmdline.Command {
 
 func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
-		Names: []string{},
 		Help: func(distroName string, isListQuery bool) string {
 			if !wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessageNoArgs()
@@ -59,81 +80,106 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default install entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
-	if !wsl.IsDistributionRegistered(name) {
-		var rootPath string
-		var rootFileSha256 string = ""
-		var showProgress bool
-		jsonPreset, _ := preset.ReadParsePreset()
-		switch len(args) {
-		case 0:
-			rootPath = detectRootfsFiles()
-			if jsonPreset.InstallFile != "" {
-				rootPath = jsonPreset.InstallFile
-			}
-			rootFileSha256 = jsonPreset.InstallFileSha256
-			showProgress = true
-
-		case 1:
-			showProgress = false
-			if args[0] == "--root" {
-				rootPath = detectRootfsFiles()
-				if jsonPreset.InstallFile != "" {
-					rootPath = jsonPreset.InstallFile
-				}
-				rootFileSha256 = jsonPreset.InstallFileSha256
-			} else {
-				rootPath = args[0]
-			}
-
-		default:
-			return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
-		}
-
-		if args == nil {
-			if repair.IsInstalledFilesExist() {
-				var in string
-				fmt.Printf("An old installation files has been found.\n")
-				fmt.Printf("Do you want to rewrite and repair the installation information?\n")
-				fmt.Printf("Type y/n:")
-				fmt.Scan(&in)
-
-				if in == "y" {
-					err := repairRegistry(reg, name)
-					if err != nil {
-						return errutil.NewDisplayError(err, showProgress, true, showProgress)
-					}
-					errutil.StdoutGreenPrintln("done.")
-					return nil
-				}
-			}
-		}
-
-		err := Install(wsl, reg, name, rootPath, rootFileSha256, showProgress)
-		if err != nil {
-			return errutil.NewDisplayError(err, showProgress, true, args == nil)
-		}
-
-		if jsonPreset.WslVersion == 1 || jsonPreset.WslVersion == 2 {
-			wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
-			_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(jsonPreset.WslVersion)).Output()
-		}
-
-		if err == nil {
-			if showProgress {
-				errutil.StdoutGreenPrintln("Installation complete")
-			}
-		} else {
-			return errutil.NewDisplayError(err, showProgress, true, args == nil)
-		}
-
-		if args == nil {
-			fmt.Fprintf(os.Stdout, "Press enter to continue...")
-			bufio.NewReader(os.Stdin).ReadString('\n')
-		}
-
-	} else {
+	if wsl.IsDistributionRegistered(name) {
 		errutil.ErrorRedPrintln("ERR: [" + name + "] is already installed.")
 		return errutil.NewDisplayError(os.ErrInvalid, false, true, false)
 	}
+
+	parsed, err := parseArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+
+	opts := resolveOptions(parsed)
+	return executeWithOptions(wsl, reg, name, opts)
+}
+
+func parseArgs(args []string) (installArgs, error) {
+	parsed := installArgs{fromNoArgCall: args == nil}
+
+	switch len(args) {
+	case 0:
+		parsed.mode = installModeAuto
+	case 1:
+		if args[0] == "--root" {
+			parsed.mode = installModeRoot
+		} else {
+			parsed.mode = installModePath
+			parsed.inputPath = args[0]
+		}
+	default:
+		return installArgs{}, os.ErrInvalid
+	}
+
+	return parsed, nil
+}
+
+func resolveOptions(parsed installArgs) installOptions {
+	jsonPreset, _ := preset.ReadParsePreset()
+
+	opts := installOptions{
+		showProgress:  parsed.mode == installModeAuto,
+		pauseAfterRun: parsed.fromNoArgCall,
+		presetVersion: jsonPreset.WslVersion,
+	}
+
+	switch parsed.mode {
+	case installModeAuto, installModeRoot:
+		rootPath := detectRootfsFiles()
+		if jsonPreset.InstallFile != "" {
+			rootPath = jsonPreset.InstallFile
+		}
+		opts.rootPath = rootPath
+		opts.rootFileSHA256 = jsonPreset.InstallFileSha256
+	case installModePath:
+		opts.rootPath = parsed.inputPath
+	}
+
+	return opts
+}
+
+func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts installOptions) error {
+	if opts.pauseAfterRun {
+		if repair.IsInstalledFilesExist() {
+			var in string
+			fmt.Printf("An old installation files has been found.\n")
+			fmt.Printf("Do you want to rewrite and repair the installation information?\n")
+			fmt.Printf("Type y/n:")
+			fmt.Scan(&in)
+
+			if in == "y" {
+				err := repairRegistry(reg, name)
+				if err != nil {
+					return errutil.NewDisplayError(err, opts.showProgress, true, opts.showProgress)
+				}
+				errutil.StdoutGreenPrintln("done.")
+				return nil
+			}
+		}
+	}
+
+	err := Install(wsl, reg, name, opts.rootPath, opts.rootFileSHA256, opts.showProgress)
+	if err != nil {
+		return errutil.NewDisplayError(err, opts.showProgress, true, opts.pauseAfterRun)
+	}
+
+	if opts.presetVersion == 1 || opts.presetVersion == 2 {
+		wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
+		_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(opts.presetVersion)).Output()
+	}
+
+	if err == nil {
+		if opts.showProgress {
+			errutil.StdoutGreenPrintln("Installation complete")
+		}
+	} else {
+		return errutil.NewDisplayError(err, opts.showProgress, true, opts.pauseAfterRun)
+	}
+
+	if opts.pauseAfterRun {
+		fmt.Fprintf(os.Stdout, "Press enter to continue...")
+		bufio.NewReader(os.Stdin).ReadString('\n')
+	}
+
 	return nil
 }

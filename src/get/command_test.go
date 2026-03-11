@@ -10,6 +10,26 @@ import (
 	"github.com/yuk7/wsldl/lib/wtutils"
 )
 
+func TestParseArgs_WtProfileAlias(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs([]string{"--wt-pn"})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if opts.option != getOptionWTProfileName {
+		t.Fatalf("option = %v, want %v", opts.option, getOptionWTProfileName)
+	}
+}
+
+func TestParseArgs_InvalidOption_ReturnsError(t *testing.T) {
+	t.Parallel()
+
+	if _, err := parseArgs([]string{"--bad"}); err == nil {
+		t.Fatal("parseArgs succeeded unexpectedly")
+	}
+}
+
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 

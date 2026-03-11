@@ -9,6 +9,33 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+func TestParseArgs_NoArgs_AutoMode(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs(nil)
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if !opts.auto {
+		t.Fatal("auto = false, want true")
+	}
+}
+
+func TestParseArgs_CustomRegFile_SetsRegPath(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs([]string{"my-backup.reg"})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if opts.regPath != "my-backup.reg" {
+		t.Fatalf("regPath = %q, want %q", opts.regPath, "my-backup.reg")
+	}
+	if opts.tarPath != "" || opts.vhdxPath != "" {
+		t.Fatalf("unexpected output paths: tar=%q vhdx=%q", opts.tarPath, opts.vhdxPath)
+	}
+}
+
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 

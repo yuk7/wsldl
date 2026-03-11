@@ -2,11 +2,38 @@ package run
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
+
+func TestParseRunArgs_Nil_UsesCurrentDirRule(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseRunArgs(nil)
+	if err != nil {
+		t.Fatalf("parseRunArgs returned error: %v", err)
+	}
+
+	wantInherit := !fileutil.IsCurrentDirSpecial()
+	if opts.inheritPath != wantInherit {
+		t.Fatalf("inheritPath = %v, want %v", opts.inheritPath, wantInherit)
+	}
+	if len(opts.commandArgs) != 0 {
+		t.Fatalf("command args len = %d, want 0", len(opts.commandArgs))
+	}
+}
+
+func TestParseRunNoArgs_NonEmpty_ReturnsInvalid(t *testing.T) {
+	t.Parallel()
+
+	if _, err := parseRunNoArgs([]string{"extra"}); !errors.Is(err, os.ErrInvalid) {
+		t.Fatalf("err = %v, want %v", err, os.ErrInvalid)
+	}
+}
 
 func TestGetCommandWithNoArgsWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
@@ -149,6 +176,13 @@ func TestExecuteP_NoPathTranslation_DelegatesToExecute(t *testing.T) {
 	if called != 1 {
 		t.Fatalf("LaunchInteractive call count = %d, want 1", called)
 	}
+}
+
+func TestExecuteNoArgs_WithExtraArg_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	err := executeNoArgs(wsllib.MockWslLib{}, wsllib.MockWslReg{}, "Arch", []string{"extra"})
+	assertDisplayError(t, err)
 }
 
 func assertDisplayError(t *testing.T, err error) *errutil.DisplayError {

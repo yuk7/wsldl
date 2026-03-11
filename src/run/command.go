@@ -15,6 +15,17 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+type runOptions struct {
+	commandArgs []string
+	inheritPath bool
+}
+
+type runPOptions struct {
+	commandArgs []string
+}
+
+type runNoArgsOptions struct{}
+
 // GetCommandWithNoArgs returns the run command structure with no arguments
 func GetCommandWithNoArgs() cmdline.Command {
 	deps := wsllib.NewDependencies()
@@ -24,7 +35,6 @@ func GetCommandWithNoArgs() cmdline.Command {
 // GetCommandWithNoArgsWithDeps returns the run command structure with no arguments and injectable dependencies.
 func GetCommandWithNoArgsWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 	return cmdline.Command{
-		Names: []string{},
 		Help: func(distroName string, isListQuery bool) string {
 			if wsl.IsDistributionRegistered(distroName) || !isListQuery {
 				return getHelpMessageNoArgs()
@@ -84,17 +94,47 @@ func GetCommandPWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	}
 }
 
+func parseRunArgs(args []string) (runOptions, error) {
+	opts := runOptions{
+		inheritPath: true,
+	}
+	if args == nil {
+		opts.inheritPath = !fileutil.IsCurrentDirSpecial()
+		return opts, nil
+	}
+	opts.commandArgs = append(opts.commandArgs, args...)
+	return opts, nil
+}
+
+func parseRunPArgs(args []string) (runPOptions, error) {
+	opts := runPOptions{}
+	opts.commandArgs = append(opts.commandArgs, args...)
+	return opts, nil
+}
+
+func parseRunNoArgs(args []string) (runNoArgsOptions, error) {
+	if len(args) != 0 {
+		return runNoArgsOptions{}, os.ErrInvalid
+	}
+	return runNoArgsOptions{}, nil
+}
+
 // execute is default run entrypoint.
 func execute(wsl wsllib.WslLib, name string, args []string) error {
+	opts, err := parseRunArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executeWithOptions(wsl, name, opts)
+}
+
+func executeWithOptions(wsl wsllib.WslLib, name string, opts runOptions) error {
 	command := ""
-	for _, s := range args {
+	for _, s := range opts.commandArgs {
 		command = command + " " + fileutil.DQEscapeString(s)
 	}
-	var inheritpath = true
-	if args == nil {
-		inheritpath = !fileutil.IsCurrentDirSpecial()
-	}
-	exitCode, err := wsl.LaunchInteractive(name, command, inheritpath)
+
+	exitCode, err := wsl.LaunchInteractive(name, command, opts.inheritPath)
 	if err != nil {
 		return errutil.NewDisplayError(err, true, true, false)
 	}
@@ -106,8 +146,16 @@ func execute(wsl wsllib.WslLib, name string, args []string) error {
 
 // executeP runs execute function with Path Translator
 func executeP(wsl wsllib.WslLib, name string, args []string) error {
+	opts, err := parseRunPArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executePWithOptions(wsl, name, opts)
+}
+
+func executePWithOptions(wsl wsllib.WslLib, name string, opts runPOptions) error {
 	var convArgs []string
-	for _, s := range args {
+	for _, s := range opts.commandArgs {
 		if strings.Contains(s, "\\") {
 			s = strings.Replace(s, "\\", "/", -1)
 			s = fileutil.DQEscapeString(s)
@@ -131,6 +179,14 @@ func executeP(wsl wsllib.WslLib, name string, args []string) error {
 
 // executeNoArgs runs distro, but use terminal settings
 func executeNoArgs(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
+	opts, err := parseRunNoArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executeNoArgsWithOptions(wsl, reg, name, opts)
+}
+
+func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, _ runNoArgsOptions) error {
 	efPath, _ := os.Executable()
 	profile, _ := reg.GetProfileFromName(name)
 

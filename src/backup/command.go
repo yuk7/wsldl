@@ -9,6 +9,13 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+type backupOptions struct {
+	auto     bool
+	tarPath  string
+	vhdxPath string
+	regPath  string
+}
+
 // GetCommand returns the backup command structure
 func GetCommand() cmdline.Command {
 	deps := wsllib.NewDependencies()
@@ -33,23 +40,65 @@ func GetCommandWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg) cmdline.Command {
 
 // execute is default backup entrypoint
 func execute(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []string) error {
-	return executeWithBackups(wsl, reg, name, args, backupReg, backupTar, backupExt4Vhdx)
+	opts, err := parseArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executeWithBackupsOptions(wsl, reg, name, opts, backupReg, backupTar, backupExt4Vhdx)
 }
 
-func executeWithBackups(
+func parseArgs(args []string) (backupOptions, error) {
+	opts := backupOptions{}
+	switch len(args) {
+	case 0:
+		opts.auto = true
+
+	case 1:
+		arg0Lower := strings.ToLower(args[0])
+		switch arg0Lower {
+		case "--tar":
+			opts.tarPath = "backup.tar"
+		case "--tgz":
+			opts.tarPath = "backup.tar.gz"
+		case "--vhdx":
+			opts.vhdxPath = "backup.ext4.vhdx"
+		case "--vhdxgz":
+			opts.vhdxPath = "backup.ext4.vhdx.gz"
+		case "--reg":
+			opts.regPath = "backup.reg"
+		default:
+			if strings.HasSuffix(arg0Lower, ".tar") || strings.HasSuffix(arg0Lower, ".tar.gz") || strings.HasSuffix(arg0Lower, ".tgz") {
+				opts.tarPath = args[0]
+			} else if strings.HasSuffix(arg0Lower, ".ext4.vhdx") || strings.HasSuffix(arg0Lower, ".ext4.vhdx.gz") {
+				opts.vhdxPath = args[0]
+			} else if strings.HasSuffix(arg0Lower, ".reg") {
+				opts.regPath = args[0]
+			} else {
+				return backupOptions{}, os.ErrInvalid
+			}
+		}
+
+	default:
+		return backupOptions{}, os.ErrInvalid
+	}
+
+	return opts, nil
+}
+
+func executeWithBackupsOptions(
 	wsl wsllib.WslLib,
 	reg wsllib.WslReg,
 	name string,
-	args []string,
+	opts backupOptions,
 	backupRegFn func(wsllib.WslReg, string, string) error,
 	backupTarFn func(string, string) error,
 	backupExt4VhdxFn func(wsllib.WslReg, string, string) error,
 ) error {
-	opttar := ""
-	optvhdx := ""
-	optreg := ""
-	switch len(args) {
-	case 0:
+	opttar := opts.tarPath
+	optvhdx := opts.vhdxPath
+	optreg := opts.regPath
+
+	if opts.auto {
 		_, _, flags, _ := wsl.GetDistributionConfiguration(name)
 		if flags&wsllib.FlagEnableWsl2 == wsllib.FlagEnableWsl2 {
 			optvhdx = "backup.ext4.vhdx.gz"
@@ -58,34 +107,6 @@ func executeWithBackups(
 			opttar = "backup.tar.gz"
 			optreg = "backup.reg"
 		}
-
-	case 1:
-		arg0Lower := strings.ToLower(args[0])
-		switch arg0Lower {
-		case "--tar":
-			opttar = "backup.tar"
-		case "--tgz":
-			opttar = "backup.tar.gz"
-		case "--vhdx":
-			optvhdx = "backup.ext4.vhdx"
-		case "--vhdxgz":
-			optvhdx = "backup.ext4.vhdx.gz"
-		case "--reg":
-			optreg = "backup.reg"
-		default:
-			if strings.HasSuffix(arg0Lower, ".tar") || strings.HasSuffix(arg0Lower, ".tar.gz") || strings.HasSuffix(arg0Lower, ".tgz") {
-				opttar = args[0]
-			} else if strings.HasSuffix(arg0Lower, ".ext4.vhdx") || strings.HasSuffix(arg0Lower, ".ext4.vhdx.gz") {
-				optvhdx = args[0]
-			} else if strings.HasSuffix(arg0Lower, ".reg") {
-				optreg = args[0]
-			} else {
-				return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
-			}
-		}
-
-	default:
-		return errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}
 
 	if optreg != "" {
@@ -99,7 +120,6 @@ func executeWithBackups(
 		if err != nil {
 			return errutil.NewDisplayError(err, true, true, false)
 		}
-
 	}
 	if optvhdx != "" {
 		err := backupExt4VhdxFn(reg, name, optvhdx)
@@ -108,4 +128,21 @@ func executeWithBackups(
 		}
 	}
 	return nil
+}
+
+// executeWithBackups keeps compatibility with existing tests while using parsed options.
+func executeWithBackups(
+	wsl wsllib.WslLib,
+	reg wsllib.WslReg,
+	name string,
+	args []string,
+	backupRegFn func(wsllib.WslReg, string, string) error,
+	backupTarFn func(string, string) error,
+	backupExt4VhdxFn func(wsllib.WslReg, string, string) error,
+) error {
+	opts, err := parseArgs(args)
+	if err != nil {
+		return errutil.NewDisplayError(err, true, true, false)
+	}
+	return executeWithBackupsOptions(wsl, reg, name, opts, backupRegFn, backupTarFn, backupExt4VhdxFn)
 }

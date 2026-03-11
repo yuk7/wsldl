@@ -9,6 +9,52 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+func TestParseArgs_DefaultTermNumeric_SetsOption(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs([]string{"--default-term", "1"})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if opts.option != configOptionDefaultTerm {
+		t.Fatalf("option = %v, want %v", opts.option, configOptionDefaultTerm)
+	}
+	if opts.defaultTerm != wsllib.FlagWsldlTermWT {
+		t.Fatalf("defaultTerm = %d, want %d", opts.defaultTerm, wsllib.FlagWsldlTermWT)
+	}
+}
+
+func TestParseArgs_InvalidAppendPathBool_ReturnsError(t *testing.T) {
+	t.Parallel()
+
+	if _, err := parseArgs([]string{"--append-path", "not-bool"}); err == nil {
+		t.Fatal("parseArgs succeeded unexpectedly")
+	}
+}
+
+func TestUpdateFlag_DisableWhenAlreadyOff_StaysOff(t *testing.T) {
+	t.Parallel()
+
+	flags := uint32(wsllib.FlagEnableDriveMounting)
+	got := updateFlag(flags, wsllib.FlagAppendNTPath, false)
+	if got != flags {
+		t.Fatalf("flags = %d, want %d", got, flags)
+	}
+}
+
+func TestUpdateFlag_DisableWhenOn_ClearsBit(t *testing.T) {
+	t.Parallel()
+
+	flags := uint32(wsllib.FlagEnableDriveMounting | wsllib.FlagAppendNTPath)
+	got := updateFlag(flags, wsllib.FlagAppendNTPath, false)
+	if got&wsllib.FlagAppendNTPath == wsllib.FlagAppendNTPath {
+		t.Fatalf("flags = %d, want append-path bit cleared", got)
+	}
+	if got&wsllib.FlagEnableDriveMounting != wsllib.FlagEnableDriveMounting {
+		t.Fatalf("flags = %d, want mount-drive bit preserved", got)
+	}
+}
+
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 
