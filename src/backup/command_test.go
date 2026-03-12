@@ -2,6 +2,7 @@ package backup
 
 import (
 	"errors"
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -33,6 +34,79 @@ func TestParseArgs_CustomRegFile_SetsRegPath(t *testing.T) {
 	}
 	if opts.tarPath != "" || opts.vhdxPath != "" {
 		t.Fatalf("unexpected output paths: tar=%q vhdx=%q", opts.tarPath, opts.vhdxPath)
+	}
+}
+
+func TestParseArgs_ExtensionRouting(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		arg      string
+		wantTar  string
+		wantVhdx string
+		wantReg  string
+	}{
+		{name: "tar", arg: "backup.tar", wantTar: "backup.tar"},
+		{name: "tar.gz", arg: "backup.tar.gz", wantTar: "backup.tar.gz"},
+		{name: "tgz", arg: "backup.tgz", wantTar: "backup.tgz"},
+		{name: "vhdx", arg: "backup.ext4.vhdx", wantVhdx: "backup.ext4.vhdx"},
+		{name: "vhdx.gz", arg: "backup.ext4.vhdx.gz", wantVhdx: "backup.ext4.vhdx.gz"},
+		{name: "reg", arg: "backup.reg", wantReg: "backup.reg"},
+		{name: "case insensitive", arg: "BACKUP.TAR.GZ", wantTar: "BACKUP.TAR.GZ"},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			opts, err := parseArgs([]string{tt.arg})
+			if err != nil {
+				t.Fatalf("parseArgs returned error: %v", err)
+			}
+			if opts.tarPath != tt.wantTar || opts.vhdxPath != tt.wantVhdx || opts.regPath != tt.wantReg {
+				t.Fatalf("opts = %+v, want tar=%q vhdx=%q reg=%q", opts, tt.wantTar, tt.wantVhdx, tt.wantReg)
+			}
+		})
+	}
+}
+
+func TestParseArgs_ShortOptionsRouting(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		arg  string
+		want backupOptions
+	}{
+		{name: "tar", arg: "--tar", want: backupOptions{tarPath: "backup.tar"}},
+		{name: "tgz", arg: "--tgz", want: backupOptions{tarPath: "backup.tar.gz"}},
+		{name: "vhdx", arg: "--vhdx", want: backupOptions{vhdxPath: "backup.ext4.vhdx"}},
+		{name: "vhdxgz", arg: "--vhdxgz", want: backupOptions{vhdxPath: "backup.ext4.vhdx.gz"}},
+		{name: "reg", arg: "--reg", want: backupOptions{regPath: "backup.reg"}},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			opts, err := parseArgs([]string{tt.arg})
+			if err != nil {
+				t.Fatalf("parseArgs returned error: %v", err)
+			}
+			if opts != tt.want {
+				t.Fatalf("opts = %+v, want %+v", opts, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseArgs_InvalidInput_ReturnsInvalid(t *testing.T) {
+	t.Parallel()
+
+	_, err := parseArgs([]string{"backup.zip"})
+	if !errors.Is(err, os.ErrInvalid) {
+		t.Fatalf("error = %v, want %v", err, os.ErrInvalid)
 	}
 }
 

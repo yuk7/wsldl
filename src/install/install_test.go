@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"testing/fstest"
 
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
@@ -179,3 +180,26 @@ func TestInstall_RoutesToExt4VhdxFlow(t *testing.T) {
 type nopCloser struct{}
 
 func (nopCloser) Close() error { return nil }
+
+func TestDetectRootfsFileName_PrioritizesDefaultOrder(t *testing.T) {
+	t.Parallel()
+
+	fsys := fstest.MapFS{
+		"rootfs.tar.gz": {Data: []byte("rootfs")},
+		"install.tar":   {Data: []byte("install")},
+	}
+
+	got := detectRootfsFileName(fsys)
+	if got != "install.tar" {
+		t.Fatalf("detected root file = %q, want %q", got, "install.tar")
+	}
+}
+
+func TestDetectRootfsFileName_FallbackWhenNotFound(t *testing.T) {
+	t.Parallel()
+
+	got := detectRootfsFileName(fstest.MapFS{})
+	if got != "rootfs.tar.gz" {
+		t.Fatalf("detected root file = %q, want %q", got, "rootfs.tar.gz")
+	}
+}

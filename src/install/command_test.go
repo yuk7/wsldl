@@ -24,6 +24,21 @@ func TestParseArgs_Nil_IsAutoFromNoArg(t *testing.T) {
 	}
 }
 
+func TestParseArgs_EmptySlice_IsAutoButNotNoArgCall(t *testing.T) {
+	t.Parallel()
+
+	parsed, err := parseArgs([]string{})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if parsed.mode != installModeAuto {
+		t.Fatalf("mode = %v, want %v", parsed.mode, installModeAuto)
+	}
+	if parsed.fromNoArgCall {
+		t.Fatal("fromNoArgCall = true, want false")
+	}
+}
+
 func TestParseArgs_RootFlag_IsRootMode(t *testing.T) {
 	t.Parallel()
 

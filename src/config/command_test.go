@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"os"
 	"runtime"
 	"testing"
 
@@ -29,6 +30,104 @@ func TestParseArgs_InvalidAppendPathBool_ReturnsError(t *testing.T) {
 
 	if _, err := parseArgs([]string{"--append-path", "not-bool"}); err == nil {
 		t.Fatal("parseArgs succeeded unexpectedly")
+	}
+}
+
+func TestParseArgs_AllSupportedFlags(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		args []string
+		want configOptions
+	}{
+		{
+			name: "default uid",
+			args: []string{"--default-uid", "1001"},
+			want: configOptions{option: configOptionDefaultUID, uid: 1001},
+		},
+		{
+			name: "default user",
+			args: []string{"--default-user", "root"},
+			want: configOptions{option: configOptionDefaultUser, user: "root"},
+		},
+		{
+			name: "append path true",
+			args: []string{"--append-path", "true"},
+			want: configOptions{option: configOptionAppendPath, enabled: true},
+		},
+		{
+			name: "mount drive false",
+			args: []string{"--mount-drive", "false"},
+			want: configOptions{option: configOptionMountDrive, enabled: false},
+		},
+		{
+			name: "wsl version",
+			args: []string{"--wsl-version", "2"},
+			want: configOptions{option: configOptionWslVersion, wslVersion: 2},
+		},
+		{
+			name: "default term keyword",
+			args: []string{"--default-term", "wt"},
+			want: configOptions{option: configOptionDefaultTerm, defaultTerm: wsllib.FlagWsldlTermWT},
+		},
+		{
+			name: "default term numeric",
+			args: []string{"--default-term", "2"},
+			want: configOptions{option: configOptionDefaultTerm, defaultTerm: wsllib.FlagWsldlTermFlute},
+		},
+		{
+			name: "flags value",
+			args: []string{"--flags-val", "7"},
+			want: configOptions{option: configOptionFlagsVal, flags: 7},
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := parseArgs(tt.args)
+			if err != nil {
+				t.Fatalf("parseArgs returned error: %v", err)
+			}
+			if got != tt.want {
+				t.Fatalf("parseArgs = %+v, want %+v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseArgs_InvalidPatterns_ReturnError(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		args          []string
+		wantInvalidOS bool
+	}{
+		{name: "missing value", args: []string{"--append-path"}, wantInvalidOS: true},
+		{name: "unknown option", args: []string{"--unknown", "1"}, wantInvalidOS: true},
+		{name: "default uid non number", args: []string{"--default-uid", "abc"}},
+		{name: "append path non bool", args: []string{"--append-path", "nope"}},
+		{name: "mount drive non bool", args: []string{"--mount-drive", "nope"}},
+		{name: "wsl version unsupported", args: []string{"--wsl-version", "3"}, wantInvalidOS: true},
+		{name: "default term unknown", args: []string{"--default-term", "xterm"}, wantInvalidOS: true},
+		{name: "flags val non number", args: []string{"--flags-val", "abc"}},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			_, err := parseArgs(tt.args)
+			if err == nil {
+				t.Fatal("parseArgs succeeded unexpectedly")
+			}
+			if tt.wantInvalidOS && !errors.Is(err, os.ErrInvalid) {
+				t.Fatalf("error = %v, want os.ErrInvalid", err)
+			}
+		})
 	}
 }
 

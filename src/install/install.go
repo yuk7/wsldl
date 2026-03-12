@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -172,13 +173,23 @@ func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, 
 }
 
 func detectRootfsFiles() string {
-	efPath, _ := os.Executable()
+	efPath, err := os.Executable()
+	if err != nil {
+		return "rootfs.tar.gz"
+	}
+
 	efDir := filepath.Dir(efPath)
+	rootFile := detectRootfsFileName(os.DirFS(efDir))
+	if rootFile == "rootfs.tar.gz" {
+		return rootFile
+	}
+	return filepath.Join(efDir, rootFile)
+}
+
+func detectRootfsFileName(root fs.FS) string {
 	for _, rootFile := range defaultRootFiles {
-		rootPath := filepath.Join(efDir, rootFile)
-		_, err := os.Stat(rootPath)
-		if err == nil {
-			return rootPath
+		if _, err := fs.Stat(root, rootFile); err == nil {
+			return rootFile
 		}
 	}
 	return "rootfs.tar.gz"
