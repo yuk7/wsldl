@@ -17,9 +17,16 @@ func ExecRead(wsl wsllib.WslLib, name, command string) (out string, exitCode uin
 	sa := syscall.SecurityAttributes{InheritHandle: 1, SecurityDescriptor: 0}
 
 	syscall.CreatePipe(&stdin, &stdintmp, &sa, 0)
+	defer syscall.CloseHandle(stdin)
+	defer syscall.CloseHandle(stdintmp)
 	syscall.CreatePipe(&stdout, &stdouttmp, &sa, 0)
+	defer syscall.CloseHandle(stdout)
+	defer syscall.CloseHandle(stdouttmp)
 
 	handle, err := wsl.Launch(name, command, true, stdintmp, stdouttmp, stdouttmp)
+	if err == nil {
+		defer syscall.CloseHandle(handle)
+	}
 	syscall.WaitForSingleObject(handle, syscall.INFINITE)
 	syscall.GetExitCodeProcess(handle, &exitCode)
 	buf := make([]byte, syscall.MAX_LONG_PATH)
@@ -29,7 +36,7 @@ func ExecRead(wsl wsllib.WslLib, name, command string) (out string, exitCode uin
 
 	// []byte -> string and cut to fit the length.
 	out = string(buf)[:length]
-	if out[len(out)-1:] == "\n" {
+	if len(out) > 0 && out[len(out)-1:] == "\n" {
 		out = out[:len(out)-1]
 	}
 	return

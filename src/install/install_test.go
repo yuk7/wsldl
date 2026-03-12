@@ -189,17 +189,20 @@ func TestDetectRootfsFileName_PrioritizesDefaultOrder(t *testing.T) {
 		"install.tar":   {Data: []byte("install")},
 	}
 
-	got := detectRootfsFileName(fsys)
+	got, err := detectRootfsFileName(fsys)
+	if err != nil {
+		t.Fatalf("detectRootfsFileName failed: %v", err)
+	}
 	if got != "install.tar" {
 		t.Fatalf("detected root file = %q, want %q", got, "install.tar")
 	}
 }
 
-func TestDetectRootfsFileName_FallbackWhenNotFound(t *testing.T) {
+func TestDetectRootfsFileName_ReturnsErrorWhenNotFound(t *testing.T) {
 	t.Parallel()
 
-	got := detectRootfsFileName(fstest.MapFS{})
-	if got != "rootfs.tar.gz" {
-		t.Fatalf("detected root file = %q, want %q", got, "rootfs.tar.gz")
+	_, err := detectRootfsFileName(fstest.MapFS{})
+	if err == nil {
+		t.Fatal("detectRootfsFileName succeeded unexpectedly")
 	}
 }

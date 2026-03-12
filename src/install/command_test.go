@@ -96,6 +96,40 @@ func TestResolveOptions_PathMode_UsesInputPath(t *testing.T) {
 	}
 }
 
+func TestResolveOptions_AutoMode_FallbacksWhenDetectFails(t *testing.T) {
+	orig := detectRootfsFilesFunc
+	detectRootfsFilesFunc = func() (string, error) {
+		return "", errors.New("detect failed")
+	}
+	t.Cleanup(func() {
+		detectRootfsFilesFunc = orig
+	})
+
+	opts := resolveOptions(installArgs{
+		mode: installModeAuto,
+	})
+	if opts.rootPath != "rootfs.tar.gz" {
+		t.Fatalf("rootPath = %q, want %q", opts.rootPath, "rootfs.tar.gz")
+	}
+}
+
+func TestResolveOptions_AutoMode_UsesDetectedPathWhenAvailable(t *testing.T) {
+	orig := detectRootfsFilesFunc
+	detectRootfsFilesFunc = func() (string, error) {
+		return "install.tar", nil
+	}
+	t.Cleanup(func() {
+		detectRootfsFilesFunc = orig
+	})
+
+	opts := resolveOptions(installArgs{
+		mode: installModeAuto,
+	})
+	if opts.rootPath != "install.tar" {
+		t.Fatalf("rootPath = %q, want %q", opts.rootPath, "install.tar")
+	}
+}
+
 func TestExecute_AlreadyRegistered_ReturnsDisplayError(t *testing.T) {
 	t.Parallel()
 

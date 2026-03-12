@@ -37,6 +37,8 @@ type installOptions struct {
 	presetVersion  int
 }
 
+var detectRootfsFilesFunc = detectRootfsFiles
+
 func GetCommandWithNoArgs() cmdline.Command {
 	deps := wsllib.NewDependencies()
 	return GetCommandWithNoArgsWithDeps(deps.Wsl, deps.Reg)
@@ -121,7 +123,10 @@ func resolveOptions(parsed installArgs) installOptions {
 
 	switch parsed.mode {
 	case installModeAuto, installModeRoot:
-		rootPath := detectRootfsFiles()
+		rootPath := "rootfs.tar.gz"
+		if detectedRootPath, err := detectRootfsFilesFunc(); err == nil {
+			rootPath = detectedRootPath
+		}
 		if jsonPreset.InstallFile != "" {
 			rootPath = jsonPreset.InstallFile
 		}

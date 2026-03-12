@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/yuk7/wsldl/lib/download"
 	"github.com/yuk7/wsldl/lib/fileutil"
@@ -78,7 +77,6 @@ func installWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 		if tmpRootFn == "" {
 			return errors.New("failed to create temp directory")
 		}
-		rand.NewSource(time.Now().UnixNano())
 		tmpRootFn = filepath.Join(tmpRootFn, strconv.Itoa(rand.Intn(10000))+filepath.Base(rootPath))
 		defer deps.removeFile(tmpRootFn)
 		var err error
@@ -172,25 +170,28 @@ func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, 
 	return err
 }
 
-func detectRootfsFiles() string {
+func detectRootfsFiles() (string, error) {
 	efPath, err := os.Executable()
 	if err != nil {
-		return "rootfs.tar.gz"
+		return "", err
 	}
 
 	efDir := filepath.Dir(efPath)
-	rootFile := detectRootfsFileName(os.DirFS(efDir))
-	if rootFile == "rootfs.tar.gz" {
-		return rootFile
+	rootFile, err := detectRootfsFileName(os.DirFS(efDir))
+	if err != nil {
+		return "", err
 	}
-	return filepath.Join(efDir, rootFile)
+	if rootFile == "rootfs.tar.gz" {
+		return rootFile, nil
+	}
+	return filepath.Join(efDir, rootFile), nil
 }
 
-func detectRootfsFileName(root fs.FS) string {
+func detectRootfsFileName(root fs.FS) (string, error) {
 	for _, rootFile := range defaultRootFiles {
 		if _, err := fs.Stat(root, rootFile); err == nil {
-			return rootFile
+			return rootFile, nil
 		}
 	}
-	return "rootfs.tar.gz"
+	return "", errors.New("no rootfs file found in the directory")
 }
