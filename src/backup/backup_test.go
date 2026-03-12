@@ -40,6 +40,22 @@ func TestBackupExt4Vhdx_GetProfileError(t *testing.T) {
 	}
 }
 
+func TestBackupExt4Vhdx_GetProfileErrorEvenWithBasePath(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("profile failed")
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{BasePath: "C:\\WSL\\Arch"}, wantErr
+		},
+	}
+
+	err := backupExt4Vhdx(reg, "Arch", "backup.ext4.vhdx")
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+}
+
 func TestBackupExt4Vhdx_EmptyBasePathReturnsError(t *testing.T) {
 	t.Parallel()
 

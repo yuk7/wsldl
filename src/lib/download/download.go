@@ -1,6 +1,7 @@
 package download
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
@@ -11,8 +12,12 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 )
 
-func DownloadFile(url, dest string, progressBarWidth int) (string, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func DownloadFile(ctx context.Context, url, dest string, progressBarWidth int) (string, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return "", err
 	}

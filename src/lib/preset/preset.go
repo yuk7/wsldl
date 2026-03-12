@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 
 	"github.com/muhammadmuzzammil1998/jsonc"
+	"github.com/yuk7/wsldl/lib/errutil"
 )
 
 // ReadPresetJSON reads preset.json configuration json file
 func ReadPresetJSON() (res string, err error) {
-	efPath, _ := os.Executable()
+	efPath := errutil.MustExecutable()
 	dir := filepath.Dir(efPath)
 	return readPresetJSONFromDir(dir)
 }

@@ -48,7 +48,7 @@ func ExecWindowsTerminal(reg wsllib.WslReg, name string) error {
 	if profileName != "" {
 		cmd = cmd + " -p " + fileutil.DQEscapeString(profileName)
 	} else {
-		efPath, _ := os.Executable()
+		efPath := errutil.MustExecutable()
 		cmd = cmd + " " + fileutil.DQEscapeString(efPath) + " run"
 	}
 

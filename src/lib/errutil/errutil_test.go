@@ -75,3 +75,11 @@ func TestFormatError(t *testing.T) {
 		t.Fatalf("FormatError(non-nil) = %q, want %q", got, "ERR: boom")
 	}
 }
+
+func TestMustExecutable(t *testing.T) {
+	t.Parallel()
+
+	if p := MustExecutable(); p == "" {
+		t.Fatal("MustExecutable() returned empty path")
+	}
+}

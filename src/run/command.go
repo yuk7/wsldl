@@ -178,7 +178,7 @@ func executeNoArgs(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []str
 }
 
 func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, _ runNoArgsOptions) error {
-	efPath, _ := os.Executable()
+	efPath := errutil.MustExecutable()
 	profile, _ := reg.GetProfileFromName(name)
 
 	// repair when the installation is moved

@@ -1,8 +1,10 @@
 package download
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -23,7 +25,7 @@ func TestDownloadFile_WritesContentAndReturnsSHA256(t *testing.T) {
 	tmp := t.TempDir()
 	dest := filepath.Join(tmp, "file.bin")
 
-	sum, err := DownloadFile(server.URL, dest, 0)
+	sum, err := DownloadFile(context.Background(), server.URL, dest, 0)
 	if err != nil {
 		t.Fatalf("DownloadFile failed: %v", err)
 	}
@@ -63,7 +65,7 @@ func TestDownloadFile_ProgressBarModes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tmp := t.TempDir()
 			dest := filepath.Join(tmp, "file.bin")
-			if _, err := DownloadFile(server.URL, dest, tc.width); err != nil {
+			if _, err := DownloadFile(context.Background(), server.URL, dest, tc.width); err != nil {
 				t.Fatalf("DownloadFile failed for width %d: %v", tc.width, err)
 			}
 		})
@@ -85,7 +87,7 @@ func TestDownloadFile_OverwritesExistingFile(t *testing.T) {
 		t.Fatalf("write old destination failed: %v", err)
 	}
 
-	if _, err := DownloadFile(server.URL, dest, 0); err != nil {
+	if _, err := DownloadFile(context.Background(), server.URL, dest, 0); err != nil {
 		t.Fatalf("DownloadFile failed: %v", err)
 	}
 
@@ -104,8 +106,28 @@ func TestDownloadFile_InvalidURL(t *testing.T) {
 	tmp := t.TempDir()
 	dest := filepath.Join(tmp, "file.bin")
 
-	_, err := DownloadFile("://invalid-url", dest, 0)
+	_, err := DownloadFile(context.Background(), "://invalid-url", dest, 0)
 	if err == nil {
 		t.Fatal("DownloadFile succeeded unexpectedly")
+	}
+}
+
+func TestDownloadFile_ContextCanceled(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		<-r.Context().Done()
+	}))
+	defer server.Close()
+
+	tmp := t.TempDir()
+	dest := filepath.Join(tmp, "file.bin")
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	_, err := DownloadFile(ctx, server.URL, dest, 0)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v, want %v", err, context.Canceled)
 	}
 }

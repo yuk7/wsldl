@@ -3,11 +3,13 @@ package repair
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/yuk7/wsldl/lib/errutil"
 )
 
 // IsInstalledFilesExist checks if the executable directory has either WSL1 or WSL2 install files.
 func IsInstalledFilesExist() bool {
-	efPath, _ := os.Executable()
+	efPath := errutil.MustExecutable()
 	dir := filepath.Dir(efPath)
 	return isInstalledFilesExistInDir(dir, os.Stat)
 }

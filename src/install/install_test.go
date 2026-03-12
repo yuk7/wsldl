@@ -1,6 +1,8 @@
 package install
 
 import (
+	"context"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -32,7 +34,7 @@ func TestInstall_RoutesToTarRegister(t *testing.T) {
 		},
 	}
 
-	err := Install(mockWsl, wsllib.MockWslReg{}, name, rootPath, "", false)
+	err := Install(context.Background(), mockWsl, wsllib.MockWslReg{}, name, rootPath, "", false)
 	if err != nil {
 		t.Fatalf("Install failed: %v", err)
 	}
@@ -58,7 +60,7 @@ func TestInstall_ChecksumMismatchStopsBeforeRegister(t *testing.T) {
 		},
 	}
 
-	err := Install(mockWsl, wsllib.MockWslReg{}, "TestDistro", rootPath, "deadbeef", false)
+	err := Install(context.Background(), mockWsl, wsllib.MockWslReg{}, "TestDistro", rootPath, "deadbeef", false)
 	if err == nil {
 		t.Fatal("Install succeeded unexpectedly; want checksum mismatch error")
 	}
@@ -135,7 +137,7 @@ func TestInstall_RoutesToExt4VhdxFlow(t *testing.T) {
 		},
 	}
 
-	if err := installWithDeps(mockWsl, mockReg, "TestDistro", sourcePath, "", false, deps); err != nil {
+	if err := installWithDeps(context.Background(), mockWsl, mockReg, "TestDistro", sourcePath, "", false, deps); err != nil {
 		t.Fatalf("Install failed: %v", err)
 	}
 
@@ -204,5 +206,28 @@ func TestDetectRootfsFileName_ReturnsErrorWhenNotFound(t *testing.T) {
 	_, err := detectRootfsFileName(fstest.MapFS{})
 	if err == nil {
 		t.Fatal("detectRootfsFileName succeeded unexpectedly")
+	}
+}
+
+func TestInstall_ContextCanceledBeforeStart(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	called := 0
+	mockWsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+
+	err := Install(ctx, mockWsl, wsllib.MockWslReg{}, "TestDistro", "rootfs.tar", "", false)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v, want %v", err, context.Canceled)
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
 	}
 }

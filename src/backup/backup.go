@@ -19,7 +19,7 @@ func backupReg(reg wsllib.WslReg, name string, destFileName string) error {
 		return err
 	}
 
-	regexe := fileutil.GetWindowsDirectory() + "\\System32\\reg.exe"
+	regexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "reg.exe")
 	regpath := "HKEY_CURRENT_USER\\" + wsllib.LxssBaseKey + "\\" + profile.UUID
 	_, err = exec.Command(regexe, "export", regpath, destFileName, "/y").Output()
 	return err
@@ -30,12 +30,12 @@ func backupTar(distributionName string, destFileName string) error {
 	rootPathLower := strings.ToLower(destFileName)
 	if strings.HasSuffix(rootPathLower, ".gz") {
 		// create temporary tar
-		tmpTarFn := os.TempDir()
-		if tmpTarFn == "" {
+		tmpDir := os.TempDir()
+		if tmpDir == "" {
 			return errors.New("failed to create temp directory")
 		}
-		tmpTarFn = tmpTarFn + "\\" + strconv.Itoa(rand.Intn(10000)) + ".tar"
-		wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
+		tmpTarFn := filepath.Join(tmpDir, strconv.Itoa(rand.Intn(10000))+".tar")
+		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
 		_, err := exec.Command(wslexe, "--export", distributionName, tmpTarFn).Output()
 		defer os.Remove(tmpTarFn)
 		if err != nil {
@@ -45,7 +45,7 @@ func backupTar(distributionName string, destFileName string) error {
 		return fileutil.CopyFile(tmpTarFn, destFileName, true)
 	} else {
 		// not compressed
-		wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
+		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
 		_, err := exec.Command(wslexe, "--export", distributionName, destFileName).Output()
 		return err
 	}
@@ -57,13 +57,14 @@ func backupExt4Vhdx(reg wsllib.WslReg, name string, destFileName string) error {
 
 func backupExt4VhdxWithCopy(reg wsllib.WslReg, name string, destFileName string, copyFile func(srcPath, destPath string, compress bool) error) error {
 	prof, err := reg.GetProfileFromName(name)
-	if prof.BasePath != "" {
-
-	} else {
+	if prof.BasePath == "" {
 		if err != nil {
 			return err
 		}
 		return errors.New("get profile failed")
+	}
+	if err != nil {
+		return err
 	}
 
 	vhdxPath := filepath.Join(prof.BasePath, "ext4.vhdx")

@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
 func repairRegistry(reg wsllib.WslReg, name string) error {
-	efPath, _ := os.Executable()
+	efPath := errutil.MustExecutable()
 	dir := filepath.Dir(efPath)
 
 	// for rename instance
@@ -37,7 +38,7 @@ func repairRegistry(reg wsllib.WslReg, name string) error {
 		prof := reg.GenerateProfile()
 		prof.DistributionName = name
 		prof.BasePath = dir
-		prof.Flags ^= wsllib.FlagEnableWsl2
+		prof.Flags &^= wsllib.FlagEnableWsl2
 		return reg.WriteProfile(prof)
 	}
 

@@ -1,6 +1,7 @@
 package install
 
 import (
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -14,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/download"
+	"github.com/yuk7/wsldl/lib/errutil"
 	"github.com/yuk7/wsldl/lib/fileutil"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
@@ -55,12 +57,24 @@ func defaultInstallDeps() installDeps {
 	}
 }
 
-// Install installs distribution with default rootfs file names
-func Install(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool) error {
-	return installWithDeps(wsl, reg, name, rootPath, sha256Sum, showProgress, defaultInstallDeps())
+func normalizeContext(ctx context.Context) context.Context {
+	if ctx == nil {
+		return context.Background()
+	}
+	return ctx
 }
 
-func installWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool, deps installDeps) error {
+// Install installs distribution with default rootfs file names
+func Install(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool) error {
+	return installWithDeps(ctx, wsl, reg, name, rootPath, sha256Sum, showProgress, defaultInstallDeps())
+}
+
+func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath string, sha256Sum string, showProgress bool, deps installDeps) error {
+	ctx = normalizeContext(ctx)
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+
 	rootPathLower := strings.ToLower(rootPath)
 	sha256Actual := ""
 	if showProgress {
@@ -80,7 +94,7 @@ func installWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 		tmpRootFn = filepath.Join(tmpRootFn, strconv.Itoa(rand.Intn(10000))+filepath.Base(rootPath))
 		defer deps.removeFile(tmpRootFn)
 		var err error
-		sha256Actual, err = download.DownloadFile(rootPath, tmpRootFn, progressBarWidth)
+		sha256Actual, err = download.DownloadFile(ctx, rootPath, tmpRootFn, progressBarWidth)
 		if err != nil {
 			return err
 		}
@@ -113,6 +127,10 @@ func installWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, rootPath
 
 	if showProgress {
 		fmt.Println("Installing...")
+	}
+
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 
 	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
@@ -171,11 +189,7 @@ func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, 
 }
 
 func detectRootfsFiles() (string, error) {
-	efPath, err := os.Executable()
-	if err != nil {
-		return "", err
-	}
-
+	efPath := errutil.MustExecutable()
 	efDir := filepath.Dir(efPath)
 	rootFile, err := detectRootfsFileName(os.DirFS(efDir))
 	if err != nil {

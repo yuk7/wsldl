@@ -2,9 +2,11 @@ package install
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 
 	"github.com/yuk7/wsldl/lib/cmdline"
@@ -159,13 +161,13 @@ func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts 
 		}
 	}
 
-	err := Install(wsl, reg, name, opts.rootPath, opts.rootFileSHA256, opts.showProgress)
+	err := Install(context.Background(), wsl, reg, name, opts.rootPath, opts.rootFileSHA256, opts.showProgress)
 	if err != nil {
 		return errutil.NewDisplayError(err, opts.showProgress, true, opts.pauseAfterRun)
 	}
 
 	if opts.presetVersion == 1 || opts.presetVersion == 2 {
-		wslexe := fileutil.GetWindowsDirectory() + "\\System32\\wsl.exe"
+		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
 		_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(opts.presetVersion)).Output()
 	}
 

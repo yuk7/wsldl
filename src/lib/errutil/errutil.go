@@ -70,6 +70,15 @@ func FormatError(err error) string {
 	return "ERR: " + err.Error()
 }
 
+// MustExecutable returns the current executable path or panics when unavailable.
+func MustExecutable() string {
+	p, err := os.Executable()
+	if err != nil {
+		panic("failed to get executable path: " + err.Error())
+	}
+	return p
+}
+
 // Exit exits program
 func Exit(pause bool, exitCode int) {
 	if pause {
