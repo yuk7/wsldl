@@ -2,6 +2,8 @@ package clean
 
 import (
 	"errors"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/yuk7/wsldl/lib/errutil"
@@ -103,6 +105,110 @@ func TestClean_PropagatesError(t *testing.T) {
 	err := Clean(wsl, "Arch", false)
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("Clean error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestExecuteWithOptions_ConfirmationRejected_ReturnsDisplayError(t *testing.T) {
+	called := 0
+	wsl := wsllib.MockWslLib{
+		UnregisterDistributionFunc: func(name string) error {
+			called++
+			return nil
+		},
+	}
+
+	origStdin := os.Stdin
+	inR, inW, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("create stdin pipe failed: %v", err)
+	}
+	os.Stdin = inR
+	t.Cleanup(func() {
+		os.Stdin = origStdin
+		_ = inR.Close()
+		_ = inW.Close()
+	})
+
+	if _, err := io.WriteString(inW, "n\n"); err != nil {
+		t.Fatalf("write stdin failed: %v", err)
+	}
+	if err := inW.Close(); err != nil {
+		t.Fatalf("close stdin writer failed: %v", err)
+	}
+
+	err = executeWithOptions(wsl, "Arch", cleanOptions{
+		showProgress:        false,
+		requireConfirmation: true,
+	})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de, os.ErrInvalid) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), os.ErrInvalid)
+	}
+	if called != 0 {
+		t.Fatalf("UnregisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestExecuteWithOptions_ConfirmationAccepted_CallsClean(t *testing.T) {
+	called := 0
+	wsl := wsllib.MockWslLib{
+		UnregisterDistributionFunc: func(name string) error {
+			called++
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			return nil
+		},
+	}
+
+	origStdin := os.Stdin
+	inR, inW, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("create stdin pipe failed: %v", err)
+	}
+	os.Stdin = inR
+	t.Cleanup(func() {
+		os.Stdin = origStdin
+		_ = inR.Close()
+		_ = inW.Close()
+	})
+
+	if _, err := io.WriteString(inW, "y\n"); err != nil {
+		t.Fatalf("write stdin failed: %v", err)
+	}
+	if err := inW.Close(); err != nil {
+		t.Fatalf("close stdin writer failed: %v", err)
+	}
+
+	err = executeWithOptions(wsl, "Arch", cleanOptions{
+		showProgress:        false,
+		requireConfirmation: true,
+	})
+	if err != nil {
+		t.Fatalf("executeWithOptions returned error: %v", err)
+	}
+	if called != 1 {
+		t.Fatalf("UnregisterDistribution call count = %d, want 1", called)
+	}
+}
+
+func TestExecuteWithOptions_CleanError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("unregister failed")
+	wsl := wsllib.MockWslLib{
+		UnregisterDistributionFunc: func(name string) error {
+			return wantErr
+		},
+	}
+
+	err := executeWithOptions(wsl, "Arch", cleanOptions{
+		showProgress:        false,
+		requireConfirmation: false,
+	})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de, wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
 	}
 }
 

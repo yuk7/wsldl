@@ -39,7 +39,38 @@ type installOptions struct {
 	presetVersion  int
 }
 
+type installCommandDeps struct {
+	isInstalledFilesExist func() bool
+	readInput             func() string
+	repairRegistry        func(wsllib.WslReg, string) error
+	install               func(context.Context, wsllib.WslLib, wsllib.WslReg, string, string, string, bool) error
+	setVersion            func(string, int) error
+	waitForEnter          func()
+}
+
 var detectRootfsFilesFunc = detectRootfsFiles
+
+func defaultInstallCommandDeps() installCommandDeps {
+	return installCommandDeps{
+		isInstalledFilesExist: repair.IsInstalledFilesExist,
+		readInput: func() string {
+			var in string
+			fmt.Scan(&in)
+			return in
+		},
+		repairRegistry: repairRegistry,
+		install:        Install,
+		setVersion: func(name string, version int) error {
+			wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
+			_, err := exec.Command(wslexe, "--set-version", name, strconv.Itoa(version)).Output()
+			return err
+		},
+		waitForEnter: func() {
+			fmt.Fprintf(os.Stdout, "Press enter to continue...")
+			_, _ = bufio.NewReader(os.Stdin).ReadString('\n')
+		},
+	}
+}
 
 func GetCommandWithNoArgs() cmdline.Command {
 	deps := wsllib.NewDependencies()
@@ -142,16 +173,19 @@ func resolveOptions(parsed installArgs) installOptions {
 }
 
 func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts installOptions) error {
+	return executeWithOptionsAndDeps(wsl, reg, name, opts, defaultInstallCommandDeps())
+}
+
+func executeWithOptionsAndDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts installOptions, deps installCommandDeps) error {
 	if opts.pauseAfterRun {
-		if repair.IsInstalledFilesExist() {
-			var in string
+		if deps.isInstalledFilesExist() {
 			fmt.Printf("An old installation files has been found.\n")
 			fmt.Printf("Do you want to rewrite and repair the installation information?\n")
 			fmt.Printf("Type y/n:")
-			fmt.Scan(&in)
+			in := deps.readInput()
 
 			if in == "y" {
-				err := repairRegistry(reg, name)
+				err := deps.repairRegistry(reg, name)
 				if err != nil {
 					return errutil.NewDisplayError(err, opts.showProgress, true, opts.showProgress)
 				}
@@ -161,14 +195,13 @@ func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts 
 		}
 	}
 
-	err := Install(context.Background(), wsl, reg, name, opts.rootPath, opts.rootFileSHA256, opts.showProgress)
+	err := deps.install(context.Background(), wsl, reg, name, opts.rootPath, opts.rootFileSHA256, opts.showProgress)
 	if err != nil {
 		return errutil.NewDisplayError(err, opts.showProgress, true, opts.pauseAfterRun)
 	}
 
 	if opts.presetVersion == 1 || opts.presetVersion == 2 {
-		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
-		_, err = exec.Command(wslexe, "--set-version", name, strconv.Itoa(opts.presetVersion)).Output()
+		err = deps.setVersion(name, opts.presetVersion)
 	}
 
 	if err == nil {
@@ -180,8 +213,7 @@ func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts 
 	}
 
 	if opts.pauseAfterRun {
-		fmt.Fprintf(os.Stdout, "Press enter to continue...")
-		bufio.NewReader(os.Stdin).ReadString('\n')
+		deps.waitForEnter()
 	}
 
 	return nil

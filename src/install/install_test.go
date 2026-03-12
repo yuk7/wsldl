@@ -209,6 +209,57 @@ func TestDetectRootfsFileName_ReturnsErrorWhenNotFound(t *testing.T) {
 	}
 }
 
+func TestDetectRootfsFiles_ReturnsRootfsTarGzAsRelativeName(t *testing.T) {
+	tmp := t.TempDir()
+	exePath := filepath.Join(tmp, "wsldl-test.exe")
+	if err := os.WriteFile(exePath, []byte("exe"), 0o600); err != nil {
+		t.Fatalf("write executable file failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmp, "rootfs.tar.gz"), []byte("rootfs"), 0o600); err != nil {
+		t.Fatalf("write rootfs file failed: %v", err)
+	}
+
+	orig := executablePathFunc
+	executablePathFunc = func() string { return exePath }
+	t.Cleanup(func() {
+		executablePathFunc = orig
+	})
+
+	got, err := detectRootfsFiles()
+	if err != nil {
+		t.Fatalf("detectRootfsFiles failed: %v", err)
+	}
+	if got != "rootfs.tar.gz" {
+		t.Fatalf("detected path = %q, want %q", got, "rootfs.tar.gz")
+	}
+}
+
+func TestDetectRootfsFiles_ReturnsAbsolutePathForInstallTar(t *testing.T) {
+	tmp := t.TempDir()
+	exePath := filepath.Join(tmp, "wsldl-test.exe")
+	if err := os.WriteFile(exePath, []byte("exe"), 0o600); err != nil {
+		t.Fatalf("write executable file failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmp, "install.tar"), []byte("rootfs"), 0o600); err != nil {
+		t.Fatalf("write install tar failed: %v", err)
+	}
+
+	orig := executablePathFunc
+	executablePathFunc = func() string { return exePath }
+	t.Cleanup(func() {
+		executablePathFunc = orig
+	})
+
+	got, err := detectRootfsFiles()
+	if err != nil {
+		t.Fatalf("detectRootfsFiles failed: %v", err)
+	}
+	want := filepath.Join(tmp, "install.tar")
+	if got != want {
+		t.Fatalf("detected path = %q, want %q", got, want)
+	}
+}
+
 func TestInstall_ContextCanceledBeforeStart(t *testing.T) {
 	t.Parallel()
 
@@ -229,5 +280,149 @@ func TestInstall_ContextCanceledBeforeStart(t *testing.T) {
 	}
 	if called != 0 {
 		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestInstallWithDeps_NilContext_Works(t *testing.T) {
+	t.Parallel()
+
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			if rootPath != "rootfs.tar" {
+				t.Fatalf("rootPath = %q, want %q", rootPath, "rootfs.tar")
+			}
+			return nil
+		},
+	}
+
+	err := installWithDeps(nil, wsl, wsllib.MockWslReg{}, "Arch", "rootfs.tar", "", false, defaultInstallDeps())
+	if err != nil {
+		t.Fatalf("installWithDeps returned error: %v", err)
+	}
+	if called != 1 {
+		t.Fatalf("RegisterDistribution call count = %d, want 1", called)
+	}
+}
+
+func TestInstallWithDeps_HttpTempDirEmpty_ReturnsError(t *testing.T) {
+	t.Parallel()
+
+	deps := installDeps{
+		tempDir: func() string {
+			return ""
+		},
+		createFile: func(path string) (io.Closer, error) {
+			return nopCloser{}, nil
+		},
+		removeFile: func(path string) error {
+			return nil
+		},
+		copyFile: func(srcPath, destPath string, compress bool) error {
+			return nil
+		},
+	}
+
+	err := installWithDeps(context.Background(), wsllib.MockWslLib{}, wsllib.MockWslReg{}, "Arch", "https://example.com/rootfs.tar.gz", "", false, deps)
+	if err == nil {
+		t.Fatal("installWithDeps succeeded unexpectedly")
+	}
+	if err.Error() != "failed to create temp directory" {
+		t.Fatalf("error = %q, want %q", err.Error(), "failed to create temp directory")
+	}
+}
+
+func TestInstallExt4Vhdx_WrapperSuccess(t *testing.T) {
+	t.Parallel()
+
+	tmp := t.TempDir()
+	sourcePath := filepath.Join(tmp, "install.ext4.vhdx")
+	if err := os.WriteFile(sourcePath, []byte("vhdx"), 0o600); err != nil {
+		t.Fatalf("write source vhdx failed: %v", err)
+	}
+	basePath := filepath.Join(tmp, "distro")
+	if err := os.MkdirAll(basePath, 0o700); err != nil {
+		t.Fatalf("mkdir basePath failed: %v", err)
+	}
+
+	registerCalled := 0
+	unregisterCalled := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			registerCalled++
+			return nil
+		},
+		UnregisterDistributionFunc: func(name string) error {
+			unregisterCalled++
+			return nil
+		},
+	}
+
+	written := wsllib.Profile{}
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{BasePath: basePath}, nil
+		},
+		WriteProfileFunc: func(profile wsllib.Profile) error {
+			written = profile
+			return nil
+		},
+	}
+
+	err := InstallExt4Vhdx(wsl, reg, "Arch", sourcePath)
+	if err != nil {
+		t.Fatalf("InstallExt4Vhdx returned error: %v", err)
+	}
+	if registerCalled != 1 {
+		t.Fatalf("RegisterDistribution call count = %d, want 1", registerCalled)
+	}
+	if unregisterCalled != 1 {
+		t.Fatalf("UnregisterDistribution call count = %d, want 1", unregisterCalled)
+	}
+	if written.Flags&wsllib.FlagEnableWsl2 != wsllib.FlagEnableWsl2 {
+		t.Fatalf("written.Flags = %d, want WSL2 flag set", written.Flags)
+	}
+	if _, err := os.Stat(filepath.Join(basePath, "ext4.vhdx")); err != nil {
+		t.Fatalf("ext4.vhdx was not copied: %v", err)
+	}
+}
+
+func TestInstallExt4VhdxWithDeps_ProfileLookupError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("profile lookup failed")
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc:   func(name, rootPath string) error { return nil },
+		UnregisterDistributionFunc: func(name string) error { return nil },
+	}
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{}, wantErr
+		},
+	}
+
+	deps := installDeps{
+		tempDir: func() string {
+			return t.TempDir()
+		},
+		createFile: func(path string) (io.Closer, error) {
+			return nopCloser{}, nil
+		},
+		removeFile: func(path string) error {
+			return nil
+		},
+		copyFile: func(srcPath, destPath string, compress bool) error {
+			t.Fatal("copyFile should not be called when profile lookup fails")
+			return nil
+		},
+	}
+
+	err := installExt4VhdxWithDeps(wsl, reg, "Arch", "install.ext4.vhdx", deps)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
 	}
 }

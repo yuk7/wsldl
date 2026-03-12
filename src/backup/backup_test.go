@@ -24,6 +24,43 @@ func TestBackupReg_GetProfileError(t *testing.T) {
 	}
 }
 
+func TestBackupReg_RegExportCommandError(t *testing.T) {
+	t.Parallel()
+
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{
+				UUID: "00000000-0000-0000-0000-000000000000",
+			}, nil
+		},
+	}
+
+	err := backupReg(reg, "Arch", filepath.Join(t.TempDir(), "backup.reg"))
+	if err == nil {
+		t.Fatal("backupReg succeeded unexpectedly")
+	}
+}
+
+func TestBackupTar_GzipExportCommandError(t *testing.T) {
+	t.Parallel()
+
+	dest := filepath.Join(t.TempDir(), "backup.tar.gz")
+	err := backupTar("wsldl-test-missing-distro-9f85b7f2", dest)
+	if err == nil {
+		t.Fatal("backupTar succeeded unexpectedly for gzip destination")
+	}
+}
+
+func TestBackupTar_PlainExportCommandError(t *testing.T) {
+	t.Parallel()
+
+	dest := filepath.Join(t.TempDir(), "backup.tar")
+	err := backupTar("wsldl-test-missing-distro-9f85b7f2", dest)
+	if err == nil {
+		t.Fatal("backupTar succeeded unexpectedly for plain destination")
+	}
+}
+
 func TestBackupExt4Vhdx_GetProfileError(t *testing.T) {
 	t.Parallel()
 

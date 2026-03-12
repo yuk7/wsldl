@@ -26,6 +26,44 @@ type runPOptions struct {
 
 type runNoArgsOptions struct{}
 
+type runNoArgsDeps struct {
+	mustExecutable        func() string
+	stat                  func(string) (os.FileInfo, error)
+	isInstalledFilesExist func() bool
+	readInput             func() string
+	repairRegistry        func(wsllib.WslReg, wsllib.Profile) error
+	isParentConsole       func() (bool, error)
+	freeConsole           func() error
+	allocConsole          func()
+	setConsoleTitle       func(string)
+	execWindowsTerminal   func(wsllib.WslReg, string) error
+	getenv                func(string) string
+	createProcessAndWait  func(string) (int, error)
+	execute               func(wsllib.WslLib, string, []string) error
+}
+
+func defaultRunNoArgsDeps() runNoArgsDeps {
+	return runNoArgsDeps{
+		mustExecutable:        errutil.MustExecutable,
+		stat:                  os.Stat,
+		isInstalledFilesExist: repair.IsInstalledFilesExist,
+		readInput: func() string {
+			var in string
+			fmt.Scan(&in)
+			return in
+		},
+		repairRegistry:       repairRegistry,
+		isParentConsole:      console.IsParentConsole,
+		freeConsole:          console.FreeConsole,
+		allocConsole:         console.AllocConsole,
+		setConsoleTitle:      console.SetConsoleTitle,
+		execWindowsTerminal:  ExecWindowsTerminal,
+		getenv:               os.Getenv,
+		createProcessAndWait: utils.CreateProcessAndWait,
+		execute:              execute,
+	}
+}
+
 // GetCommandWithNoArgs returns the run command structure with no arguments
 func GetCommandWithNoArgs() cmdline.Command {
 	deps := wsllib.NewDependencies()
@@ -145,12 +183,21 @@ func executeP(wsl wsllib.WslLib, name string, args []string) error {
 }
 
 func executePWithOptions(wsl wsllib.WslLib, name string, opts runPOptions) error {
+	return executePWithOptionsWithExecRead(wsl, name, opts, wslexec.ExecRead)
+}
+
+func executePWithOptionsWithExecRead(
+	wsl wsllib.WslLib,
+	name string,
+	opts runPOptions,
+	execRead func(wsllib.WslLib, string, string) (string, uint32, error),
+) error {
 	var convArgs []string
 	for _, s := range opts.commandArgs {
 		if strings.Contains(s, "\\") {
 			s = strings.Replace(s, "\\", "/", -1)
 			s = fileutil.DQEscapeString(s)
-			out, exitCode, err := wslexec.ExecRead(wsl, name, "wslpath -u "+s)
+			out, exitCode, err := execRead(wsl, name, "wslpath -u "+s)
 			if err != nil || exitCode != 0 {
 				errutil.ErrorRedPrintln("ERR: Failed to Path Translation")
 				fmt.Fprintf(os.Stderr, "ExitCode: 0x%x\n", int(exitCode))
@@ -177,23 +224,26 @@ func executeNoArgs(wsl wsllib.WslLib, reg wsllib.WslReg, name string, args []str
 	return executeNoArgsWithOptions(wsl, reg, name, opts)
 }
 
-func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, _ runNoArgsOptions) error {
-	efPath := errutil.MustExecutable()
+func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts runNoArgsOptions) error {
+	return executeNoArgsWithOptionsAndDeps(wsl, reg, name, opts, defaultRunNoArgsDeps())
+}
+
+func executeNoArgsWithOptionsAndDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, _ runNoArgsOptions, deps runNoArgsDeps) error {
+	efPath := deps.mustExecutable()
 	profile, _ := reg.GetProfileFromName(name)
 
 	// repair when the installation is moved
 	if profile.BasePath != "" {
-		_, err := os.Stat(profile.BasePath)
+		_, err := deps.stat(profile.BasePath)
 		if os.IsNotExist(err) {
-			if repair.IsInstalledFilesExist() {
-				var in string
+			if deps.isInstalledFilesExist() {
 				fmt.Printf("This instance (%s) BasePath is not exist.\n", name)
 				fmt.Printf("Do you want to repair the installation information?\n")
 				fmt.Printf("Type y/n:")
-				fmt.Scan(&in)
+				in := deps.readInput()
 
 				if in == "y" {
-					err := repairRegistry(reg, profile)
+					err := deps.repairRegistry(reg, profile)
 					if err != nil {
 						return errutil.NewDisplayError(err, true, true, true)
 					}
@@ -204,25 +254,25 @@ func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string,
 		}
 	}
 
-	b, err := console.IsParentConsole()
+	b, err := deps.isParentConsole()
 	if err != nil {
 		b = true
 	}
 	if !b {
 		switch profile.WsldlTerm {
 		case wsllib.FlagWsldlTermWT:
-			console.FreeConsole()
-			return ExecWindowsTerminal(reg, name)
+			_ = deps.freeConsole()
+			return deps.execWindowsTerminal(reg, name)
 
 		case wsllib.FlagWsldlTermFlute:
-			console.FreeConsole()
-			exe := os.Getenv("LOCALAPPDATA")
+			_ = deps.freeConsole()
+			exe := deps.getenv("LOCALAPPDATA")
 			exe = fileutil.DQEscapeString(exe + "\\Microsoft\\WindowsApps\\53621FSApps.FluentTerminal_87x1pks76srcp\\flute.exe")
 
 			cmd := exe + " run " + fileutil.DQEscapeString(efPath+" run")
-			res, err := utils.CreateProcessAndWait(cmd)
+			res, err := deps.createProcessAndWait(cmd)
 			if err != nil {
-				console.AllocConsole()
+				deps.allocConsole()
 				fmt.Fprintln(os.Stderr, "ERR: Failed to launch the terminal process")
 				fmt.Fprintf(os.Stderr, "%s\n", exe)
 				return errutil.NewDisplayError(err, true, false, true)
@@ -239,9 +289,9 @@ func executeNoArgsWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string,
 			name = profile.DistributionName
 		}
 
-		console.SetConsoleTitle(name)
-		return execute(wsl, name, nil)
+		deps.setConsoleTitle(name)
+		return deps.execute(wsl, name, nil)
 	} else {
-		return execute(wsl, name, nil)
+		return deps.execute(wsl, name, nil)
 	}
 }

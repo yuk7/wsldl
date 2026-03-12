@@ -39,6 +39,8 @@ var (
 	}
 )
 
+var executablePathFunc = errutil.MustExecutable
+
 type installDeps struct {
 	tempDir    func() string
 	createFile func(path string) (io.Closer, error)
@@ -189,7 +191,7 @@ func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, 
 }
 
 func detectRootfsFiles() (string, error) {
-	efPath := errutil.MustExecutable()
+	efPath := executablePathFunc()
 	efDir := filepath.Dir(efPath)
 	rootFile, err := detectRootfsFileName(os.DirFS(efDir))
 	if err != nil {

@@ -206,6 +206,135 @@ func TestExecute_VhdxCustomPath_Success(t *testing.T) {
 	}
 }
 
+func TestExecuteWithBackupsOptions_AutoWSL2_UsesRegAndVhdxGz(t *testing.T) {
+	t.Parallel()
+
+	gotReg := ""
+	gotVhdx := ""
+	tarCalled := 0
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			return 0, 0, uint32(wsllib.FlagEnableWsl2), nil
+		},
+	}
+
+	err := executeWithBackupsOptions(
+		wsl,
+		wsllib.MockWslReg{},
+		"Arch",
+		backupOptions{auto: true},
+		func(_ wsllib.WslReg, _ string, path string) error {
+			gotReg = path
+			return nil
+		},
+		func(string, string) error {
+			tarCalled++
+			return nil
+		},
+		func(_ wsllib.WslReg, _ string, path string) error {
+			gotVhdx = path
+			return nil
+		},
+	)
+	if err != nil {
+		t.Fatalf("executeWithBackupsOptions returned error: %v", err)
+	}
+	if gotReg != "backup.reg" {
+		t.Fatalf("reg path = %q, want %q", gotReg, "backup.reg")
+	}
+	if gotVhdx != "backup.ext4.vhdx.gz" {
+		t.Fatalf("vhdx path = %q, want %q", gotVhdx, "backup.ext4.vhdx.gz")
+	}
+	if tarCalled != 0 {
+		t.Fatalf("backupTar call count = %d, want 0", tarCalled)
+	}
+}
+
+func TestExecuteWithBackupsOptions_AutoWSL1_UsesRegAndTarGz(t *testing.T) {
+	t.Parallel()
+
+	regCalled := 0
+	vhdxCalled := 0
+	gotTar := ""
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 0, 0, 0, nil
+		},
+	}
+
+	err := executeWithBackupsOptions(
+		wsl,
+		wsllib.MockWslReg{},
+		"Arch",
+		backupOptions{auto: true},
+		func(wsllib.WslReg, string, string) error {
+			regCalled++
+			return nil
+		},
+		func(_ string, path string) error {
+			gotTar = path
+			return nil
+		},
+		func(wsllib.WslReg, string, string) error {
+			vhdxCalled++
+			return nil
+		},
+	)
+	if err != nil {
+		t.Fatalf("executeWithBackupsOptions returned error: %v", err)
+	}
+	if regCalled != 1 {
+		t.Fatalf("backupReg call count = %d, want 1", regCalled)
+	}
+	if gotTar != "backup.tar.gz" {
+		t.Fatalf("tar path = %q, want %q", gotTar, "backup.tar.gz")
+	}
+	if vhdxCalled != 0 {
+		t.Fatalf("backupExt4Vhdx call count = %d, want 0", vhdxCalled)
+	}
+}
+
+func TestExecuteWithBackupsOptions_TarError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("tar failed")
+	err := executeWithBackupsOptions(
+		wsllib.MockWslLib{},
+		wsllib.MockWslReg{},
+		"Arch",
+		backupOptions{tarPath: "backup.tar.gz"},
+		func(wsllib.WslReg, string, string) error { return nil },
+		func(string, string) error { return wantErr },
+		func(wsllib.WslReg, string, string) error { return nil },
+	)
+	de := assertDisplayError(t, err)
+	if !errors.Is(de, wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
+	}
+}
+
+func TestExecuteWithBackupsOptions_VhdxError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("vhdx failed")
+	err := executeWithBackupsOptions(
+		wsllib.MockWslLib{},
+		wsllib.MockWslReg{},
+		"Arch",
+		backupOptions{vhdxPath: "backup.ext4.vhdx.gz"},
+		func(wsllib.WslReg, string, string) error { return nil },
+		func(string, string) error { return nil },
+		func(wsllib.WslReg, string, string) error { return wantErr },
+	)
+	de := assertDisplayError(t, err)
+	if !errors.Is(de, wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
+	}
+}
+
 func assertDisplayError(t *testing.T, err error) *errutil.DisplayError {
 	t.Helper()
 	var de *errutil.DisplayError
