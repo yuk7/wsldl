@@ -40,6 +40,15 @@ func TestParseArgs_WithY_DisablesProgress(t *testing.T) {
 	}
 }
 
+func TestParseArgs_TooManyArgs_ReturnsError(t *testing.T) {
+	t.Parallel()
+
+	_, err := parseArgs([]string{"-y", "extra"})
+	if !errors.Is(err, os.ErrInvalid) {
+		t.Fatalf("error = %v, want %v", err, os.ErrInvalid)
+	}
+}
+
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 
@@ -61,6 +70,33 @@ func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	if got := cmd.HelpText(); got == "" {
 		t.Fatal("HelpText should not be empty")
 	}
+}
+
+func TestGetCommand_WiresDefaultDeps(t *testing.T) {
+	t.Parallel()
+
+	cmd := GetCommand()
+	if len(cmd.Names) != 1 || cmd.Names[0] != "clean" {
+		t.Fatalf("Names = %v, want [clean]", cmd.Names)
+	}
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
+	}
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
+	}
+	if cmd.Run == nil {
+		t.Fatal("Run is nil")
+	}
+
+	err := cmd.Run("Arch", []string{"--bad"})
+	assertDisplayError(t, err)
 }
 
 func TestExecute_WithY_CallsUnregister(t *testing.T) {
@@ -105,6 +141,28 @@ func TestClean_PropagatesError(t *testing.T) {
 	err := Clean(wsl, "Arch", false)
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("Clean error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestClean_ShowProgressTrue_Success(t *testing.T) {
+	t.Parallel()
+
+	called := 0
+	wsl := wsllib.MockWslLib{
+		UnregisterDistributionFunc: func(name string) error {
+			called++
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			return nil
+		},
+	}
+
+	if err := Clean(wsl, "Arch", true); err != nil {
+		t.Fatalf("Clean returned error: %v", err)
+	}
+	if called != 1 {
+		t.Fatalf("UnregisterDistribution call count = %d, want 1", called)
 	}
 }
 

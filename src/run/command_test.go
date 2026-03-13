@@ -16,10 +16,7 @@ import (
 func TestParseRunArgs_Nil_UsesCurrentDirRule(t *testing.T) {
 	t.Parallel()
 
-	opts, err := parseRunArgs(nil)
-	if err != nil {
-		t.Fatalf("parseRunArgs returned error: %v", err)
-	}
+	opts := parseRunArgs(nil)
 
 	wantInherit := !fileutil.IsCurrentDirSpecial()
 	if opts.inheritPath != wantInherit {
@@ -381,6 +378,45 @@ func TestExecutePWithOptionsWithExecRead_PathTranslationNonZeroExit_ReturnsExitC
 	}
 }
 
+func TestExecutePWithOptionsWithExecRead_PathTranslationSuccess_UsesTranslatedArgs(t *testing.T) {
+	t.Parallel()
+
+	execReadCalled := 0
+	wsl := wsllib.MockWslLib{
+		LaunchInteractiveFunc: func(name, command string, inheritPath bool) (uint32, error) {
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			if !strings.Contains(command, " /mnt/c/Users/user/file.txt") {
+				t.Fatalf("command = %q, want translated path", command)
+			}
+			return 0, nil
+		},
+	}
+
+	err := executePWithOptionsWithExecRead(
+		wsl,
+		"Arch",
+		runPOptions{commandArgs: []string{`C:\Users\user\file.txt`}},
+		func(_ wsllib.WslLib, name, command string) (string, uint32, error) {
+			execReadCalled++
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			if command != "wslpath -u C:/Users/user/file.txt" {
+				t.Fatalf("command = %q, want %q", command, "wslpath -u C:/Users/user/file.txt")
+			}
+			return "/mnt/c/Users/user/file.txt", 0, nil
+		},
+	)
+	if err != nil {
+		t.Fatalf("executePWithOptionsWithExecRead returned error: %v", err)
+	}
+	if execReadCalled != 1 {
+		t.Fatalf("execRead call count = %d, want 1", execReadCalled)
+	}
+}
+
 func TestExecuteNoArgs_WithExtraArg_ReturnsDisplayError(t *testing.T) {
 	t.Parallel()
 
@@ -667,6 +703,32 @@ func TestExecuteNoArgsWithOptionsAndDeps_NonConsoleFluteNonZeroExit_ReturnsExitC
 	}
 	if ee.Pause {
 		t.Fatal("pause = true, want false")
+	}
+}
+
+func TestExecuteNoArgsWithOptionsAndDeps_NonConsoleFluteSuccess_ReturnsNil(t *testing.T) {
+	t.Parallel()
+
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{WsldlTerm: wsllib.FlagWsldlTermFlute}, nil
+		},
+	}
+	freeCalled := 0
+	deps := newRunNoArgsDepsForTest()
+	deps.isParentConsole = func() (bool, error) { return false, nil }
+	deps.freeConsole = func() error {
+		freeCalled++
+		return nil
+	}
+	deps.createProcessAndWait = func(string) (int, error) { return 0, nil }
+
+	err := executeNoArgsWithOptionsAndDeps(wsllib.MockWslLib{}, reg, "Arch", runNoArgsOptions{}, deps)
+	if err != nil {
+		t.Fatalf("executeNoArgsWithOptionsAndDeps returned error: %v", err)
+	}
+	if freeCalled != 1 {
+		t.Fatalf("freeConsole call count = %d, want 1", freeCalled)
 	}
 }
 

@@ -24,11 +24,15 @@ func DQEscapeString(str string) string {
 
 // GetWindowsDirectory gets windows direcotry path
 func GetWindowsDirectory() string {
-	dir := os.Getenv("SYSTEMROOT")
+	return getWindowsDirectoryFromEnv(os.Getenv)
+}
+
+func getWindowsDirectoryFromEnv(getenv func(string) string) string {
+	dir := getenv("SYSTEMROOT")
 	if dir != "" {
 		return dir
 	}
-	dir = os.Getenv("WINDIR")
+	dir = getenv("WINDIR")
 	if dir != "" {
 		return dir
 	}
@@ -37,18 +41,30 @@ func GetWindowsDirectory() string {
 
 // IsCurrentDirSpecial gets whether the current directory is special (Windows, USEPROFILE)
 func IsCurrentDirSpecial() bool {
-	cdir, err := filepath.Abs(".")
+	return isCurrentDirSpecial(filepath.Abs, os.Getenv)
+}
+
+func isCurrentDirSpecial(absPath func(string) (string, error), getenv func(string) string) bool {
+	cdir, err := absPath(".")
 	if err != nil {
 		return true
 	}
+	return isSpecialDir(cdir, getenv, absPath)
+}
+
+func isSpecialDir(cdir string, getenv func(string) string, absPath func(string) (string, error)) bool {
 	sdarr := strings.Split(SpecialDirs, ",")
 	for _, item := range sdarr {
-		splititem := strings.Split(item, ":")
+		splititem := strings.SplitN(item, ":", 2)
 		itemdir := ""
 		if splititem[0] != "" {
-			itemdir = os.Getenv(splititem[0])
+			itemdir = getenv(splititem[0])
 		}
-		itemdir, err = filepath.Abs(itemdir + "\\" + splititem[1])
+		suffix := ""
+		if len(splititem) > 1 {
+			suffix = splititem[1]
+		}
+		itemdir, err := absPath(itemdir + "\\" + suffix)
 		if err != nil {
 			return true
 		}

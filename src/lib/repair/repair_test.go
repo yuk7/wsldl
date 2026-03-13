@@ -3,6 +3,7 @@ package repair
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -55,4 +56,38 @@ func TestIsInstalledFilesExistInDir(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestIsInstalledFilesExist(t *testing.T) {
+	oldExecutablePathFunc := executablePathFunc
+	oldStatPathFunc := statPathFunc
+	t.Cleanup(func() {
+		executablePathFunc = oldExecutablePathFunc
+		statPathFunc = oldStatPathFunc
+	})
+
+	executablePathFunc = func() string {
+		return "X:\\dir\\wsldl.exe"
+	}
+
+	t.Run("vhdx exists", func(t *testing.T) {
+		statPathFunc = func(name string) (os.FileInfo, error) {
+			if name == filepath.Dir("X:\\dir\\wsldl.exe")+"\\ext4.vhdx" {
+				return nil, nil
+			}
+			return nil, errors.New("not found")
+		}
+		if !IsInstalledFilesExist() {
+			t.Fatal("IsInstalledFilesExist() = false, want true")
+		}
+	})
+
+	t.Run("not exists", func(t *testing.T) {
+		statPathFunc = func(name string) (os.FileInfo, error) {
+			return nil, errors.New("not found")
+		}
+		if IsInstalledFilesExist() {
+			t.Fatal("IsInstalledFilesExist() = true, want false")
+		}
+	})
 }

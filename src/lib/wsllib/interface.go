@@ -51,7 +51,19 @@ type Dependencies struct {
 }
 
 func NewDependencies() Dependencies {
-	if isUnitTestProcess() {
+	return newDependenciesForProcess(isUnitTestProcess())
+}
+
+func newDependenciesForProcess(unitTest bool) Dependencies {
+	return newDependencies(
+		unitTest,
+		nativeWslLibProvider,
+		nativeWslRegProvider,
+	)
+}
+
+func newDependencies(unitTest bool, newWsl func() WslLib, newReg func() WslReg) Dependencies {
+	if unitTest {
 		return Dependencies{
 			Wsl: MockWslLib{},
 			Reg: MockWslReg{},
@@ -59,9 +71,17 @@ func NewDependencies() Dependencies {
 	}
 
 	return Dependencies{
-		Wsl: NewNativeWslLib(),
-		Reg: NewNativeWslReg(),
+		Wsl: newWsl(),
+		Reg: newReg(),
 	}
+}
+
+func nativeWslLibProvider() WslLib {
+	return NewNativeWslLib()
+}
+
+func nativeWslRegProvider() WslReg {
+	return NewNativeWslReg()
 }
 
 func isUnitTestProcess() bool {

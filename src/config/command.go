@@ -141,6 +141,16 @@ func parseArgs(args []string) (configOptions, error) {
 }
 
 func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts configOptions) error {
+	return executeWithOptionsAndExecRead(wsl, reg, name, opts, wslexec.ExecRead)
+}
+
+func executeWithOptionsAndExecRead(
+	wsl wsllib.WslLib,
+	reg wsllib.WslReg,
+	name string,
+	opts configOptions,
+	execRead func(wsllib.WslLib, string, string) (string, uint32, error),
+) error {
 	uid, flags, err := wslapi.GetConfig(wsl, name)
 	if err != nil {
 		errutil.ErrorRedPrintln("ERR: Failed to GetDistributionConfiguration")
@@ -152,7 +162,7 @@ func executeWithOptions(wsl wsllib.WslLib, reg wsllib.WslReg, name string, opts 
 		uid = opts.uid
 
 	case configOptionDefaultUser:
-		str, _, errtmp := wslexec.ExecRead(wsl, name, "id -u "+fileutil.DQEscapeString(opts.user))
+		str, _, errtmp := execRead(wsl, name, "id -u "+fileutil.DQEscapeString(opts.user))
 		err = errtmp
 		if err == nil {
 			intUID, convErr := strconv.Atoi(str)

@@ -2,6 +2,7 @@ package wtutils
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -80,5 +81,74 @@ func TestReadWTConfigJSONFromPath(t *testing.T) {
 	}
 	if got != content {
 		t.Fatalf("readWTConfigJSONFromPath = %q, want %q", got, content)
+	}
+}
+
+func TestReadWTConfigJSONFromPath_NotFound(t *testing.T) {
+	t.Parallel()
+
+	if _, err := readWTConfigJSONFromPath(filepath.Join(t.TempDir(), "missing.json")); err == nil {
+		t.Fatal("readWTConfigJSONFromPath succeeded unexpectedly")
+	}
+}
+
+func TestReadWTConfigJSON(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("LOCALAPPDATA", tmp)
+
+	content := `{"profiles":{"list":[{"name":"Arch"}]}}`
+	path := wtConfigPath(tmp)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll failed: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("write settings.json failed: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Remove(path)
+	})
+
+	got, err := ReadWTConfigJSON()
+	if err != nil {
+		t.Fatalf("ReadWTConfigJSON failed: %v", err)
+	}
+	if got != content {
+		t.Fatalf("ReadWTConfigJSON = %q, want %q", got, content)
+	}
+}
+
+func TestReadParseWTConfig(t *testing.T) {
+	tmp := t.TempDir()
+	t.Setenv("LOCALAPPDATA", tmp)
+
+	content := `{"profiles":{"list":[{"name":"Arch","commandline":"wsl.exe -d Arch"}]}}`
+	path := wtConfigPath(tmp)
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatalf("MkdirAll failed: %v", err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatalf("write settings.json failed: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = os.Remove(path)
+	})
+
+	conf, err := ReadParseWTConfig()
+	if err != nil {
+		t.Fatalf("ReadParseWTConfig failed: %v", err)
+	}
+	if len(conf.Profiles.ProfileList) != 1 {
+		t.Fatalf("profile count = %d, want 1", len(conf.Profiles.ProfileList))
+	}
+	if conf.Profiles.ProfileList[0].Name != "Arch" {
+		t.Fatalf("profile name = %q, want %q", conf.Profiles.ProfileList[0].Name, "Arch")
+	}
+}
+
+func TestReadParseWTConfig_ReadError(t *testing.T) {
+	t.Setenv("LOCALAPPDATA", t.TempDir())
+
+	if _, err := ReadParseWTConfig(); err == nil {
+		t.Fatal("ReadParseWTConfig succeeded unexpectedly")
 	}
 }

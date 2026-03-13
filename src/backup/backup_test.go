@@ -3,6 +3,7 @@ package backup
 import (
 	"errors"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/yuk7/wsldl/lib/wsllib"
@@ -58,6 +59,96 @@ func TestBackupTar_PlainExportCommandError(t *testing.T) {
 	err := backupTar("wsldl-test-missing-distro-9f85b7f2", dest)
 	if err == nil {
 		t.Fatal("backupTar succeeded unexpectedly for plain destination")
+	}
+}
+
+func TestBackupTarWithDeps_GzipSuccessCopiesCompressedTar(t *testing.T) {
+	t.Parallel()
+
+	dest := filepath.Join(t.TempDir(), "backup.tar.gz")
+	var calls []string
+	var gotExportDistribution string
+	var gotExportDest string
+	var gotCopySrc string
+	var gotCopyDest string
+	var gotCopyCompress bool
+	var gotRemoved string
+
+	deps := backupTarDeps{
+		tempDir: func() string { return t.TempDir() },
+		export: func(distributionName, destFileName string) error {
+			calls = append(calls, "export")
+			gotExportDistribution = distributionName
+			gotExportDest = destFileName
+			return nil
+		},
+		copyFile: func(srcPath, destPath string, compress bool) error {
+			calls = append(calls, "copy")
+			gotCopySrc = srcPath
+			gotCopyDest = destPath
+			gotCopyCompress = compress
+			return nil
+		},
+		remove: func(path string) error {
+			calls = append(calls, "remove")
+			gotRemoved = path
+			return nil
+		},
+		randIntn: func(n int) int { return 42 },
+	}
+
+	if err := backupTarWithDeps("Arch", dest, deps); err != nil {
+		t.Fatalf("backupTarWithDeps returned error: %v", err)
+	}
+
+	wantCalls := []string{"export", "copy", "remove"}
+	if !reflect.DeepEqual(calls, wantCalls) {
+		t.Fatalf("calls = %v, want %v", calls, wantCalls)
+	}
+	if gotExportDistribution != "Arch" {
+		t.Fatalf("distribution = %q, want %q", gotExportDistribution, "Arch")
+	}
+	wantTmpTar := filepath.Join(filepath.Dir(gotExportDest), "42.tar")
+	if gotExportDest != wantTmpTar {
+		t.Fatalf("export dest = %q, want %q", gotExportDest, wantTmpTar)
+	}
+	if gotCopySrc != gotExportDest {
+		t.Fatalf("copy src = %q, want %q", gotCopySrc, gotExportDest)
+	}
+	if gotCopyDest != dest {
+		t.Fatalf("copy dest = %q, want %q", gotCopyDest, dest)
+	}
+	if !gotCopyCompress {
+		t.Fatal("copy compress = false, want true")
+	}
+	if gotRemoved != gotExportDest {
+		t.Fatalf("remove path = %q, want %q", gotRemoved, gotExportDest)
+	}
+}
+
+func TestBackupTarWithDeps_GzipTempDirEmptyReturnsError(t *testing.T) {
+	t.Parallel()
+
+	deps := backupTarDeps{
+		tempDir: func() string { return "" },
+		export: func(distributionName, destFileName string) error {
+			t.Fatal("export should not be called when temp dir is empty")
+			return nil
+		},
+		copyFile: func(srcPath, destPath string, compress bool) error {
+			t.Fatal("copyFile should not be called when temp dir is empty")
+			return nil
+		},
+		remove:   func(path string) error { return nil },
+		randIntn: func(n int) int { return 0 },
+	}
+
+	err := backupTarWithDeps("Arch", "backup.tar.gz", deps)
+	if err == nil {
+		t.Fatal("backupTarWithDeps succeeded unexpectedly")
+	}
+	if err.Error() != "failed to create temp directory" {
+		t.Fatalf("error = %q, want %q", err.Error(), "failed to create temp directory")
 	}
 }
 

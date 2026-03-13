@@ -13,6 +13,28 @@ import (
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
+type backupTarDeps struct {
+	tempDir  func() string
+	export   func(distributionName, destFileName string) error
+	copyFile func(srcPath, destPath string, compress bool) error
+	remove   func(path string) error
+	randIntn func(int) int
+}
+
+func defaultBackupTarDeps() backupTarDeps {
+	return backupTarDeps{
+		tempDir: os.TempDir,
+		export: func(distributionName, destFileName string) error {
+			wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
+			_, err := exec.Command(wslexe, "--export", distributionName, destFileName).Output()
+			return err
+		},
+		copyFile: fileutil.CopyFile,
+		remove:   os.Remove,
+		randIntn: rand.Intn,
+	}
+}
+
 func backupReg(reg wsllib.WslReg, name string, destFileName string) error {
 	profile, err := reg.GetProfileFromName(name)
 	if err != nil {
@@ -26,28 +48,29 @@ func backupReg(reg wsllib.WslReg, name string, destFileName string) error {
 }
 
 func backupTar(distributionName string, destFileName string) error {
+	return backupTarWithDeps(distributionName, destFileName, defaultBackupTarDeps())
+}
+
+func backupTarWithDeps(distributionName string, destFileName string, deps backupTarDeps) error {
 	// compress and copy
 	rootPathLower := strings.ToLower(destFileName)
 	if strings.HasSuffix(rootPathLower, ".gz") {
 		// create temporary tar
-		tmpDir := os.TempDir()
+		tmpDir := deps.tempDir()
 		if tmpDir == "" {
 			return errors.New("failed to create temp directory")
 		}
-		tmpTarFn := filepath.Join(tmpDir, strconv.Itoa(rand.Intn(10000))+".tar")
-		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
-		_, err := exec.Command(wslexe, "--export", distributionName, tmpTarFn).Output()
-		defer os.Remove(tmpTarFn)
+		tmpTarFn := filepath.Join(tmpDir, strconv.Itoa(deps.randIntn(10000))+".tar")
+		err := deps.export(distributionName, tmpTarFn)
+		defer deps.remove(tmpTarFn)
 		if err != nil {
 			return err
 		}
 
-		return fileutil.CopyFile(tmpTarFn, destFileName, true)
+		return deps.copyFile(tmpTarFn, destFileName, true)
 	} else {
 		// not compressed
-		wslexe := filepath.Join(fileutil.GetWindowsDirectory(), "System32", "wsl.exe")
-		_, err := exec.Command(wslexe, "--export", distributionName, destFileName).Output()
-		return err
+		return deps.export(distributionName, destFileName)
 	}
 }
 

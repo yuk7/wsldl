@@ -20,6 +20,29 @@ func TestGetCommand(t *testing.T) {
 	}
 }
 
+func TestGetCommand_Run_PrintsAndReturnsNil(t *testing.T) {
+	oldProject, oldVersion, oldURL := project, version, url
+	project = "wsldl2-test"
+	version = "9.9.9"
+	url = "https://example.test/version"
+	t.Cleanup(func() {
+		project, version, url = oldProject, oldVersion, oldURL
+	})
+
+	cmd := GetCommand()
+	out := captureStdout(t, func() {
+		if err := cmd.Run("Arch", []string{"ignored"}); err != nil {
+			t.Fatalf("Run returned error: %v", err)
+		}
+	})
+	if !strings.Contains(out, "wsldl2-test, version 9.9.9  ("+runtime.GOARCH+")") {
+		t.Fatalf("output missing version line: %q", out)
+	}
+	if !strings.Contains(out, "https://example.test/version") {
+		t.Fatalf("output missing url line: %q", out)
+	}
+}
+
 func TestExecute_PrintsVersionInfo(t *testing.T) {
 	oldProject, oldVersion, oldURL := project, version, url
 	project = "wsldl2-test"

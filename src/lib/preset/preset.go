@@ -8,10 +8,15 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 )
 
+var executablePathFunc = errutil.MustExecutable
+
 // ReadPresetJSON reads preset.json configuration json file
 func ReadPresetJSON() (res string, err error) {
-	efPath := errutil.MustExecutable()
-	dir := filepath.Dir(efPath)
+	return readPresetJSONFromExecutablePath(executablePathFunc())
+}
+
+func readPresetJSONFromExecutablePath(executablePath string) (res string, err error) {
+	dir := filepath.Dir(executablePath)
 	return readPresetJSONFromDir(dir)
 }
 
@@ -38,7 +43,11 @@ func ParsePresetJSON(str string) (res Preset, err error) {
 
 // ReadParsePreset reads and parses preset.json configuration file
 func ReadParsePreset() (conf Preset, err error) {
-	json, err := ReadPresetJSON()
+	return readParsePresetFromExecutablePath(executablePathFunc())
+}
+
+func readParsePresetFromExecutablePath(executablePath string) (conf Preset, err error) {
+	json, err := readPresetJSONFromExecutablePath(executablePath)
 	if err != nil {
 		return
 	}

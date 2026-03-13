@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/yuk7/wsldl/lib/errutil"
+	"github.com/yuk7/wsldl/lib/preset"
 	"github.com/yuk7/wsldl/lib/wsllib"
 )
 
@@ -130,6 +131,34 @@ func TestResolveOptions_AutoMode_UsesDetectedPathWhenAvailable(t *testing.T) {
 	})
 	if opts.rootPath != "install.tar" {
 		t.Fatalf("rootPath = %q, want %q", opts.rootPath, "install.tar")
+	}
+}
+
+func TestResolveOptions_AutoMode_PresetInstallFileOverridesDetectedPath(t *testing.T) {
+	origDetect := detectRootfsFilesFunc
+	detectRootfsFilesFunc = func() (string, error) {
+		return "install.tar", nil
+	}
+	origReadPreset := readParsePresetFunc
+	readParsePresetFunc = func() (preset.Preset, error) {
+		return preset.Preset{
+			InstallFile:       "override.tar.gz",
+			InstallFileSha256: "abc123",
+		}, nil
+	}
+	t.Cleanup(func() {
+		detectRootfsFilesFunc = origDetect
+		readParsePresetFunc = origReadPreset
+	})
+
+	opts := resolveOptions(installArgs{
+		mode: installModeAuto,
+	})
+	if opts.rootPath != "override.tar.gz" {
+		t.Fatalf("rootPath = %q, want %q", opts.rootPath, "override.tar.gz")
+	}
+	if opts.rootFileSHA256 != "abc123" {
+		t.Fatalf("rootFileSHA256 = %q, want %q", opts.rootFileSHA256, "abc123")
 	}
 }
 
@@ -455,6 +484,33 @@ func TestExecuteWithOptionsAndDeps_PauseAfterRun_WaitsForEnter(t *testing.T) {
 	}
 }
 
+func TestExecuteWithOptionsAndDeps_ShowProgressTrue_PrintsCompletion(t *testing.T) {
+	t.Parallel()
+
+	deps := installCommandDeps{
+		isInstalledFilesExist: func() bool { return false },
+		readInput:             func() string { return "" },
+		repairRegistry:        func(wsllib.WslReg, string) error { return nil },
+		install: func(context.Context, wsllib.WslLib, wsllib.WslReg, string, string, string, bool) error {
+			return nil
+		},
+		setVersion: func(string, int) error { return nil },
+		waitForEnter: func() {
+			t.Fatal("waitForEnter should not be called when pauseAfterRun=false")
+		},
+	}
+
+	err := executeWithOptionsAndDeps(wsllib.MockWslLib{}, wsllib.MockWslReg{}, "Arch", installOptions{
+		rootPath:      "rootfs.tar.gz",
+		showProgress:  true,
+		pauseAfterRun: false,
+		presetVersion: 0,
+	}, deps)
+	if err != nil {
+		t.Fatalf("executeWithOptionsAndDeps returned error: %v", err)
+	}
+}
+
 func TestGetCommandWithNoArgsWithDeps_HelpVisibility(t *testing.T) {
 	t.Parallel()
 
@@ -476,6 +532,9 @@ func TestGetCommandWithNoArgsWithDeps_HelpVisibility(t *testing.T) {
 	if got := cmd.HelpText(); got == "" {
 		t.Fatal("HelpText should not be empty")
 	}
+
+	err := cmd.Run("Arch", []string{"a", "b"})
+	assertDisplayError(t, err)
 }
 
 func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
@@ -499,6 +558,9 @@ func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	if got := cmd.HelpText(); got == "" {
 		t.Fatal("HelpText should not be empty")
 	}
+
+	err := cmd.Run("Arch", []string{"a", "b"})
+	assertDisplayError(t, err)
 }
 
 func TestGetCommand_DefaultDeps_BasicShape(t *testing.T) {

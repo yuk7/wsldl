@@ -1,8 +1,14 @@
 package errutil
 
 import (
+	"bytes"
 	"errors"
+	"os"
+	"os/exec"
+	"strings"
 	"testing"
+
+	"github.com/fatih/color"
 )
 
 func TestDisplayError(t *testing.T) {
@@ -77,9 +83,109 @@ func TestFormatError(t *testing.T) {
 }
 
 func TestMustExecutable(t *testing.T) {
-	t.Parallel()
-
 	if p := MustExecutable(); p == "" {
 		t.Fatal("MustExecutable() returned empty path")
+	}
+}
+
+func TestMustExecutable_PanicsOnExecutableError(t *testing.T) {
+	orig := executablePathFunc
+	executablePathFunc = func() (string, error) {
+		return "", errors.New("boom")
+	}
+	t.Cleanup(func() {
+		executablePathFunc = orig
+	})
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("MustExecutable did not panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("panic type = %T, want string", recovered)
+		}
+		if !strings.Contains(msg, "failed to get executable path") {
+			t.Fatalf("panic message = %q, want to contain %q", msg, "failed to get executable path")
+		}
+	}()
+
+	_ = MustExecutable()
+}
+
+func TestExit_ExitsWithProvidedCode(t *testing.T) {
+	if os.Getenv("WSDLD_TEST_EXIT_HELPER") == "1" {
+		Exit(false, 7)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestExit_ExitsWithProvidedCode$")
+	cmd.Env = append(os.Environ(), "WSDLD_TEST_EXIT_HELPER=1")
+	err := cmd.Run()
+	if err == nil {
+		t.Fatal("helper process succeeded unexpectedly")
+	}
+	exitErr, ok := err.(*exec.ExitError)
+	if !ok {
+		t.Fatalf("error type = %T, want *exec.ExitError", err)
+	}
+	if exitErr.ExitCode() != 7 {
+		t.Fatalf("exit code = %d, want %d", exitErr.ExitCode(), 7)
+	}
+}
+
+func TestExit_WithPause_PrintsPromptAndExits(t *testing.T) {
+	if os.Getenv("WSDLD_TEST_EXIT_PAUSE_HELPER") == "1" {
+		Exit(true, 5)
+		return
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=TestExit_WithPause_PrintsPromptAndExits$")
+	cmd.Env = append(os.Environ(), "WSDLD_TEST_EXIT_PAUSE_HELPER=1")
+	cmd.Stdin = strings.NewReader("\n")
+
+	var stdout bytes.Buffer
+	cmd.Stdout = &stdout
+
+	err := cmd.Run()
+	if err == nil {
+		t.Fatal("helper process succeeded unexpectedly")
+	}
+	exitErr, ok := err.(*exec.ExitError)
+	if !ok {
+		t.Fatalf("error type = %T, want *exec.ExitError", err)
+	}
+	if exitErr.ExitCode() != 5 {
+		t.Fatalf("exit code = %d, want %d", exitErr.ExitCode(), 5)
+	}
+	if !strings.Contains(stdout.String(), "Press enter to exit...") {
+		t.Fatalf("stdout = %q, want to contain pause prompt", stdout.String())
+	}
+}
+
+func TestColorPrintFunctions_WriteToConfiguredWriters(t *testing.T) {
+	t.Parallel()
+
+	oldErr := color.Error
+	oldOut := color.Output
+	t.Cleanup(func() {
+		color.Error = oldErr
+		color.Output = oldOut
+	})
+
+	var errBuf bytes.Buffer
+	var outBuf bytes.Buffer
+	color.Error = &errBuf
+	color.Output = &outBuf
+
+	ErrorRedPrintln("err message")
+	StdoutGreenPrintln("ok message")
+
+	if !strings.Contains(errBuf.String(), "err message") {
+		t.Fatalf("stderr output = %q, want to contain %q", errBuf.String(), "err message")
+	}
+	if !strings.Contains(outBuf.String(), "ok message") {
+		t.Fatalf("stdout output = %q, want to contain %q", outBuf.String(), "ok message")
 	}
 }

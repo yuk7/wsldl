@@ -25,6 +25,21 @@ func TestParseArgs_DefaultTermNumeric_SetsOption(t *testing.T) {
 	}
 }
 
+func TestParseArgs_DefaultTermDefaultKeyword_SetsDefaultValue(t *testing.T) {
+	t.Parallel()
+
+	opts, err := parseArgs([]string{"--default-term", "default"})
+	if err != nil {
+		t.Fatalf("parseArgs returned error: %v", err)
+	}
+	if opts.option != configOptionDefaultTerm {
+		t.Fatalf("option = %v, want %v", opts.option, configOptionDefaultTerm)
+	}
+	if opts.defaultTerm != wsllib.FlagWsldlTermDefault {
+		t.Fatalf("defaultTerm = %d, want %d", opts.defaultTerm, wsllib.FlagWsldlTermDefault)
+	}
+}
+
 func TestParseArgs_InvalidAppendPathBool_ReturnsError(t *testing.T) {
 	t.Parallel()
 
@@ -131,6 +146,15 @@ func TestParseArgs_InvalidPatterns_ReturnError(t *testing.T) {
 	}
 }
 
+func TestParseArgs_WslVersionNonNumber_ReturnsError(t *testing.T) {
+	t.Parallel()
+
+	_, err := parseArgs([]string{"--wsl-version", "x"})
+	if err == nil {
+		t.Fatal("parseArgs succeeded unexpectedly")
+	}
+}
+
 func TestUpdateFlag_DisableWhenAlreadyOff_StaysOff(t *testing.T) {
 	t.Parallel()
 
@@ -175,6 +199,33 @@ func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	if got := cmd.HelpText(); got == "" {
 		t.Fatal("HelpText should not be empty")
 	}
+}
+
+func TestGetCommand_WiresDefaultDeps(t *testing.T) {
+	t.Parallel()
+
+	cmd := GetCommand()
+	if len(cmd.Names) != 2 || cmd.Names[0] != "config" || cmd.Names[1] != "set" {
+		t.Fatalf("Names = %v, want [config set]", cmd.Names)
+	}
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
+	}
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
+	}
+	if cmd.Run == nil {
+		t.Fatal("Run is nil")
+	}
+
+	err := cmd.Run("Arch", []string{"--bad", "1"})
+	assertDisplayError(t, err)
 }
 
 func TestExecute_DefaultUID_ConfigureDistribution(t *testing.T) {
@@ -384,6 +435,172 @@ func TestExecute_DefaultUser_OnNonWindows_ReturnsDisplayError(t *testing.T) {
 	}
 	err := execute(wsl, wsllib.MockWslReg{}, "Arch", []string{"--default-user", "root"})
 	assertDisplayError(t, err)
+}
+
+func TestExecuteWithOptions_DefaultUser_SuccessUpdatesUID(t *testing.T) {
+	t.Parallel()
+
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 4, nil
+		},
+		ConfigureDistributionFunc: func(name string, uid uint64, flags uint32) error {
+			if name != "Arch" || uid != 2001 || flags != 4 {
+				t.Fatalf("ConfigureDistribution args: name=%q uid=%d flags=%d", name, uid, flags)
+			}
+			return nil
+		},
+	}
+
+	execRead := func(_ wsllib.WslLib, name string, cmd string) (string, uint32, error) {
+		if name != "Arch" {
+			t.Fatalf("name = %q, want %q", name, "Arch")
+		}
+		if cmd != "id -u root" {
+			t.Fatalf("cmd = %q, want %q", cmd, "id -u root")
+		}
+		return "2001", 0, nil
+	}
+
+	err := executeWithOptionsAndExecRead(
+		wsl,
+		wsllib.MockWslReg{},
+		"Arch",
+		configOptions{option: configOptionDefaultUser, user: "root"},
+		execRead,
+	)
+	if err != nil {
+		t.Fatalf("executeWithOptionsAndExecRead returned error: %v", err)
+	}
+}
+
+func TestExecuteWithOptions_DefaultUser_InvalidUIDOutput_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+	}
+
+	execRead := func(_ wsllib.WslLib, _ string, _ string) (string, uint32, error) {
+		return "not-a-number", 0, nil
+	}
+
+	err := executeWithOptionsAndExecRead(
+		wsl,
+		wsllib.MockWslReg{},
+		"Arch",
+		configOptions{option: configOptionDefaultUser, user: "root"},
+		execRead,
+	)
+	de := assertDisplayError(t, err)
+	if de.Unwrap().Error() != "not-a-number" {
+		t.Fatalf("wrapped error = %v, want %q", de.Unwrap(), "not-a-number")
+	}
+}
+
+func TestExecute_WslVersion_SetError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("set failed")
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+	}
+	reg := wsllib.MockWslReg{
+		SetWslVersionFunc: func(name string, version int) error {
+			return wantErr
+		},
+	}
+
+	err := execute(wsl, reg, "Arch", []string{"--wsl-version", "2"})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de.Unwrap(), wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
+	}
+}
+
+func TestExecute_DefaultTerm_GetProfileError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("profile failed")
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+	}
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{}, wantErr
+		},
+	}
+
+	err := execute(wsl, reg, "Arch", []string{"--default-term", "wt"})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de.Unwrap(), wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
+	}
+}
+
+func TestExecute_DefaultTerm_WriteProfileError_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wantErr := errors.New("write failed")
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+	}
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{DistributionName: name}, nil
+		},
+		WriteProfileFunc: func(profile wsllib.Profile) error {
+			return wantErr
+		},
+	}
+
+	err := execute(wsl, reg, "Arch", []string{"--default-term", "wt"})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de.Unwrap(), wantErr) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), wantErr)
+	}
+}
+
+func TestExecute_MountDriveTrue_SetsFlag(t *testing.T) {
+	t.Parallel()
+
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+		ConfigureDistributionFunc: func(name string, uid uint64, flags uint32) error {
+			if flags&wsllib.FlagEnableDriveMounting != wsllib.FlagEnableDriveMounting {
+				t.Fatalf("flags = %d, want mount-drive bit set", flags)
+			}
+			return nil
+		},
+	}
+	if err := execute(wsl, wsllib.MockWslReg{}, "Arch", []string{"--mount-drive", "true"}); err != nil {
+		t.Fatalf("execute returned error: %v", err)
+	}
+}
+
+func TestExecuteWithOptions_InvalidOption_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	wsl := wsllib.MockWslLib{
+		GetDistributionConfigurationFunc: func(name string) (uint32, uint64, uint32, error) {
+			return 2, 1000, 0, nil
+		},
+	}
+	err := executeWithOptions(wsl, wsllib.MockWslReg{}, "Arch", configOptions{option: configOption(999)})
+	de := assertDisplayError(t, err)
+	if !errors.Is(de.Unwrap(), os.ErrInvalid) {
+		t.Fatalf("wrapped error = %v, want %v", de.Unwrap(), os.ErrInvalid)
+	}
 }
 
 func assertDisplayError(t *testing.T, err error) *errutil.DisplayError {

@@ -23,8 +23,10 @@ import (
 )
 
 var (
-	executableFunc = os.Executable
-	exitFunc       = errutil.Exit
+	executableFunc           = os.Executable
+	exitFunc                 = errutil.Exit
+	runSubCommandFunc        = cmdline.RunSubCommand
+	showHelpFromCommandsFunc = help.ShowHelpFromCommands
 )
 
 // main is the entry point of the application
@@ -66,7 +68,7 @@ func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
 		Visible:  helpCommand.Visible,
 		HelpText: helpCommand.HelpText,
 		Run: func(distroName string, args []string) error {
-			help.ShowHelpFromCommands(
+			showHelpFromCommandsFunc(
 				append(commands, helpCommand), distroName, args,
 			)
 			return nil
@@ -90,7 +92,7 @@ func runMain(deps wsllib.Dependencies, argv []string, executablePath string) {
 		handleDisplayError(err, true, true, false)
 	}
 
-	err := cmdline.RunSubCommand(commandsWithHelp, name, argv[1:])
+	err := runSubCommandFunc(commandsWithHelp, name, argv[1:])
 	if errors.Is(err, cmdline.ErrCommandNotFound) || errors.Is(err, cmdline.ErrNoDefault) {
 		err = errutil.NewDisplayError(os.ErrInvalid, true, true, false)
 	}

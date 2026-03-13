@@ -8,6 +8,8 @@ import (
 	"github.com/fatih/color"
 )
 
+var executablePathFunc = os.Executable
+
 // DisplayError keeps CLI display options alongside an underlying error.
 type DisplayError struct {
 	Err       error
@@ -72,7 +74,7 @@ func FormatError(err error) string {
 
 // MustExecutable returns the current executable path or panics when unavailable.
 func MustExecutable() string {
-	p, err := os.Executable()
+	p, err := executablePathFunc()
 	if err != nil {
 		panic("failed to get executable path: " + err.Error())
 	}

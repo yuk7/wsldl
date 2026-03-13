@@ -133,6 +133,33 @@ func TestGetCommandWithDeps_HelpVisibility(t *testing.T) {
 	}
 }
 
+func TestGetCommand_WiresDefaultDeps(t *testing.T) {
+	t.Parallel()
+
+	cmd := GetCommand()
+	if len(cmd.Names) != 1 || cmd.Names[0] != "backup" {
+		t.Fatalf("Names = %v, want [backup]", cmd.Names)
+	}
+	if cmd.Visible == nil {
+		t.Fatal("Visible is nil")
+	}
+	if cmd.Visible("Arch") {
+		t.Fatal("Visible(Arch) = true, want false")
+	}
+	if cmd.HelpText == nil {
+		t.Fatal("HelpText is nil")
+	}
+	if got := cmd.HelpText(); got == "" {
+		t.Fatal("HelpText should not be empty")
+	}
+	if cmd.Run == nil {
+		t.Fatal("Run is nil")
+	}
+
+	err := cmd.Run("Arch", []string{"--bad"})
+	assertDisplayError(t, err)
+}
+
 func TestExecute_InvalidArgLength_ReturnsDisplayError(t *testing.T) {
 	t.Parallel()
 
@@ -204,6 +231,21 @@ func TestExecute_VhdxCustomPath_Success(t *testing.T) {
 	if gotDestPath != destPath {
 		t.Fatalf("dest path = %q, want %q", gotDestPath, destPath)
 	}
+}
+
+func TestExecuteWithBackups_InvalidArgs_ReturnsDisplayError(t *testing.T) {
+	t.Parallel()
+
+	err := executeWithBackups(
+		wsllib.MockWslLib{},
+		wsllib.MockWslReg{},
+		"Arch",
+		[]string{"a", "b"},
+		func(wsllib.WslReg, string, string) error { return nil },
+		func(string, string) error { return nil },
+		func(wsllib.WslReg, string, string) error { return nil },
+	)
+	assertDisplayError(t, err)
 }
 
 func TestExecuteWithBackupsOptions_AutoWSL2_UsesRegAndVhdxGz(t *testing.T) {

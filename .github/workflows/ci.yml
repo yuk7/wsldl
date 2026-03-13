@@ -31,7 +31,7 @@ jobs:
       - name: Test (go test)
         run: |
           cd src
-          go test ./...
+          go test ./... -cover
 
   compile-wsldl-windows:
     name: Compile wsldl

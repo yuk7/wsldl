@@ -49,6 +49,7 @@ type installCommandDeps struct {
 }
 
 var detectRootfsFilesFunc = detectRootfsFiles
+var readParsePresetFunc = preset.ReadParsePreset
 
 func defaultInstallCommandDeps() installCommandDeps {
 	return installCommandDeps{
@@ -146,7 +147,7 @@ func parseArgs(args []string) (installArgs, error) {
 }
 
 func resolveOptions(parsed installArgs) installOptions {
-	jsonPreset, _ := preset.ReadParsePreset()
+	jsonPreset, _ := readParsePresetFunc()
 
 	opts := installOptions{
 		showProgress:  parsed.mode == installModeAuto,

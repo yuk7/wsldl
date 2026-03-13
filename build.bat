@@ -170,8 +170,8 @@ exit /b
 :test
 set DOING=test
 cd /d %~dp0\src
-echo %GOPRG% test ./...
-%GOPRG% test ./...
+echo %GOPRG% test ./... -cover
+%GOPRG% test ./... -cover
 exit /b !ERRORLEVEL!
 
 :clean

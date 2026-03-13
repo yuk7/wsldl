@@ -123,22 +123,22 @@ func GetCommandPWithDeps(wsl wsllib.WslLib) cmdline.Command {
 	}
 }
 
-func parseRunArgs(args []string) (runOptions, error) {
+func parseRunArgs(args []string) runOptions {
 	opts := runOptions{
 		inheritPath: true,
 	}
 	if args == nil {
 		opts.inheritPath = !fileutil.IsCurrentDirSpecial()
-		return opts, nil
+		return opts
 	}
 	opts.commandArgs = append(opts.commandArgs, args...)
-	return opts, nil
+	return opts
 }
 
-func parseRunPArgs(args []string) (runPOptions, error) {
+func parseRunPArgs(args []string) runPOptions {
 	opts := runPOptions{}
 	opts.commandArgs = append(opts.commandArgs, args...)
-	return opts, nil
+	return opts
 }
 
 func parseRunNoArgs(args []string) (runNoArgsOptions, error) {
@@ -150,10 +150,7 @@ func parseRunNoArgs(args []string) (runNoArgsOptions, error) {
 
 // execute is default run entrypoint.
 func execute(wsl wsllib.WslLib, name string, args []string) error {
-	opts, err := parseRunArgs(args)
-	if err != nil {
-		return errutil.NewDisplayError(err, true, true, false)
-	}
+	opts := parseRunArgs(args)
 	return executeWithOptions(wsl, name, opts)
 }
 
@@ -175,10 +172,7 @@ func executeWithOptions(wsl wsllib.WslLib, name string, opts runOptions) error {
 
 // executeP runs execute function with Path Translator
 func executeP(wsl wsllib.WslLib, name string, args []string) error {
-	opts, err := parseRunPArgs(args)
-	if err != nil {
-		return errutil.NewDisplayError(err, true, true, false)
-	}
+	opts := parseRunPArgs(args)
 	return executePWithOptions(wsl, name, opts)
 }
 

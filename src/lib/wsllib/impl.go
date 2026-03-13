@@ -9,6 +9,21 @@ import (
 	wslreg "github.com/yuk7/wslreglib-go"
 )
 
+var (
+	wslIsDistributionRegisteredFunc     = wsllibgo.WslIsDistributionRegistered
+	wslRegisterDistributionFunc         = wsllibgo.WslRegisterDistribution
+	wslUnregisterDistributionFunc       = wsllibgo.WslUnregisterDistribution
+	wslLaunchInteractiveFunc            = wsllibgo.WslLaunchInteractive
+	wslLaunchFunc                       = wsllibgo.WslLaunch
+	wslGetDistributionConfigurationFunc = wsllibgo.WslGetDistributionConfiguration
+	wslConfigureDistributionFunc        = wsllibgo.WslConfigureDistribution
+	regGetProfileFromNameFunc           = wslreg.GetProfileFromName
+	regGetProfileFromBasePathFunc       = wslreg.GetProfileFromBasePath
+	regWriteProfileFunc                 = wslreg.WriteProfile
+	regSetWslVersionFunc                = wslreg.SetWslVersion
+	regGenerateProfileFunc              = wslreg.GenerateProfile
+)
+
 type nativeWslLib struct{}
 
 func NewNativeWslLib() WslLib {
@@ -16,31 +31,31 @@ func NewNativeWslLib() WslLib {
 }
 
 func (nativeWslLib) IsDistributionRegistered(name string) bool {
-	return wsllibgo.WslIsDistributionRegistered(name)
+	return wslIsDistributionRegisteredFunc(name)
 }
 
 func (nativeWslLib) RegisterDistribution(name, rootPath string) error {
-	return wsllibgo.WslRegisterDistribution(name, rootPath)
+	return wslRegisterDistributionFunc(name, rootPath)
 }
 
 func (nativeWslLib) UnregisterDistribution(name string) error {
-	return wsllibgo.WslUnregisterDistribution(name)
+	return wslUnregisterDistributionFunc(name)
 }
 
 func (nativeWslLib) LaunchInteractive(name, command string, inheritPath bool) (uint32, error) {
-	return wsllibgo.WslLaunchInteractive(name, command, inheritPath)
+	return wslLaunchInteractiveFunc(name, command, inheritPath)
 }
 
 func (nativeWslLib) Launch(name, command string, inheritPath bool, stdin, stdout, stderr Handle) (Handle, error) {
-	return wsllibgo.WslLaunch(name, command, inheritPath, syscall.Handle(stdin), syscall.Handle(stdout), syscall.Handle(stderr))
+	return wslLaunchFunc(name, command, inheritPath, syscall.Handle(stdin), syscall.Handle(stdout), syscall.Handle(stderr))
 }
 
 func (nativeWslLib) GetDistributionConfiguration(name string) (uint32, uint64, uint32, error) {
-	return wsllibgo.WslGetDistributionConfiguration(name)
+	return wslGetDistributionConfigurationFunc(name)
 }
 
 func (nativeWslLib) ConfigureDistribution(name string, uid uint64, flags uint32) error {
-	return wsllibgo.WslConfigureDistribution(name, uid, flags)
+	return wslConfigureDistributionFunc(name, uid, flags)
 }
 
 type nativeWslReg struct{}
@@ -78,23 +93,23 @@ func fromProfile(p Profile) wslreg.Profile {
 }
 
 func (nativeWslReg) GetProfileFromName(name string) (Profile, error) {
-	p, err := wslreg.GetProfileFromName(name)
+	p, err := regGetProfileFromNameFunc(name)
 	return toProfile(p), err
 }
 
 func (nativeWslReg) GetProfileFromBasePath(path string) (Profile, error) {
-	p, err := wslreg.GetProfileFromBasePath(path)
+	p, err := regGetProfileFromBasePathFunc(path)
 	return toProfile(p), err
 }
 
 func (nativeWslReg) WriteProfile(profile Profile) error {
-	return wslreg.WriteProfile(fromProfile(profile))
+	return regWriteProfileFunc(fromProfile(profile))
 }
 
 func (nativeWslReg) SetWslVersion(name string, version int) error {
-	return wslreg.SetWslVersion(name, version)
+	return regSetWslVersionFunc(name, version)
 }
 
 func (nativeWslReg) GenerateProfile() Profile {
-	return toProfile(wslreg.GenerateProfile())
+	return toProfile(regGenerateProfileFunc())
 }

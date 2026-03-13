@@ -108,6 +108,48 @@ func TestExecWindowsTerminalWithDeps_NoProfileUsesExecutableRun(t *testing.T) {
 	}
 }
 
+func TestExecWindowsTerminalWithDeps_FallbackToCaseInsensitiveProfileName(t *testing.T) {
+	t.Parallel()
+
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{DistributionName: "Arch"}, nil
+		},
+	}
+	conf := wtutils.Config{}
+	conf.Profiles.ProfileList = []wtutils.Profile{
+		{GUID: "{other-guid}", Name: "ARCH"},
+	}
+
+	gotCommand := ""
+	deps := execWindowsTerminalDeps{
+		readParseWTConfig: func() (wtutils.Config, error) {
+			return conf, nil
+		},
+		createProfileGUID: func(name string) string {
+			if name != "Arch" {
+				t.Fatalf("name = %q, want %q", name, "Arch")
+			}
+			return "guid-1234"
+		},
+		getenv:         func(string) string { return `C:\Users\user\AppData\Local` },
+		mustExecutable: func() string { t.Fatal("mustExecutable should not be called"); return "" },
+		createProcessAndWait: func(commandLine string) (int, error) {
+			gotCommand = commandLine
+			return 0, nil
+		},
+		allocConsole: func() {},
+	}
+
+	err := execWindowsTerminalWithDeps(reg, "arch", deps)
+	if err != nil {
+		t.Fatalf("execWindowsTerminalWithDeps returned error: %v", err)
+	}
+	if !strings.Contains(gotCommand, `wt.exe -p ARCH`) {
+		t.Fatalf("commandLine = %q, want to contain %q", gotCommand, `wt.exe -p ARCH`)
+	}
+}
+
 func TestExecWindowsTerminalWithDeps_ProcessErrorReturnsDisplayError(t *testing.T) {
 	t.Parallel()
 

@@ -18,7 +18,11 @@ func FreeConsole() error {
 }
 
 // AllocConsole is a no-op outside Windows.
-func AllocConsole() {}
+func AllocConsole() {
+	_ = ConsoleProcNames
+}
 
 // SetConsoleTitle is a no-op outside Windows.
-func SetConsoleTitle(title string) {}
+func SetConsoleTitle(title string) {
+	_ = title
+}
