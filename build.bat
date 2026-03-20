@@ -14,6 +14,10 @@ if not defined GOPRG (
     set GOPRG=go
 )
 
+if not defined GOTOOLCHAIN (
+    set GOTOOLCHAIN=go1.25.8+auto
+)
+
 if not defined GOARCH (
     echo GOARCH is not defined, detecting cpu architecture...
     if "%PROCESSOR_ARCHITECTURE%"=="x86" (

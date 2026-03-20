@@ -20,6 +20,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup env
+        run: |
+          go env -w GOTOOLCHAIN=go1.25.8+auto
       - name: Test
         run: .\build.bat test
 
@@ -28,6 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup env
+        run: |
+          go env -w GOTOOLCHAIN=go1.25.8+auto
       - name: Test (go test)
         run: |
           cd src
