@@ -37,11 +37,14 @@ var (
 		"install.ext4.vhdx",
 		"install.ext4.vhdx.gz",
 	}
+	mustExecutable = errutil.MustExecutable
 )
 
 type installDeps struct {
 	tempDir       func() string
+	statFile      func(path string) (os.FileInfo, error)
 	createFile    func(path string) (io.Closer, error)
+	renameFile    func(oldpath, newpath string) error
 	removeFile    func(path string) error
 	copyFile      func(srcPath, destPath string, compress bool) error
 	confirmResume func() bool
@@ -50,9 +53,11 @@ type installDeps struct {
 func defaultInstallDeps() installDeps {
 	return installDeps{
 		tempDir: os.TempDir,
+		statFile: os.Stat,
 		createFile: func(path string) (io.Closer, error) {
 			return os.Create(path)
 		},
+		renameFile: os.Rename,
 		removeFile: os.Remove,
 		copyFile:   fileutil.CopyFile,
 		confirmResume: func() bool {
@@ -81,6 +86,26 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 	ctx = normalizeContext(ctx)
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+	if deps.tempDir == nil {
+		deps.tempDir = os.TempDir
+	}
+	if deps.statFile == nil {
+		deps.statFile = os.Stat
+	}
+	if deps.createFile == nil {
+		deps.createFile = func(path string) (io.Closer, error) {
+			return os.Create(path)
+		}
+	}
+	if deps.renameFile == nil {
+		deps.renameFile = os.Rename
+	}
+	if deps.removeFile == nil {
+		deps.removeFile = os.Remove
+	}
+	if deps.copyFile == nil {
+		deps.copyFile = fileutil.CopyFile
 	}
 
 	rootPathLower := strings.ToLower(rootPath)
@@ -114,26 +139,26 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 			if err != nil {
 				return "", err
 			}
-			if err := os.Rename(cachePartialPath, cacheRootPath); err != nil {
-				return "", err
-			}
+				if err := deps.renameFile(cachePartialPath, cacheRootPath); err != nil {
+					return "", err
+				}
 			if showProgress {
 				fmt.Println()
 			}
 			return sum, nil
 		}
 
-		if _, err := os.Stat(cacheRootPath); err == nil {
-			usedCachedDownload = true
-			rootPath = cacheRootPath
+			if _, err := deps.statFile(cacheRootPath); err == nil {
+				usedCachedDownload = true
+				rootPath = cacheRootPath
 			if showProgress {
 				fmt.Printf("Using cached download: %s\n", rootPath)
 			}
 		} else if !errors.Is(err, os.ErrNotExist) {
 			return err
 		} else {
-			if _, err := os.Stat(cachePartialPath); err == nil {
-				keepPartial := true
+				if _, err := deps.statFile(cachePartialPath); err == nil {
+					keepPartial := true
 				if showProgress {
 					if deps.confirmResume != nil {
 						keepPartial = deps.confirmResume()
@@ -305,7 +330,7 @@ func installExt4VhdxWithDeps(wsl wsllib.WslLib, reg wsllib.WslReg, name string, 
 }
 
 func detectRootfsFiles() (string, error) {
-	efPath := errutil.MustExecutable()
+	efPath := mustExecutable()
 	efDir := filepath.Dir(efPath)
 	rootFile, err := detectRootfsFileName(os.DirFS(efDir))
 	if err != nil {

@@ -16,6 +16,7 @@ import (
 )
 
 var defaultClientMu sync.Mutex
+var downloadInternalMu sync.Mutex
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
 
@@ -31,6 +32,34 @@ func withDefaultClientTransport(t *testing.T, rt http.RoundTripper) {
 	t.Cleanup(func() {
 		http.DefaultClient.Transport = oldTransport
 		defaultClientMu.Unlock()
+	})
+}
+
+func withDownloadInternals(
+	t *testing.T,
+	statFile func(path string) (os.FileInfo, error),
+	openForRead func(path string) (io.ReadCloser, error),
+	calcSHA256 func(path string) (string, error),
+) {
+	t.Helper()
+	downloadInternalMu.Lock()
+	oldStat := downloadStatFile
+	oldOpen := downloadOpenForRead
+	oldCalc := downloadCalcSHA256
+	if statFile != nil {
+		downloadStatFile = statFile
+	}
+	if openForRead != nil {
+		downloadOpenForRead = openForRead
+	}
+	if calcSHA256 != nil {
+		downloadCalcSHA256 = calcSHA256
+	}
+	t.Cleanup(func() {
+		downloadStatFile = oldStat
+		downloadOpenForRead = oldOpen
+		downloadCalcSHA256 = oldCalc
+		downloadInternalMu.Unlock()
 	})
 }
 
@@ -145,8 +174,6 @@ func TestDownloadFile_OverwritesExistingFile(t *testing.T) {
 }
 
 func TestDownloadFile_InvalidURL(t *testing.T) {
-	t.Parallel()
-
 	tmp := t.TempDir()
 	dest := filepath.Join(tmp, "file.bin")
 
@@ -214,8 +241,6 @@ func TestDownloadFile_ContentLengthZero_WithProgressBar(t *testing.T) {
 }
 
 func TestDownloadFile_ReadError_ReturnsError(t *testing.T) {
-	t.Parallel()
-
 	wantErr := errors.New("read failed")
 	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
 		return &http.Response{
@@ -313,5 +338,57 @@ func TestDownloadFile_HTTPErrorStatus_ReturnsError(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "unexpected status code: 404") {
 		t.Fatalf("error = %q, want to contain %q", err.Error(), "unexpected status code: 404")
+	}
+}
+
+func TestDownloadFile_StatError_ReturnsError(t *testing.T) {
+	wantErr := errors.New("stat failed")
+	withDownloadInternals(t,
+		func(path string) (os.FileInfo, error) { return nil, wantErr },
+		nil,
+		nil,
+	)
+
+	dest := filepath.Join(t.TempDir(), "file.bin")
+	_, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestDownloadFile_CalculateSHA256Error_ReturnsError(t *testing.T) {
+	payload := []byte("payload")
+	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return newHTTPResponse(payload, int64(len(payload))), nil
+	}))
+
+	wantErr := errors.New("calculate sha256 failed")
+	withDownloadInternals(t, nil, nil, func(path string) (string, error) {
+		return "", wantErr
+	})
+
+	dest := filepath.Join(t.TempDir(), "file.bin")
+	_, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestCalculateSHA256_CopyError(t *testing.T) {
+	wantErr := errors.New("copy failed")
+	withDownloadInternals(t, nil, func(path string) (io.ReadCloser, error) {
+		return errReadCloser{err: wantErr}, nil
+	}, nil)
+
+	_, err := calculateSHA256("ignored-path")
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestCalculateSHA256_FileOpenError(t *testing.T) {
+	_, err := calculateSHA256(filepath.Join(t.TempDir(), "missing.bin"))
+	if err == nil {
+		t.Fatal("calculateSHA256 succeeded unexpectedly")
 	}
 }

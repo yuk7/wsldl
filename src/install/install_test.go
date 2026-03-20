@@ -19,6 +19,8 @@ import (
 )
 
 var installHTTPMu sync.Mutex
+var installStdinMu sync.Mutex
+var installExecutableMu sync.Mutex
 
 type installRoundTripFunc func(*http.Request) (*http.Response, error)
 
@@ -34,6 +36,47 @@ func withInstallMockTransport(t *testing.T, rt http.RoundTripper) {
 	t.Cleanup(func() {
 		http.DefaultClient.Transport = oldTransport
 		installHTTPMu.Unlock()
+	})
+}
+
+func withInstallMockStdin(t *testing.T, input string) {
+	t.Helper()
+	installStdinMu.Lock()
+	oldStdin := os.Stdin
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		installStdinMu.Unlock()
+		t.Fatalf("os.Pipe failed: %v", err)
+	}
+	if _, err := w.WriteString(input); err != nil {
+		_ = r.Close()
+		_ = w.Close()
+		installStdinMu.Unlock()
+		t.Fatalf("write mock stdin failed: %v", err)
+	}
+	if err := w.Close(); err != nil {
+		_ = r.Close()
+		installStdinMu.Unlock()
+		t.Fatalf("close mock stdin writer failed: %v", err)
+	}
+
+	os.Stdin = r
+	t.Cleanup(func() {
+		os.Stdin = oldStdin
+		_ = r.Close()
+		installStdinMu.Unlock()
+	})
+}
+
+func withMockMustExecutable(t *testing.T, stub func() string) {
+	t.Helper()
+	installExecutableMu.Lock()
+	old := mustExecutable
+	mustExecutable = stub
+	t.Cleanup(func() {
+		mustExecutable = old
+		installExecutableMu.Unlock()
 	})
 }
 
@@ -452,6 +495,119 @@ func TestInstallExt4VhdxWithDeps_ProfileLookupError(t *testing.T) {
 	}
 }
 
+func TestDefaultInstallDeps_FileHelpers(t *testing.T) {
+	deps := defaultInstallDeps()
+	if deps.tempDir() == "" {
+		t.Fatal("tempDir returned empty path")
+	}
+
+	tmp := t.TempDir()
+	createdPath := filepath.Join(tmp, "created.bin")
+	f, err := deps.createFile(createdPath)
+	if err != nil {
+		t.Fatalf("createFile failed: %v", err)
+	}
+	_ = f.Close()
+	if _, err := os.Stat(createdPath); err != nil {
+		t.Fatalf("created file missing: %v", err)
+	}
+
+	if err := deps.removeFile(createdPath); err != nil {
+		t.Fatalf("removeFile failed: %v", err)
+	}
+	if _, err := os.Stat(createdPath); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("created file still exists after remove: %v", err)
+	}
+
+	srcPath := filepath.Join(tmp, "src.bin")
+	dstPath := filepath.Join(tmp, "dst.bin")
+	payload := []byte("copy payload")
+	if err := os.WriteFile(srcPath, payload, 0o600); err != nil {
+		t.Fatalf("write src file failed: %v", err)
+	}
+	if err := deps.copyFile(srcPath, dstPath, false); err != nil {
+		t.Fatalf("copyFile failed: %v", err)
+	}
+	got, err := os.ReadFile(dstPath)
+	if err != nil {
+		t.Fatalf("read dst file failed: %v", err)
+	}
+	if string(got) != string(payload) {
+		t.Fatalf("copied payload = %q, want %q", got, payload)
+	}
+}
+
+func TestDefaultInstallDeps_ConfirmResumeAcceptsYes(t *testing.T) {
+	withInstallMockStdin(t, " y \n")
+	deps := defaultInstallDeps()
+	if !deps.confirmResume() {
+		t.Fatal("confirmResume returned false, want true")
+	}
+}
+
+func TestDefaultInstallDeps_ConfirmResumeRejectsNo(t *testing.T) {
+	withInstallMockStdin(t, "n\n")
+	deps := defaultInstallDeps()
+	if deps.confirmResume() {
+		t.Fatal("confirmResume returned true, want false")
+	}
+}
+
+func TestDetectRootfsFiles_UsesExecutableDir_InstallTar(t *testing.T) {
+	tmp := t.TempDir()
+	exePath := filepath.Join(tmp, "wsldl-test.exe")
+	if err := os.WriteFile(exePath, []byte("exe"), 0o600); err != nil {
+		t.Fatalf("write executable file failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmp, "install.tar"), []byte("rootfs"), 0o600); err != nil {
+		t.Fatalf("write install.tar failed: %v", err)
+	}
+
+	withMockMustExecutable(t, func() string { return exePath })
+	got, err := detectRootfsFiles()
+	if err != nil {
+		t.Fatalf("detectRootfsFiles failed: %v", err)
+	}
+	want := filepath.Join(tmp, "install.tar")
+	if got != want {
+		t.Fatalf("detected path = %q, want %q", got, want)
+	}
+}
+
+func TestDetectRootfsFiles_ReturnsRelativeRootfsTarGz(t *testing.T) {
+	tmp := t.TempDir()
+	exePath := filepath.Join(tmp, "wsldl-test.exe")
+	if err := os.WriteFile(exePath, []byte("exe"), 0o600); err != nil {
+		t.Fatalf("write executable file failed: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(tmp, "rootfs.tar.gz"), []byte("rootfs"), 0o600); err != nil {
+		t.Fatalf("write rootfs.tar.gz failed: %v", err)
+	}
+
+	withMockMustExecutable(t, func() string { return exePath })
+	got, err := detectRootfsFiles()
+	if err != nil {
+		t.Fatalf("detectRootfsFiles failed: %v", err)
+	}
+	if got != "rootfs.tar.gz" {
+		t.Fatalf("detected path = %q, want %q", got, "rootfs.tar.gz")
+	}
+}
+
+func TestDetectRootfsFiles_ActualFunction_ReturnsErrorWhenNotFound(t *testing.T) {
+	tmp := t.TempDir()
+	exePath := filepath.Join(tmp, "wsldl-test.exe")
+	if err := os.WriteFile(exePath, []byte("exe"), 0o600); err != nil {
+		t.Fatalf("write executable file failed: %v", err)
+	}
+
+	withMockMustExecutable(t, func() string { return exePath })
+	_, err := detectRootfsFiles()
+	if err == nil {
+		t.Fatal("detectRootfsFiles succeeded unexpectedly")
+	}
+}
+
 func TestInstallWithDeps_HTTPDownloadPath_Success(t *testing.T) {
 	payload := []byte("rootfs")
 	const downloadURL = "http://example.com/rootfs.tar.gz"
@@ -502,6 +658,275 @@ func TestInstallWithDeps_HTTPDownloadPath_Success(t *testing.T) {
 	}
 	if _, statErr := os.Stat(wantCachePath + ".part"); !errors.Is(statErr, os.ErrNotExist) {
 		t.Fatalf("partial file still exists: stat err = %v", statErr)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_RenameError(t *testing.T) {
+	payload := []byte("rootfs")
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	withInstallMockTransport(t, installRoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode:    http.StatusOK,
+			Body:          io.NopCloser(strings.NewReader(string(payload))),
+			ContentLength: int64(len(payload)),
+			Header:        make(http.Header),
+		}, nil
+	}))
+
+	wantErr := errors.New("rename failed")
+	tmp := t.TempDir()
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+	deps := installDeps{
+		tempDir: func() string { return tmp },
+		renameFile: func(oldpath, newpath string) error {
+			return wantErr
+		},
+		removeFile: os.Remove,
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, "", false, deps)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_CacheStatError(t *testing.T) {
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	tmp := t.TempDir()
+	cachePath := getDownloadCachePath(tmp, downloadURL)
+	wantErr := errors.New("cache stat failed")
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+
+	deps := installDeps{
+		tempDir: func() string { return tmp },
+		statFile: func(path string) (os.FileInfo, error) {
+			if path == cachePath {
+				return nil, wantErr
+			}
+			return nil, os.ErrNotExist
+		},
+		removeFile: os.Remove,
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, "", false, deps)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_PartialStatError(t *testing.T) {
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	tmp := t.TempDir()
+	cachePath := getDownloadCachePath(tmp, downloadURL)
+	partPath := cachePath + ".part"
+	wantErr := errors.New("partial stat failed")
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+
+	deps := installDeps{
+		tempDir: func() string { return tmp },
+		statFile: func(path string) (os.FileInfo, error) {
+			if path == cachePath {
+				return nil, os.ErrNotExist
+			}
+			if path == partPath {
+				return nil, wantErr
+			}
+			return nil, os.ErrNotExist
+		},
+		removeFile: os.Remove,
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, "", false, deps)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_ShowProgressTrue_CachedChecksumPath(t *testing.T) {
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	tmp := t.TempDir()
+	cachePath := getDownloadCachePath(tmp, downloadURL)
+	payload := []byte("cached payload")
+	if err := os.WriteFile(cachePath, payload, 0o600); err != nil {
+		t.Fatalf("write cache file failed: %v", err)
+	}
+	sumRaw := sha256.Sum256(payload)
+	sum := hex.EncodeToString(sumRaw[:])
+
+	gotRootPath := ""
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			gotRootPath = rootPath
+			return nil
+		},
+	}
+	deps := installDeps{
+		tempDir:    tmpDirConst(tmp),
+		removeFile: func(path string) error { return os.Remove(path) },
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	if err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, sum, true, deps); err != nil {
+		t.Fatalf("installWithDeps returned error: %v", err)
+	}
+	if gotRootPath != cachePath {
+		t.Fatalf("rootPath = %q, want %q", gotRootPath, cachePath)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_ShowProgressTrue_CachedChecksumMismatch_RedownloadError(t *testing.T) {
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	tmp := t.TempDir()
+	cachePath := getDownloadCachePath(tmp, downloadURL)
+	if err := os.WriteFile(cachePath, []byte("bad"), 0o600); err != nil {
+		t.Fatalf("write cache file failed: %v", err)
+	}
+	sumRaw := sha256.Sum256([]byte("good"))
+	wantSum := hex.EncodeToString(sumRaw[:])
+	wantErr := errors.New("download failed")
+
+	withInstallMockTransport(t, installRoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return nil, wantErr
+	}))
+
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+	deps := installDeps{
+		tempDir:    tmpDirConst(tmp),
+		removeFile: func(path string) error { return os.Remove(path) },
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, wantSum, true, deps)
+	if !errors.Is(err, wantErr) {
+		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_UsesDefaultDepsWhenNil(t *testing.T) {
+	payload := []byte("rootfs")
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	withInstallMockTransport(t, installRoundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode:    http.StatusOK,
+			Body:          io.NopCloser(strings.NewReader(string(payload))),
+			ContentLength: int64(len(payload)),
+			Header:        make(http.Header),
+		}, nil
+	}))
+
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+	if err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, "", false, installDeps{}); err != nil {
+		t.Fatalf("installWithDeps returned error: %v", err)
+	}
+	if called != 1 {
+		t.Fatalf("RegisterDistribution call count = %d, want 1", called)
+	}
+}
+
+func TestInstallWithDeps_Ext4Vhdx_UsesDefaultDepsWhenNil(t *testing.T) {
+	tmp := t.TempDir()
+	sourcePath := filepath.Join(tmp, "install.ext4.vhdx")
+	if err := os.WriteFile(sourcePath, []byte("vhdx"), 0o600); err != nil {
+		t.Fatalf("write source vhdx failed: %v", err)
+	}
+	basePath := filepath.Join(tmp, "distro")
+	if err := os.MkdirAll(basePath, 0o700); err != nil {
+		t.Fatalf("mkdir basePath failed: %v", err)
+	}
+
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc:   func(name, rootPath string) error { return nil },
+		UnregisterDistributionFunc: func(name string) error { return nil },
+	}
+	reg := wsllib.MockWslReg{
+		GetProfileFromNameFunc: func(name string) (wsllib.Profile, error) {
+			return wsllib.Profile{BasePath: basePath}, nil
+		},
+		WriteProfileFunc: func(profile wsllib.Profile) error { return nil },
+	}
+
+	if err := installWithDeps(context.Background(), wsl, reg, "Arch", sourcePath, "", false, installDeps{}); err != nil {
+		t.Fatalf("installWithDeps returned error: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(basePath, "ext4.vhdx")); err != nil {
+		t.Fatalf("ext4.vhdx was not copied: %v", err)
+	}
+}
+
+func TestInstallWithDeps_HTTPDownloadPath_CachedChecksumCalculationError(t *testing.T) {
+	const downloadURL = "http://example.com/rootfs.tar.gz"
+	tmp := t.TempDir()
+	cachePath := getDownloadCachePath(tmp, downloadURL)
+	if err := os.MkdirAll(cachePath, 0o700); err != nil {
+		t.Fatalf("mkdir cache path failed: %v", err)
+	}
+
+	sumRaw := sha256.Sum256([]byte("expected"))
+	wantSum := hex.EncodeToString(sumRaw[:])
+	called := 0
+	wsl := wsllib.MockWslLib{
+		RegisterDistributionFunc: func(name, rootPath string) error {
+			called++
+			return nil
+		},
+	}
+	deps := installDeps{
+		tempDir:    tmpDirConst(tmp),
+		removeFile: func(path string) error { return os.Remove(path) },
+		copyFile:   func(srcPath, destPath string, compress bool) error { return nil },
+	}
+
+	err := installWithDeps(context.Background(), wsl, wsllib.MockWslReg{}, "Arch", downloadURL, wantSum, false, deps)
+	if err == nil {
+		t.Fatal("installWithDeps succeeded unexpectedly")
+	}
+	if called != 0 {
+		t.Fatalf("RegisterDistribution call count = %d, want 0", called)
 	}
 }
 

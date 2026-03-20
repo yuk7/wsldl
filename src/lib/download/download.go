@@ -14,13 +14,19 @@ import (
 	"github.com/yuk7/wsldl/lib/errutil"
 )
 
+var (
+	downloadStatFile    = os.Stat
+	downloadOpenForRead = func(path string) (io.ReadCloser, error) { return os.Open(path) }
+	downloadCalcSHA256  = calculateSHA256
+)
+
 func DownloadFile(ctx context.Context, url, dest string, progressBarWidth int) (string, error) {
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
 	resumeOffset := int64(0)
-	info, err := os.Stat(dest)
+	info, err := downloadStatFile(dest)
 	if err == nil {
 		resumeOffset = info.Size()
 	} else if !errors.Is(err, os.ErrNotExist) {
@@ -41,7 +47,7 @@ func DownloadFile(ctx context.Context, url, dest string, progressBarWidth int) (
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusRequestedRangeNotSatisfiable && resumeOffset > 0 {
-		return calculateSHA256(dest)
+		return downloadCalcSHA256(dest)
 	}
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -102,7 +108,7 @@ func DownloadFile(ctx context.Context, url, dest string, progressBarWidth int) (
 		return "", err
 	}
 
-	sha256String, err := calculateSHA256(dest)
+	sha256String, err := downloadCalcSHA256(dest)
 	if err != nil {
 		return "", err
 	}
@@ -111,7 +117,7 @@ func DownloadFile(ctx context.Context, url, dest string, progressBarWidth int) (
 }
 
 func calculateSHA256(path string) (string, error) {
-	f, err := os.Open(path)
+	f, err := downloadOpenForRead(path)
 	if err != nil {
 		return "", err
 	}
