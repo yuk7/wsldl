@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 )
@@ -34,8 +35,12 @@ func withDefaultClientTransport(t *testing.T, rt http.RoundTripper) {
 }
 
 func newHTTPResponse(payload []byte, contentLength int64) *http.Response {
+	return newHTTPResponseWithStatus(payload, contentLength, http.StatusOK)
+}
+
+func newHTTPResponseWithStatus(payload []byte, contentLength int64, statusCode int) *http.Response {
 	return &http.Response{
-		StatusCode:    http.StatusOK,
+		StatusCode:    statusCode,
 		Body:          io.NopCloser(bytes.NewReader(payload)),
 		ContentLength: contentLength,
 		Header:        make(http.Header),
@@ -111,7 +116,9 @@ func TestDownloadFile_ProgressBarModes(t *testing.T) {
 
 func TestDownloadFile_OverwritesExistingFile(t *testing.T) {
 	payload := []byte("short")
+	gotRangeHeader := ""
 	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		gotRangeHeader = req.Header.Get("Range")
 		return newHTTPResponse(payload, int64(len(payload))), nil
 	}))
 
@@ -123,6 +130,9 @@ func TestDownloadFile_OverwritesExistingFile(t *testing.T) {
 
 	if _, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0); err != nil {
 		t.Fatalf("DownloadFile failed: %v", err)
+	}
+	if gotRangeHeader == "" {
+		t.Fatal("Range header was not set for existing file")
 	}
 
 	got, err := os.ReadFile(dest)
@@ -220,5 +230,88 @@ func TestDownloadFile_ReadError_ReturnsError(t *testing.T) {
 	_, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
 	if !errors.Is(err, wantErr) {
 		t.Fatalf("error = %v, want %v", err, wantErr)
+	}
+}
+
+func TestDownloadFile_ResumeWithRange_Success(t *testing.T) {
+	initial := []byte("hello ")
+	rest := []byte("world")
+	payload := append(append([]byte{}, initial...), rest...)
+	gotRangeHeader := ""
+
+	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		gotRangeHeader = req.Header.Get("Range")
+		if gotRangeHeader != "bytes=6-" {
+			t.Fatalf("Range header = %q, want %q", gotRangeHeader, "bytes=6-")
+		}
+		return newHTTPResponseWithStatus(rest, int64(len(rest)), http.StatusPartialContent), nil
+	}))
+
+	dest := filepath.Join(t.TempDir(), "file.bin")
+	if err := os.WriteFile(dest, initial, 0o600); err != nil {
+		t.Fatalf("write initial destination failed: %v", err)
+	}
+
+	sum, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
+	if err != nil {
+		t.Fatalf("DownloadFile failed: %v", err)
+	}
+
+	wantSumRaw := sha256.Sum256(payload)
+	wantSum := hex.EncodeToString(wantSumRaw[:])
+	if sum != wantSum {
+		t.Fatalf("sha256 = %q, want %q", sum, wantSum)
+	}
+
+	got, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatalf("read destination failed: %v", err)
+	}
+	if string(got) != string(payload) {
+		t.Fatalf("destination payload = %q, want %q", got, payload)
+	}
+}
+
+func TestDownloadFile_RequestedRangeNotSatisfiable_ReturnsExistingHash(t *testing.T) {
+	payload := []byte("already complete")
+	gotRangeHeader := ""
+
+	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		gotRangeHeader = req.Header.Get("Range")
+		return newHTTPResponseWithStatus(nil, 0, http.StatusRequestedRangeNotSatisfiable), nil
+	}))
+
+	dest := filepath.Join(t.TempDir(), "file.bin")
+	if err := os.WriteFile(dest, payload, 0o600); err != nil {
+		t.Fatalf("write destination failed: %v", err)
+	}
+
+	sum, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
+	if err != nil {
+		t.Fatalf("DownloadFile failed: %v", err)
+	}
+	if gotRangeHeader == "" {
+		t.Fatal("Range header was not set for existing file")
+	}
+
+	wantSumRaw := sha256.Sum256(payload)
+	wantSum := hex.EncodeToString(wantSumRaw[:])
+	if sum != wantSum {
+		t.Fatalf("sha256 = %q, want %q", sum, wantSum)
+	}
+}
+
+func TestDownloadFile_HTTPErrorStatus_ReturnsError(t *testing.T) {
+	withDefaultClientTransport(t, roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return newHTTPResponseWithStatus([]byte("not found"), int64(len([]byte("not found"))), http.StatusNotFound), nil
+	}))
+
+	dest := filepath.Join(t.TempDir(), "file.bin")
+	_, err := DownloadFile(context.Background(), "http://example.com/file.bin", dest, 0)
+	if err == nil {
+		t.Fatal("DownloadFile succeeded unexpectedly")
+	}
+	if !strings.Contains(err.Error(), "unexpected status code: 404") {
+		t.Fatalf("error = %q, want to contain %q", err.Error(), "unexpected status code: 404")
 	}
 }

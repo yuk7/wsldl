@@ -1,6 +1,7 @@
 package install
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -8,10 +9,9 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"math/rand"
+	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/yuk7/wsldl/lib/download"
@@ -40,10 +40,11 @@ var (
 )
 
 type installDeps struct {
-	tempDir    func() string
-	createFile func(path string) (io.Closer, error)
-	removeFile func(path string) error
-	copyFile   func(srcPath, destPath string, compress bool) error
+	tempDir       func() string
+	createFile    func(path string) (io.Closer, error)
+	removeFile    func(path string) error
+	copyFile      func(srcPath, destPath string, compress bool) error
+	confirmResume func() bool
 }
 
 func defaultInstallDeps() installDeps {
@@ -54,6 +55,13 @@ func defaultInstallDeps() installDeps {
 		},
 		removeFile: os.Remove,
 		copyFile:   fileutil.CopyFile,
+		confirmResume: func() bool {
+			fmt.Printf("A partial download was found.\n")
+			fmt.Printf("Do you want to resume the download?\n")
+			fmt.Printf("Type y/n:")
+			in, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+			return strings.EqualFold(strings.TrimSpace(in), "y")
+		},
 	}
 }
 
@@ -77,6 +85,7 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 
 	rootPathLower := strings.ToLower(rootPath)
 	sha256Actual := ""
+	usedCachedDownload := false
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
 	}
@@ -84,37 +93,101 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 	if strings.HasPrefix(rootPathLower, "http://") || strings.HasPrefix(rootPathLower, "https://") {
 		progressBarWidth := 0
 		if showProgress {
-			fmt.Println("Downloading...")
 			progressBarWidth = 35
 		}
-		tmpRootFn := deps.tempDir()
-		if tmpRootFn == "" {
+		tmpRootDir := deps.tempDir()
+		if tmpRootDir == "" {
 			return errors.New("failed to create temp directory")
 		}
-		tmpRootFn = filepath.Join(tmpRootFn, strconv.Itoa(rand.Intn(10000))+filepath.Base(rootPath))
-		defer deps.removeFile(tmpRootFn)
-		var err error
-		sha256Actual, err = download.DownloadFile(ctx, rootPath, tmpRootFn, progressBarWidth)
-		if err != nil {
-			return err
+		downloadURL := rootPath
+		cacheRootPath := getDownloadCachePath(tmpRootDir, downloadURL)
+		cachePartialPath := cacheRootPath + ".part"
+		downloadToCache := func() (string, error) {
+			if showProgress {
+				fmt.Println("Downloading...")
+			}
+			sum, err := download.DownloadFile(ctx, downloadURL, cachePartialPath, progressBarWidth)
+			if err != nil {
+				return "", err
+			}
+			if err := os.Rename(cachePartialPath, cacheRootPath); err != nil {
+				return "", err
+			}
+			if showProgress {
+				fmt.Println()
+			}
+			return sum, nil
 		}
-		rootPath = tmpRootFn
+
+		if _, err := os.Stat(cacheRootPath); err == nil {
+			usedCachedDownload = true
+			rootPath = cacheRootPath
+			if showProgress {
+				fmt.Printf("Using cached download: %s\n", rootPath)
+			}
+		} else if !errors.Is(err, os.ErrNotExist) {
+			return err
+		} else {
+			if _, err := os.Stat(cachePartialPath); err == nil {
+				keepPartial := true
+				if showProgress {
+					if deps.confirmResume != nil {
+						keepPartial = deps.confirmResume()
+					}
+				}
+				if !keepPartial {
+					_ = deps.removeFile(cachePartialPath)
+				}
+			} else if !errors.Is(err, os.ErrNotExist) {
+				return err
+			}
+
+			var err error
+			sha256Actual, err = downloadToCache()
+			if err != nil {
+				return err
+			}
+			rootPath = cacheRootPath
+		}
 		rootPathLower = strings.ToLower(rootPath)
-		fmt.Println()
+
+		if sha256Sum != "" && sha256Actual == "" {
+			if showProgress {
+				fmt.Println("Calculating checksum...")
+			}
+			var err error
+			sha256Actual, err = calculateFileSHA256(rootPath)
+			if err != nil {
+				return err
+			}
+		}
+		shouldRetryOnChecksumMismatch := false
+		if sha256Sum != "" && sha256Actual != "" && sha256Sum != sha256Actual {
+			shouldRetryOnChecksumMismatch = usedCachedDownload || !showProgress
+		}
+		if shouldRetryOnChecksumMismatch {
+			if showProgress {
+				fmt.Println("Checksum mismatch. Re-downloading...")
+			}
+			_ = deps.removeFile(cacheRootPath)
+			_ = deps.removeFile(cachePartialPath)
+			var err error
+			sha256Actual, err = downloadToCache()
+			if err != nil {
+				return err
+			}
+			rootPath = cacheRootPath
+			rootPathLower = strings.ToLower(rootPath)
+		}
 	} else if sha256Sum != "" {
 		if showProgress {
 			fmt.Println("Calculating checksum...")
 		}
-		f, err := os.Open(rootPath)
+		var err error
+		sha256Actual, err = calculateFileSHA256(rootPath)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
-		h := sha256.New()
-		if _, err := io.Copy(h, f); err != nil {
-			return err
-		}
-		sha256Actual = hex.EncodeToString(h.Sum(nil))
 	}
 
 	if showProgress && sha256Actual != "" {
@@ -137,6 +210,32 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 		return installExt4VhdxWithDeps(wsl, reg, name, rootPath, deps)
 	}
 	return InstallTar(wsl, name, rootPath)
+}
+
+func getDownloadCachePath(tempDir, rawURL string) string {
+	u, err := url.Parse(rawURL)
+	cacheBase := "download.bin"
+	if err == nil {
+		if base := filepath.Base(u.Path); base != "." && base != "/" && base != "" {
+			cacheBase = base
+		}
+	}
+	urlHash := sha256.Sum256([]byte(rawURL))
+	return filepath.Join(tempDir, fmt.Sprintf("wsldl-download-%s-%s", hex.EncodeToString(urlHash[:8]), cacheBase))
+}
+
+func calculateFileSHA256(path string) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 func InstallTar(wsl wsllib.WslLib, name string, rootPath string) error {
