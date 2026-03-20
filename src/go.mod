@@ -1,6 +1,6 @@
 module github.com/yuk7/wsldl
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/fatih/color v1.18.0
@@ -10,7 +10,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.19.0
 	github.com/yuk7/wsllib-go v1.0.0
 	github.com/yuk7/wslreglib-go v1.0.1
-	golang.org/x/text v0.34.0
+	golang.org/x/text v0.35.0
 )
 
 require (
