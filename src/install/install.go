@@ -86,6 +86,8 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 	rootPathLower := strings.ToLower(rootPath)
 	sha256Actual := ""
 	usedCachedDownload := false
+	downloadCachePath := ""
+	downloadPartialPath := ""
 	if showProgress {
 		fmt.Printf("Using: %s\n", rootPath)
 	}
@@ -102,6 +104,8 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 		downloadURL := rootPath
 		cacheRootPath := getDownloadCachePath(tmpRootDir, downloadURL)
 		cachePartialPath := cacheRootPath + ".part"
+		downloadCachePath = cacheRootPath
+		downloadPartialPath = cachePartialPath
 		downloadToCache := func() (string, error) {
 			if showProgress {
 				fmt.Println("Downloading...")
@@ -206,10 +210,23 @@ func installWithDeps(ctx context.Context, wsl wsllib.WslLib, reg wsllib.WslReg, 
 		return err
 	}
 
+	var installErr error
 	if strings.HasSuffix(rootPathLower, "ext4.vhdx") || strings.HasSuffix(rootPathLower, "ext4.vhdx.gz") {
-		return installExt4VhdxWithDeps(wsl, reg, name, rootPath, deps)
+		installErr = installExt4VhdxWithDeps(wsl, reg, name, rootPath, deps)
+	} else {
+		installErr = InstallTar(wsl, name, rootPath)
 	}
-	return InstallTar(wsl, name, rootPath)
+	if installErr != nil {
+		return installErr
+	}
+
+	if downloadCachePath != "" {
+		_ = deps.removeFile(downloadCachePath)
+		if downloadPartialPath != "" {
+			_ = deps.removeFile(downloadPartialPath)
+		}
+	}
+	return nil
 }
 
 func getDownloadCachePath(tempDir, rawURL string) string {

@@ -497,8 +497,8 @@ func TestInstallWithDeps_HTTPDownloadPath_Success(t *testing.T) {
 	if gotRootPath != wantCachePath {
 		t.Fatalf("download path = %q, want %q", gotRootPath, wantCachePath)
 	}
-	if _, statErr := os.Stat(wantCachePath); statErr != nil {
-		t.Fatalf("cached file missing after download: %v", statErr)
+	if _, statErr := os.Stat(wantCachePath); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("cached file still exists after successful install: %v", statErr)
 	}
 	if _, statErr := os.Stat(wantCachePath + ".part"); !errors.Is(statErr, os.ErrNotExist) {
 		t.Fatalf("partial file still exists: stat err = %v", statErr)
@@ -821,8 +821,18 @@ func TestInstallWithDeps_HTTPDownloadPath_SkipsDownloadWhenCached(t *testing.T) 
 	if err != nil {
 		t.Fatalf("second installWithDeps returned error: %v", err)
 	}
-	if downloadCalls != 1 {
-		t.Fatalf("download call count = %d, want 1", downloadCalls)
+	if _, statErr := os.Stat(cachePath); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("cache file still exists after successful install: %v", statErr)
+	}
+	if _, statErr := os.Stat(cachePath + ".part"); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("partial file still exists after successful install: %v", statErr)
+	}
+	err = installWithDeps(context.Background(), wslSuccess, wsllib.MockWslReg{}, "Arch", downloadURL, "", false, deps)
+	if err != nil {
+		t.Fatalf("third installWithDeps returned error: %v", err)
+	}
+	if downloadCalls != 2 {
+		t.Fatalf("download call count after third install = %d, want 2", downloadCalls)
 	}
 }
 
